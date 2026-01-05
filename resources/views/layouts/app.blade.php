@@ -146,6 +146,57 @@
                 </div>
                 @endif
 
+                {{-- PUM (Permintaan Uang Muka) Submenu --}}
+                @if(auth()->user()->hasPermission('manage_pum') || auth()->user()->hasPermission('manage_pum_workflows') || auth()->user()->hasPermission('approve_pum'))
+                <div class="mb-4" x-data="{ open: {{ request()->routeIs('pum-requests.*') || request()->routeIs('pum-workflows.*') || request()->routeIs('pum-approvals.*') ? 'true' : 'false' }} }">
+                <button @click="open = !open" 
+                        class="w-full flex items-center justify-between px-4 py-3 text-white rounded-lg hover:bg-green-800 transition-colors">
+                    <div class="flex items-center">
+                            <i class="fas fa-money-bill-wave w-5 sidebar-icon mr-3"></i>
+                            <span class="sidebar-text">Uang Muka</span>
+                        </div>
+                        <i class="fas fa-chevron-down sidebar-text text-xs transition-transform duration-200" :class="{ 'rotate-180': open }"></i>
+                    </button>
+                    
+                    <div x-show="open" 
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 -translate-y-2"
+                         x-transition:enter-end="opacity-100 translate-y-0"
+                         x-transition:leave="transition ease-in duration-150"
+                         x-transition:leave-start="opacity-100 translate-y-0"
+                         x-transition:leave-end="opacity-0 -translate-y-2"
+                         class="mt-1 ml-4 pl-4 border-l-2 border-green-600 space-y-1">
+                        
+                        @if(auth()->user()->hasPermission('approve_pum'))
+                        <a href="{{ route('pum-approvals.index') }}" 
+                           class="flex items-center px-3 py-2 text-green-100 rounded-lg hover:bg-green-800 hover:text-white transition-colors text-sm {{ request()->routeIs('pum-approvals.*') ? 'bg-green-800 text-white' : '' }}"
+                           title="Approval">
+                            <i class="fas fa-clipboard-check w-4 mr-2"></i>
+                            <span class="sidebar-text">Approval</span>
+                        </a>
+                        @endif
+                        
+                        @if(auth()->user()->hasPermission('manage_pum'))
+                        <a href="{{ route('pum-requests.index') }}" 
+                           class="flex items-center px-3 py-2 text-green-100 rounded-lg hover:bg-green-800 hover:text-white transition-colors text-sm {{ request()->routeIs('pum-requests.*') ? 'bg-green-800 text-white' : '' }}"
+                           title="Daftar Permintaan">
+                            <i class="fas fa-file-invoice-dollar w-4 mr-2"></i>
+                            <span class="sidebar-text">Daftar Permintaan</span>
+                        </a>
+                        @endif
+                        
+                        @if(auth()->user()->hasPermission('manage_pum_workflows'))
+                        <a href="{{ route('pum-workflows.index') }}" 
+                           class="flex items-center px-3 py-2 text-green-100 rounded-lg hover:bg-green-800 hover:text-white transition-colors text-sm {{ request()->routeIs('pum-workflows.*') ? 'bg-green-800 text-white' : '' }}"
+                           title="Kelola Workflow">
+                            <i class="fas fa-project-diagram w-4 mr-2"></i>
+                            <span class="sidebar-text">Kelola Workflow</span>
+                        </a>
+                        @endif
+                    </div>
+                </div>
+                @endif
+
             </nav>
         </div>
 

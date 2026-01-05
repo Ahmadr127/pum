@@ -8,16 +8,27 @@ use Illuminate\Support\Facades\Auth;
 
 class CheckPermission
 {
-    public function handle(Request $request, Closure $next, $permission)
+    /**
+     * Handle an incoming request.
+     * 
+     * Supports multiple permissions with OR logic.
+     * Usage: permission:manage_pum,approve_pum (user needs at least one of these permissions)
+     */
+    public function handle(Request $request, Closure $next, ...$permissions)
     {
         if (!Auth::check()) {
             return redirect('/login');
         }
 
-        if (!Auth::user()->hasPermission($permission)) {
-            abort(403, 'Unauthorized action.');
+        $user = Auth::user();
+        
+        // Check if user has at least one of the required permissions
+        foreach ($permissions as $permission) {
+            if ($user->hasPermission($permission)) {
+                return $next($request);
+            }
         }
 
-        return $next($request);
+        abort(403, 'Unauthorized action.');
     }
 }

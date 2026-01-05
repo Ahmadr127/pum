@@ -8,6 +8,9 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\OrganizationTypeController;
 use App\Http\Controllers\OrganizationUnitController;
+use App\Http\Controllers\PumRequestController;
+use App\Http\Controllers\PumApprovalWorkflowController;
+use App\Http\Controllers\PumApprovalController;
 
 /*
 |--------------------------------------------------------------------------
@@ -69,6 +72,56 @@ Route::middleware('auth')->group(function () {
             ->name('organization-units.remove-member');
         Route::patch('organization-units/{organization_unit}/head', [OrganizationUnitController::class, 'updateHead'])
             ->name('organization-units.update-head');
+    });
+
+    // PUM (Permintaan Uang Muka) Routes - Management (create, edit, delete)
+    Route::middleware('permission:manage_pum')->group(function () {
+        Route::get('pum-requests', [PumRequestController::class, 'index'])
+            ->name('pum-requests.index');
+        Route::get('pum-requests/create', [PumRequestController::class, 'create'])
+            ->name('pum-requests.create');
+        Route::post('pum-requests', [PumRequestController::class, 'store'])
+            ->name('pum-requests.store');
+        Route::get('pum-requests/{pum_request}/edit', [PumRequestController::class, 'edit'])
+            ->name('pum-requests.edit');
+        Route::put('pum-requests/{pum_request}', [PumRequestController::class, 'update'])
+            ->name('pum-requests.update');
+        Route::patch('pum-requests/{pum_request}', [PumRequestController::class, 'update']);
+        Route::delete('pum-requests/{pum_request}', [PumRequestController::class, 'destroy'])
+            ->name('pum-requests.destroy');
+        Route::post('pum-requests/{pum_request}/submit', [PumRequestController::class, 'submit'])
+            ->name('pum-requests.submit');
+        Route::post('pum-requests/{pum_request}/fulfill', [PumRequestController::class, 'fulfill'])
+            ->name('pum-requests.fulfill');
+        Route::get('pum-requests-export', [PumRequestController::class, 'export'])
+            ->name('pum-requests.export');
+    });
+
+    // PUM Routes - View detail (for both manage_pum and approve_pum)
+    Route::middleware('permission:manage_pum,approve_pum')->group(function () {
+        Route::get('pum-requests/{pum_request}', [PumRequestController::class, 'show'])
+            ->name('pum-requests.show');
+    });
+
+    // PUM Routes - Approval actions (for approvers)
+    Route::middleware('permission:approve_pum')->group(function () {
+        Route::post('pum-requests/{pum_request}/approve', [PumRequestController::class, 'approve'])
+            ->name('pum-requests.approve');
+        Route::post('pum-requests/{pum_request}/reject', [PumRequestController::class, 'reject'])
+            ->name('pum-requests.reject');
+    });
+
+    // PUM Workflow Management Routes
+    Route::middleware('permission:manage_pum_workflows')->group(function () {
+        Route::resource('pum-workflows', PumApprovalWorkflowController::class);
+        Route::post('pum-workflows/{pum_workflow}/set-default', [PumApprovalWorkflowController::class, 'setDefault'])
+            ->name('pum-workflows.set-default');
+    });
+
+    // PUM Approvals Routes (for approvers)
+    Route::middleware('permission:approve_pum')->group(function () {
+        Route::get('pum-approvals', [PumApprovalController::class, 'index'])
+            ->name('pum-approvals.index');
     });
 
 });

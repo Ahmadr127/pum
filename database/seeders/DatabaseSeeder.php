@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             RolePermissionSeeder::class,
             OrganizationTypeSeeder::class,
             OrganizationUnitSeeder::class,
+            PumWorkflowSeeder::class,
         ]);
 
         // Create admin user
