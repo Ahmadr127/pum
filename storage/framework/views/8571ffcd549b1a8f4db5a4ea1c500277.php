@@ -3,24 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Sistem')</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <link rel="icon" type="image/x-icon" href="{{ asset('images/logo.png') }}">
+    <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
+    <title><?php echo $__env->yieldContent('title', 'Sistem'); ?></title>
+    <?php echo app('Illuminate\Foundation\Vite')(['resources/css/app.css', 'resources/js/app.js']); ?>
+    <link rel="icon" type="image/x-icon" href="<?php echo e(asset('images/logo.png')); ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
-    {{-- Sidebar CSS --}}
-    <link rel="stylesheet" href="{{ asset('css/sidebar.css') }}">
     
-    {{-- Sidebar JS - MUST load before Alpine.js to prevent flicker --}}
-    <script src="{{ asset('js/sidebar.js') }}"></script>
+    <link rel="stylesheet" href="<?php echo e(asset('css/sidebar.css')); ?>">
+    
+    
+    <script src="<?php echo e(asset('js/sidebar.js')); ?>"></script>
 </head>
 <body class="bg-gray-100 overflow-x-hidden h-screen">
-    {{-- 
-        Alpine Component with separated desktop/mobile logic
-        - Desktop: toggles width via CSS class on html element
-        - Mobile: toggles visibility via transform
-    --}}
+    
     <div x-data="sidebarComponent()" x-init="init()" class="h-full flex overflow-x-hidden">
         
         <!-- Sidebar: No x-cloak, use CSS to control visibility -->
@@ -31,9 +27,9 @@
             <div class="flex items-center justify-between h-20 px-4 border-b border-green-600 flex-shrink-0">
                 <div class="flex items-center space-x-3 overflow-hidden">
                     <div class="bg-white rounded-xl border border-green-200 shadow-sm p-2 flex-shrink-0">
-                        <img src="{{ asset('images/logo.png') }}" alt="Logo" class="h-8 w-auto object-contain">
+                        <img src="<?php echo e(asset('images/logo.png')); ?>" alt="Logo" class="h-8 w-auto object-contain">
                     </div>
-                    {{-- Use CSS-driven visibility instead of x-show --}}
+                    
                     <h1 class="sidebar-text text-xl font-bold text-white tracking-wide truncate">PUM System</h1>
                 </div>
             </div>
@@ -41,21 +37,21 @@
             <!-- Sidebar Navigation -->
             <nav class="flex-1 overflow-y-auto sidebar-scroll px-4 py-6">
                 
-                {{-- Dashboard --}}
-                @if(auth()->user()->hasPermission('view_dashboard'))
+                
+                <?php if(auth()->user()->hasPermission('view_dashboard')): ?>
                 <div class="mb-4">
-                    <a href="{{ route('dashboard') }}" 
-                       class="sidebar-link flex items-center px-4 py-3 text-white rounded-lg hover:bg-green-800 transition-colors {{ request()->routeIs('dashboard') ? 'bg-green-800' : '' }}" 
+                    <a href="<?php echo e(route('dashboard')); ?>" 
+                       class="sidebar-link flex items-center px-4 py-3 text-white rounded-lg hover:bg-green-800 transition-colors <?php echo e(request()->routeIs('dashboard') ? 'bg-green-800' : ''); ?>" 
                        title="Dashboard">
                         <i class="fas fa-tachometer-alt w-5 sidebar-icon mr-3"></i>
                         <span class="sidebar-text">Dashboard</span>
                     </a>
                 </div>
-                @endif
+                <?php endif; ?>
 
-                {{-- User & Access Management Submenu --}}
-                @if(auth()->user()->hasPermission('manage_users') || auth()->user()->hasPermission('manage_roles') || auth()->user()->hasPermission('manage_permissions'))
-                <div class="mb-4" x-data="{ open: {{ request()->routeIs('users.*') || request()->routeIs('roles.*') || request()->routeIs('permissions.*') ? 'true' : 'false' }} }">
+                
+                <?php if(auth()->user()->hasPermission('manage_users') || auth()->user()->hasPermission('manage_roles') || auth()->user()->hasPermission('manage_permissions')): ?>
+                <div class="mb-4" x-data="{ open: <?php echo e(request()->routeIs('users.*') || request()->routeIs('roles.*') || request()->routeIs('permissions.*') ? 'true' : 'false'); ?> }">
                 <button @click="open = !open" 
                         class="w-full flex items-center justify-between px-4 py-3 text-white rounded-lg hover:bg-green-800 transition-colors">
                     <div class="flex items-center">
@@ -74,39 +70,39 @@
                          x-transition:leave-end="opacity-0 -translate-y-2"
                          class="mt-1 ml-4 pl-4 border-l-2 border-green-600 space-y-1">
                         
-                        @if(auth()->user()->hasPermission('manage_users'))
-                        <a href="{{ route('users.index') }}" 
-                           class="flex items-center px-3 py-2 text-green-100 rounded-lg hover:bg-green-800 hover:text-white transition-colors text-sm {{ request()->routeIs('users.*') ? 'bg-green-800 text-white' : '' }}"
+                        <?php if(auth()->user()->hasPermission('manage_users')): ?>
+                        <a href="<?php echo e(route('users.index')); ?>" 
+                           class="flex items-center px-3 py-2 text-green-100 rounded-lg hover:bg-green-800 hover:text-white transition-colors text-sm <?php echo e(request()->routeIs('users.*') ? 'bg-green-800 text-white' : ''); ?>"
                            title="Users">
                             <i class="fas fa-users w-4 mr-2"></i>
                             <span class="sidebar-text">Users</span>
                         </a>
-                        @endif
+                        <?php endif; ?>
                         
-                        @if(auth()->user()->hasPermission('manage_roles'))
-                        <a href="{{ route('roles.index') }}" 
-                           class="flex items-center px-3 py-2 text-green-100 rounded-lg hover:bg-green-800 hover:text-white transition-colors text-sm {{ request()->routeIs('roles.*') ? 'bg-green-800 text-white' : '' }}"
+                        <?php if(auth()->user()->hasPermission('manage_roles')): ?>
+                        <a href="<?php echo e(route('roles.index')); ?>" 
+                           class="flex items-center px-3 py-2 text-green-100 rounded-lg hover:bg-green-800 hover:text-white transition-colors text-sm <?php echo e(request()->routeIs('roles.*') ? 'bg-green-800 text-white' : ''); ?>"
                            title="Roles">
                             <i class="fas fa-user-shield w-4 mr-2"></i>
                             <span class="sidebar-text">Roles</span>
                         </a>
-                        @endif
+                        <?php endif; ?>
                         
-                        @if(auth()->user()->hasPermission('manage_permissions'))
-                        <a href="{{ route('permissions.index') }}" 
-                           class="flex items-center px-3 py-2 text-green-100 rounded-lg hover:bg-green-800 hover:text-white transition-colors text-sm {{ request()->routeIs('permissions.*') ? 'bg-green-800 text-white' : '' }}"
+                        <?php if(auth()->user()->hasPermission('manage_permissions')): ?>
+                        <a href="<?php echo e(route('permissions.index')); ?>" 
+                           class="flex items-center px-3 py-2 text-green-100 rounded-lg hover:bg-green-800 hover:text-white transition-colors text-sm <?php echo e(request()->routeIs('permissions.*') ? 'bg-green-800 text-white' : ''); ?>"
                            title="Permissions">
                             <i class="fas fa-key w-4 mr-2"></i>
                             <span class="sidebar-text">Permissions</span>
                         </a>
-                        @endif
+                        <?php endif; ?>
                     </div>
                 </div>
-                @endif
+                <?php endif; ?>
 
-                {{-- Organization Management Submenu --}}
-                @if(auth()->user()->hasPermission('manage_organization_types') || auth()->user()->hasPermission('manage_organization_units'))
-                <div class="mb-4" x-data="{ open: {{ request()->routeIs('organization-types.*') || request()->routeIs('organization-units.*') ? 'true' : 'false' }} }">
+                
+                <?php if(auth()->user()->hasPermission('manage_organization_types') || auth()->user()->hasPermission('manage_organization_units')): ?>
+                <div class="mb-4" x-data="{ open: <?php echo e(request()->routeIs('organization-types.*') || request()->routeIs('organization-units.*') ? 'true' : 'false'); ?> }">
                 <button @click="open = !open" 
                         class="w-full flex items-center justify-between px-4 py-3 text-white rounded-lg hover:bg-green-800 transition-colors">
                     <div class="flex items-center">
@@ -125,30 +121,30 @@
                          x-transition:leave-end="opacity-0 -translate-y-2"
                          class="mt-1 ml-4 pl-4 border-l-2 border-green-600 space-y-1">
                         
-                        @if(auth()->user()->hasPermission('manage_organization_types'))
-                        <a href="{{ route('organization-types.index') }}" 
-                           class="flex items-center px-3 py-2 text-green-100 rounded-lg hover:bg-green-800 hover:text-white transition-colors text-sm {{ request()->routeIs('organization-types.*') ? 'bg-green-800 text-white' : '' }}"
+                        <?php if(auth()->user()->hasPermission('manage_organization_types')): ?>
+                        <a href="<?php echo e(route('organization-types.index')); ?>" 
+                           class="flex items-center px-3 py-2 text-green-100 rounded-lg hover:bg-green-800 hover:text-white transition-colors text-sm <?php echo e(request()->routeIs('organization-types.*') ? 'bg-green-800 text-white' : ''); ?>"
                            title="Tipe Organisasi">
                             <i class="fas fa-sitemap w-4 mr-2"></i>
                             <span class="sidebar-text">Tipe Organisasi</span>
                         </a>
-                        @endif
+                        <?php endif; ?>
                         
-                        @if(auth()->user()->hasPermission('manage_organization_units'))
-                        <a href="{{ route('organization-units.index') }}" 
-                           class="flex items-center px-3 py-2 text-green-100 rounded-lg hover:bg-green-800 hover:text-white transition-colors text-sm {{ request()->routeIs('organization-units.*') ? 'bg-green-800 text-white' : '' }}"
+                        <?php if(auth()->user()->hasPermission('manage_organization_units')): ?>
+                        <a href="<?php echo e(route('organization-units.index')); ?>" 
+                           class="flex items-center px-3 py-2 text-green-100 rounded-lg hover:bg-green-800 hover:text-white transition-colors text-sm <?php echo e(request()->routeIs('organization-units.*') ? 'bg-green-800 text-white' : ''); ?>"
                            title="Unit Organisasi">
                             <i class="fas fa-diagram-project w-4 mr-2"></i>
                             <span class="sidebar-text">Unit Organisasi</span>
                         </a>
-                        @endif
+                        <?php endif; ?>
                     </div>
                 </div>
-                @endif
+                <?php endif; ?>
 
-                {{-- PUM (Permintaan Uang Muka) Submenu --}}
-                @if(auth()->user()->hasPermission('manage_pum') || auth()->user()->hasPermission('manage_pum_workflows') || auth()->user()->hasPermission('approve_pum'))
-                <div class="mb-4" x-data="{ open: {{ request()->routeIs('pum-requests.*') || request()->routeIs('pum-workflows.*') || request()->routeIs('pum-approvals.*') ? 'true' : 'false' }} }">
+                
+                <?php if(auth()->user()->hasPermission('manage_pum') || auth()->user()->hasPermission('manage_pum_workflows') || auth()->user()->hasPermission('approve_pum')): ?>
+                <div class="mb-4" x-data="{ open: <?php echo e(request()->routeIs('pum-requests.*') || request()->routeIs('pum-workflows.*') || request()->routeIs('pum-approvals.*') ? 'true' : 'false'); ?> }">
                 <button @click="open = !open" 
                         class="w-full flex items-center justify-between px-4 py-3 text-white rounded-lg hover:bg-green-800 transition-colors">
                     <div class="flex items-center">
@@ -167,35 +163,35 @@
                          x-transition:leave-end="opacity-0 -translate-y-2"
                          class="mt-1 ml-4 pl-4 border-l-2 border-green-600 space-y-1">
                         
-                        @if(auth()->user()->hasPermission('approve_pum'))
-                        <a href="{{ route('pum-approvals.index') }}" 
-                           class="flex items-center px-3 py-2 text-green-100 rounded-lg hover:bg-green-800 hover:text-white transition-colors text-sm {{ request()->routeIs('pum-approvals.*') ? 'bg-green-800 text-white' : '' }}"
+                        <?php if(auth()->user()->hasPermission('approve_pum')): ?>
+                        <a href="<?php echo e(route('pum-approvals.index')); ?>" 
+                           class="flex items-center px-3 py-2 text-green-100 rounded-lg hover:bg-green-800 hover:text-white transition-colors text-sm <?php echo e(request()->routeIs('pum-approvals.*') ? 'bg-green-800 text-white' : ''); ?>"
                            title="Approval">
                             <i class="fas fa-clipboard-check w-4 mr-2"></i>
                             <span class="sidebar-text">Approval</span>
                         </a>
-                        @endif
+                        <?php endif; ?>
                         
-                        @if(auth()->user()->hasPermission('manage_pum'))
-                        <a href="{{ route('pum-requests.index') }}" 
-                           class="flex items-center px-3 py-2 text-green-100 rounded-lg hover:bg-green-800 hover:text-white transition-colors text-sm {{ request()->routeIs('pum-requests.*') ? 'bg-green-800 text-white' : '' }}"
+                        <?php if(auth()->user()->hasPermission('manage_pum')): ?>
+                        <a href="<?php echo e(route('pum-requests.index')); ?>" 
+                           class="flex items-center px-3 py-2 text-green-100 rounded-lg hover:bg-green-800 hover:text-white transition-colors text-sm <?php echo e(request()->routeIs('pum-requests.*') ? 'bg-green-800 text-white' : ''); ?>"
                            title="Daftar Permintaan">
                             <i class="fas fa-file-invoice-dollar w-4 mr-2"></i>
                             <span class="sidebar-text">Daftar Permintaan</span>
                         </a>
-                        @endif
+                        <?php endif; ?>
                         
-                        @if(auth()->user()->hasPermission('manage_pum_workflows'))
-                        <a href="{{ route('pum-workflows.index') }}" 
-                           class="flex items-center px-3 py-2 text-green-100 rounded-lg hover:bg-green-800 hover:text-white transition-colors text-sm {{ request()->routeIs('pum-workflows.*') ? 'bg-green-800 text-white' : '' }}"
+                        <?php if(auth()->user()->hasPermission('manage_pum_workflows')): ?>
+                        <a href="<?php echo e(route('pum-workflows.index')); ?>" 
+                           class="flex items-center px-3 py-2 text-green-100 rounded-lg hover:bg-green-800 hover:text-white transition-colors text-sm <?php echo e(request()->routeIs('pum-workflows.*') ? 'bg-green-800 text-white' : ''); ?>"
                            title="Kelola Workflow">
                             <i class="fas fa-project-diagram w-4 mr-2"></i>
                             <span class="sidebar-text">Kelola Workflow</span>
                         </a>
-                        @endif
+                        <?php endif; ?>
                     </div>
                 </div>
-                @endif
+                <?php endif; ?>
 
             </nav>
         </div>
@@ -217,13 +213,13 @@
                         </button>
                         
                         <div class="hidden sm:block">
-                            <h2 class="text-xl font-semibold text-gray-800">@yield('title', 'Dashboard')</h2>
+                            <h2 class="text-xl font-semibold text-gray-800"><?php echo $__env->yieldContent('title', 'Dashboard'); ?></h2>
                             <p class="text-sm text-gray-500">Sistem</p>
                         </div>
                         
                         <!-- Mobile Title -->
                         <div class="sm:hidden">
-                            <h2 class="text-lg font-semibold text-gray-800">@yield('title', 'Dashboard')</h2>
+                            <h2 class="text-lg font-semibold text-gray-800"><?php echo $__env->yieldContent('title', 'Dashboard'); ?></h2>
                         </div>
                     </div>
                     
@@ -235,7 +231,7 @@
                                     <i class="fas fa-user text-sm text-white"></i>
                                 </div>
                                 <div class="text-left hidden sm:block">
-                                    <div class="text-sm font-medium text-gray-700">{{ auth()->user()->name }}</div>
+                                    <div class="text-sm font-medium text-gray-700"><?php echo e(auth()->user()->name); ?></div>
                                 </div>
                                 <i class="fas fa-chevron-down text-xs text-gray-400 transition-transform duration-200" :class="{ 'rotate-180': open }"></i>
                             </button>
@@ -252,17 +248,17 @@
                                  x-cloak>
                                 
                                 <div class="py-1">
-                                    @if(auth()->user()->hasPermission('view_dashboard'))
-                                    <a href="{{ route('dashboard') }}" class="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                                    <?php if(auth()->user()->hasPermission('view_dashboard')): ?>
+                                    <a href="<?php echo e(route('dashboard')); ?>" class="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
                                         <i class="fas fa-home w-4 h-4 mr-2 text-gray-400"></i>
                                         Dashboard
                                     </a>
-                                    @endif
+                                    <?php endif; ?>
                                     
                                     <div class="border-t border-gray-100 my-1"></div>
                                     
-                                    <form method="POST" action="{{ route('logout') }}" class="block">
-                                        @csrf
+                                    <form method="POST" action="<?php echo e(route('logout')); ?>" class="block">
+                                        <?php echo csrf_field(); ?>
                                         <button type="submit" 
                                                 class="flex items-center w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
                                                 onclick="return confirm('Apakah Anda yakin ingin keluar?')">
@@ -279,7 +275,7 @@
 
             <!-- Page Content -->
             <main class="flex-1 p-3 sm:p-4 lg:p-5 bg-gray-50 overflow-y-auto overflow-x-hidden max-w-full">
-                @yield('content')
+                <?php echo $__env->yieldContent('content'); ?>
             </main>
         </div>
 
@@ -297,25 +293,26 @@
         </div>
     </div>
 
-    {{-- Load Alpine.js AFTER sidebar component is defined --}}
+    
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     
-    <script src="{{ asset('js/toast.js') }}"></script>
+    <script src="<?php echo e(asset('js/toast.js')); ?>"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function(){
-            @if(session('success'))
-                window.Toast && Toast.success(@json(session('success')));
-            @endif
-            @if(session('error'))
-                window.Toast && Toast.error(@json(session('error')));
-            @endif
-            @if($errors->any())
-                @foreach($errors->all() as $err)
-                    window.Toast && Toast.error(@json($err), { duration: 6000 });
-                @endforeach
-            @endif
+            <?php if(session('success')): ?>
+                window.Toast && Toast.success(<?php echo json_encode(session('success'), 15, 512) ?>);
+            <?php endif; ?>
+            <?php if(session('error')): ?>
+                window.Toast && Toast.error(<?php echo json_encode(session('error'), 15, 512) ?>);
+            <?php endif; ?>
+            <?php if($errors->any()): ?>
+                <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $err): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    window.Toast && Toast.error(<?php echo json_encode($err, 15, 512) ?>, { duration: 6000 });
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+            <?php endif; ?>
         });
     </script>
-    @stack('scripts')
+    <?php echo $__env->yieldPushContent('scripts'); ?>
 </body>
 </html>
+<?php /**PATH D:\Pemrograman\magang\pum\resources\views/layouts/app.blade.php ENDPATH**/ ?>

@@ -98,7 +98,19 @@ class PumApprovalWorkflowController extends Controller
         $roles = Role::orderBy('display_name')->get();
         $users = User::orderBy('name')->get();
         
-        return view('pum.workflows.edit', compact('pumWorkflow', 'roles', 'users'));
+        // Prepare steps data for JavaScript
+        $stepsData = $pumWorkflow->steps->map(function($step) {
+            return [
+                'id' => $step->id,
+                'name' => $step->name,
+                'approver_type' => $step->approver_type,
+                'role_id' => $step->role_id ? (string)$step->role_id : '',
+                'user_id' => $step->user_id ? (string)$step->user_id : '',
+                'is_required' => $step->is_required,
+            ];
+        })->values()->toArray();
+        
+        return view('pum.workflows.edit', compact('pumWorkflow', 'roles', 'users', 'stepsData'));
     }
 
     /**

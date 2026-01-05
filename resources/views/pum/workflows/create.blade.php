@@ -3,7 +3,7 @@
 @section('title', 'Buat Workflow Approval')
 
 @section('content')
-<div class="w-full max-w-4xl mx-auto" x-data="workflowForm()">
+<div class="w-full px-4" x-data="workflowForm()">
     <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
         <div class="p-6 bg-white border-b border-gray-200">
             <h2 class="text-xl font-bold text-gray-900 mb-6">Buat Workflow Approval Baru</h2>

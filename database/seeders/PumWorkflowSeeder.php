@@ -14,30 +14,24 @@ class PumWorkflowSeeder extends Seeder
      */
     public function run(): void
     {
+        // Ensure roles exist
+        $managerRole = Role::where('name', 'manager')->first();
+        $keuanganRole = Role::where('name', 'keuangan')->first();
+        $direkturRole = Role::where('name', 'direktur')->first();
+
+        if (!$managerRole || !$keuanganRole || !$direkturRole) {
+            $this->command->error('Required roles not found. Please run PumRoleSeeder first.');
+            return;
+        }
+
         // Create default workflow
         $workflow = PumApprovalWorkflow::firstOrCreate(
             ['name' => 'Default Approval Workflow'],
             [
-                'description' => 'Workflow persetujuan uang muka standar: Manager → Keuangan → Direktur',
+                'description' => 'Workflow persetujuan uang muka standar dengan 3 tingkat approval: Manager → Keuangan → Direktur',
                 'is_active' => true,
                 'is_default' => true,
             ]
-        );
-
-        // Get or create roles
-        $managerRole = Role::firstOrCreate(
-            ['name' => 'manager'],
-            ['display_name' => 'Manager', 'description' => 'Manager dengan hak approval']
-        );
-
-        $financeRole = Role::firstOrCreate(
-            ['name' => 'keuangan'],
-            ['display_name' => 'Keuangan', 'description' => 'Bagian Keuangan']
-        );
-
-        $directorRole = Role::firstOrCreate(
-            ['name' => 'direktur'],
-            ['display_name' => 'Direktur', 'description' => 'Direktur Perusahaan']
         );
 
         // Delete old approval steps for this workflow
@@ -50,20 +44,23 @@ class PumWorkflowSeeder extends Seeder
                 'name' => 'Approval Manager',
                 'approver_type' => 'role',
                 'role_id' => $managerRole->id,
+                'user_id' => null,
                 'is_required' => true,
             ],
             [
                 'order' => 2,
                 'name' => 'Approval Keuangan',
                 'approver_type' => 'role',
-                'role_id' => $financeRole->id,
+                'role_id' => $keuanganRole->id,
+                'user_id' => null,
                 'is_required' => true,
             ],
             [
                 'order' => 3,
                 'name' => 'Approval Direktur',
                 'approver_type' => 'role',
-                'role_id' => $directorRole->id,
+                'role_id' => $direkturRole->id,
+                'user_id' => null,
                 'is_required' => true,
             ],
         ];
@@ -75,7 +72,12 @@ class PumWorkflowSeeder extends Seeder
             ));
         }
 
-        $this->command->info('Default PUM workflow created with ' . count($steps) . ' approval steps.');
-        $this->command->info('Workflow: Manager → Keuangan → Direktur');
+        $this->command->info('✓ Default PUM workflow created with ' . count($steps) . ' approval steps.');
+        $this->command->info('✓ Workflow: Manager → Keuangan → Direktur');
+        $this->command->line('');
+        $this->command->info('Approval Steps:');
+        foreach ($steps as $step) {
+            $this->command->line("  {$step['order']}. {$step['name']}");
+        }
     }
 }

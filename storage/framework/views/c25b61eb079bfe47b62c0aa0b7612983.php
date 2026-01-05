@@ -1,8 +1,6 @@
-@extends('layouts.auth')
+<?php $__env->startSection('title', 'Login - PUM System'); ?>
 
-@section('title', 'Login - PUM System')
-
-@section('content')
+<?php $__env->startSection('content'); ?>
 <div class="min-h-screen w-full flex">
     <!-- Left Side - Login Form -->
     <div class="w-full lg:w-1/2 flex items-center justify-center p-8 bg-gray-50">
@@ -10,7 +8,7 @@
             <!-- Mobile Logo -->
             <div class="lg:hidden flex flex-col items-center mb-8">
                 <div class="rounded-2xl border border-green-200 bg-white shadow-md p-4 mb-3">
-                    <img src="{{ asset('images/logo.png') }}" alt="Logo" class="h-16 object-contain" />
+                    <img src="<?php echo e(asset('images/logo.png')); ?>" alt="Logo" class="h-16 object-contain" />
                 </div>
                 <h2 class="text-2xl font-bold text-gray-800">PUM System</h2>
                 <p class="text-sm text-gray-600">Sistem Permintaan Uang Muka</p>
@@ -25,8 +23,8 @@
                 </div>
 
                 <!-- Form -->
-                <form action="{{ route('login') }}" method="POST" class="space-y-5">
-                    @csrf
+                <form action="<?php echo e(route('login')); ?>" method="POST" class="space-y-5">
+                    <?php echo csrf_field(); ?>
 
                     <!-- Username -->
                     <div>
@@ -39,7 +37,7 @@
                             type="text" 
                             required 
                             placeholder="Masukkan username Anda" 
-                            value="{{ old('username') }}"
+                            value="<?php echo e(old('username')); ?>"
                             class="w-full rounded-xl border-2 border-gray-200 px-4 py-3 bg-white text-gray-900 shadow-sm outline-none transition focus:ring-4 focus:ring-green-500/20 focus:border-green-600 hover:border-gray-300"
                         />
                     </div>
@@ -79,21 +77,21 @@
                     </div>
 
                     <!-- Error Messages -->
-                    @if ($errors->any())
+                    <?php if($errors->any()): ?>
                     <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
                         <div class="flex items-start">
                             <i class="fas fa-exclamation-circle text-red-500 mt-0.5 mr-3"></i>
                             <div class="flex-1">
                                 <p class="text-sm font-semibold text-red-800 mb-1">Terjadi kesalahan:</p>
                                 <ul class="list-disc list-inside text-sm text-red-700 space-y-1">
-                                    @foreach ($errors->all() as $error)
-                                        <li>{{ $error }}</li>
-                                    @endforeach
+                                    <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <li><?php echo e($error); ?></li>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </ul>
                             </div>
                         </div>
                     </div>
-                    @endif
+                    <?php endif; ?>
 
                     <!-- Submit Button -->
                     <button 
@@ -107,7 +105,7 @@
 
                 <!-- Footer -->
                 <div class="mt-6 text-center text-sm text-gray-500">
-                    <p>© {{ date('Y') }} PUM System. All rights reserved.</p>
+                    <p>© <?php echo e(date('Y')); ?> PUM System. All rights reserved.</p>
                 </div>
             </div>
         </div>
@@ -125,7 +123,7 @@
         <div class="relative z-10 flex flex-col items-center justify-center w-full px-12 text-white">
             <!-- Logo -->
             <div class="mb-8 bg-white rounded-3xl shadow-2xl p-8">
-                <img src="{{ asset('images/logo.png') }}" alt="Logo" class="h-32 w-32 object-contain" />
+                <img src="<?php echo e(asset('images/logo.png')); ?>" alt="Logo" class="h-32 w-32 object-contain" />
             </div>
 
             <!-- App Name -->
@@ -151,4 +149,6 @@
         }
     })();
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.auth', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH D:\Pemrograman\magang\pum\resources\views/auth/login.blade.php ENDPATH**/ ?>

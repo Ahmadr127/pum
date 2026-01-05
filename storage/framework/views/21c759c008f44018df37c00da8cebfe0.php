@@ -1,16 +1,15 @@
-@extends('layouts.app')
 
-@section('title', 'Edit Workflow - ' . $pumWorkflow->name)
 
-@section('content')
-<div class="w-full px-4" x-data="workflowEditForm()">
+<?php $__env->startSection('title', 'Buat Workflow Approval'); ?>
+
+<?php $__env->startSection('content'); ?>
+<div class="w-full max-w-4xl mx-auto" x-data="workflowForm()">
     <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
         <div class="p-6 bg-white border-b border-gray-200">
-            <h2 class="text-xl font-bold text-gray-900 mb-6">Edit Workflow Approval</h2>
+            <h2 class="text-xl font-bold text-gray-900 mb-6">Buat Workflow Approval Baru</h2>
 
-            <form action="{{ route('pum-workflows.update', $pumWorkflow) }}" method="POST" @submit="prepareSubmit">
-                @csrf
-                @method('PUT')
+            <form action="<?php echo e(route('pum-workflows.store')); ?>" method="POST" @submit="prepareSubmit">
+                <?php echo csrf_field(); ?>
                 
                 <!-- Basic Info -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
@@ -18,21 +17,29 @@
                         <label for="name" class="block text-sm font-medium text-gray-700 mb-1">
                             Nama Workflow <span class="text-red-500">*</span>
                         </label>
-                        <input type="text" name="name" id="name" value="{{ old('name', $pumWorkflow->name) }}" required
-                               class="block w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500">
-                        @error('name')
-                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                        @enderror
+                        <input type="text" name="name" id="name" value="<?php echo e(old('name')); ?>" required
+                               class="block w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                               placeholder="Contoh: Approval Standar 3 Level">
+                        <?php $__errorArgs = ['name'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                            <p class="text-red-500 text-xs mt-1"><?php echo e($message); ?></p>
+                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                     </div>
 
                     <div class="flex items-center gap-6">
                         <label class="flex items-center">
-                            <input type="checkbox" name="is_active" value="1" {{ $pumWorkflow->is_active ? 'checked' : '' }}
+                            <input type="checkbox" name="is_active" value="1" checked
                                    class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
                             <span class="ml-2 text-sm text-gray-700">Aktif</span>
                         </label>
                         <label class="flex items-center">
-                            <input type="checkbox" name="is_default" value="1" {{ $pumWorkflow->is_default ? 'checked' : '' }}
+                            <input type="checkbox" name="is_default" value="1"
                                    class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
                             <span class="ml-2 text-sm text-gray-700">Jadikan Default</span>
                         </label>
@@ -44,7 +51,8 @@
                         Deskripsi
                     </label>
                     <textarea name="description" id="description" rows="2"
-                              class="block w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500">{{ old('description', $pumWorkflow->description) }}</textarea>
+                              class="block w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                              placeholder="Deskripsi singkat workflow ini..."><?php echo e(old('description')); ?></textarea>
                 </div>
 
                 <!-- Steps Section -->
@@ -76,7 +84,8 @@
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-1">Nama Step *</label>
                                         <input type="text" x-model="step.name" required
-                                               class="block w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                               class="block w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                               placeholder="Contoh: Approval Manager">
                                     </div>
 
                                     <!-- Approver Type -->
@@ -90,33 +99,32 @@
                                         </select>
                                     </div>
 
-                                    <!-- Role Selector -->
+                                    <!-- Role / User Selector -->
                                     <div x-show="step.approver_type === 'role'">
                                         <label class="block text-sm font-medium text-gray-700 mb-1">Pilih Role *</label>
                                         <select x-model="step.role_id"
                                                 class="block w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500">
                                             <option value="">Pilih Role...</option>
-                                            @foreach($roles as $role)
-                                                <option value="{{ $role->id }}">{{ $role->display_name }}</option>
-                                            @endforeach
+                                            <?php $__currentLoopData = $roles; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $role): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                <option value="<?php echo e($role->id); ?>"><?php echo e($role->display_name); ?></option>
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                         </select>
                                     </div>
 
-                                    <!-- User Selector -->
                                     <div x-show="step.approver_type === 'user'">
                                         <label class="block text-sm font-medium text-gray-700 mb-1">Pilih User *</label>
                                         <select x-model="step.user_id"
                                                 class="block w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500">
                                             <option value="">Pilih User...</option>
-                                            @foreach($users as $user)
-                                                <option value="{{ $user->id }}">{{ $user->name }}</option>
-                                            @endforeach
+                                            <?php $__currentLoopData = $users; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $user): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                <option value="<?php echo e($user->id); ?>"><?php echo e($user->name); ?></option>
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                         </select>
                                     </div>
 
                                     <div x-show="step.approver_type === 'organization_head'" class="text-sm text-gray-500 flex items-center">
                                         <i class="fas fa-info-circle mr-2"></i>
-                                        Kepala unit organisasi pemohon
+                                        Approver akan diambil dari kepala unit organisasi pemohon
                                     </div>
                                 </div>
 
@@ -135,7 +143,6 @@
                     <!-- Hidden inputs for steps -->
                     <template x-for="(step, index) in steps" :key="'input_' + index">
                         <div>
-                            <input type="hidden" :name="'steps[' + index + '][id]'" :value="step.id || ''">
                             <input type="hidden" :name="'steps[' + index + '][name]'" :value="step.name">
                             <input type="hidden" :name="'steps[' + index + '][approver_type]'" :value="step.approver_type">
                             <input type="hidden" :name="'steps[' + index + '][role_id]'" :value="step.role_id || ''">
@@ -147,11 +154,11 @@
 
                 <!-- Actions -->
                 <div class="mt-6 flex justify-end gap-3 border-t border-gray-200 pt-6">
-                    <a href="{{ route('pum-workflows.show', $pumWorkflow) }}" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 font-medium">
+                    <a href="<?php echo e(route('pum-workflows.index')); ?>" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 font-medium">
                         Batal
                     </a>
                     <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 font-medium">
-                        <i class="fas fa-save mr-1"></i> Simpan Perubahan
+                        <i class="fas fa-save mr-1"></i> Simpan Workflow
                     </button>
                 </div>
             </form>
@@ -160,13 +167,14 @@
 </div>
 
 <script>
-function workflowEditForm() {
+function workflowForm() {
     return {
-        steps: @json($stepsData),
+        steps: [
+            { name: '', approver_type: 'role', role_id: '', user_id: '', is_required: true }
+        ],
 
         addStep() {
             this.steps.push({ 
-                id: null,
                 name: '', 
                 approver_type: 'role', 
                 role_id: '', 
@@ -182,11 +190,13 @@ function workflowEditForm() {
         },
 
         onApproverTypeChange(index) {
+            // Clear role_id and user_id when type changes
             this.steps[index].role_id = '';
             this.steps[index].user_id = '';
         },
 
         prepareSubmit(e) {
+            // Validate steps
             for (let step of this.steps) {
                 if (!step.name) {
                     alert('Semua step harus memiliki nama');
@@ -209,4 +219,6 @@ function workflowEditForm() {
     }
 }
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH D:\Pemrograman\magang\pum\resources\views/pum/workflows/create.blade.php ENDPATH**/ ?>
