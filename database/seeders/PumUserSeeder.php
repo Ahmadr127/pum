@@ -15,50 +15,38 @@ class PumUserSeeder extends Seeder
     public function run(): void
     {
         // Get roles
-        $managerRole = Role::where('name', 'manager')->first();
-        $keuanganRole = Role::where('name', 'keuangan')->first();
         $direkturRole = Role::where('name', 'direktur')->first();
-        $staffRole = Role::where('name', 'staff')->first();
 
-        $users = [
-            [
-                'name' => 'Manager PUM',
-                'email' => 'manager@pum.test',
-                'username' => 'manager.pum',
-                'password' => Hash::make('password'),
-                'role_id' => $managerRole?->id,
-            ],
-            [
-                'name' => 'Keuangan PUM',
-                'email' => 'keuangan@pum.test',
-                'username' => 'keuangan.pum',
-                'password' => Hash::make('password'),
-                'role_id' => $keuanganRole?->id,
-            ],
-            [
-                'name' => 'Direktur PUM',
-                'email' => 'direktur@pum.test',
-                'username' => 'direktur.pum',
-                'password' => Hash::make('password'),
+        // Get organization units
+        $direkturUnit = \App\Models\OrganizationUnit::where('code', 'DIRUT')->first();
+
+        // Check if direktur user already exists from OrganizationUnitSeeder
+        $existingDirektur = User::where('username', 'direktur.utama')->first();
+        
+        if ($existingDirektur) {
+            // Update existing user to have direktur role
+            $existingDirektur->update([
                 'role_id' => $direkturRole?->id,
-            ],
-            [
-                'name' => 'Staff PUM',
-                'email' => 'staff@pum.test',
-                'username' => 'staff.pum',
-                'password' => Hash::make('password'),
-                'role_id' => $staffRole?->id,
-            ],
-        ];
-
-        foreach ($users as $userData) {
+            ]);
+            $this->command->info('✓ User Direktur Utama updated with direktur role');
+        } else {
+            // Create new direktur user if not exists
             User::firstOrCreate(
-                ['email' => $userData['email']],
-                $userData
+                ['email' => 'direktur@pum.test'],
+                [
+                    'name' => 'Dr. Ahmad Direktur',
+                    'username' => 'direktur.pum',
+                    'password' => Hash::make('password'),
+                    'role_id' => $direkturRole?->id,
+                    'organization_unit_id' => $direkturUnit?->id,
+                ]
             );
+            $this->command->info('✓ User Direktur created');
         }
 
-        $this->command->info('PUM users created successfully.');
+        $this->command->info('PUM users setup completed.');
         $this->command->info('Default password for all users: password');
+        $this->command->info('✓ User Manager dan Staff PUM dihapus (tidak digunakan)');
+        $this->command->info('✓ User Keuangan ada di Departemen Keuangan (siti.keuangan)');
     }
 }

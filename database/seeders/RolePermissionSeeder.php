@@ -34,20 +34,55 @@ class RolePermissionSeeder extends Seeder
             'description' => 'Role dengan akses penuh ke sistem'
         ]);
 
+        $managerRole = Role::firstOrCreate(
+            ['name' => 'manager'],
+            [
+                'display_name' => 'Manager',
+                'description' => 'Manager unit organisasi dengan hak approval'
+            ]
+        );
 
-        $userRole = Role::create([
-            'name' => 'user',
-            'display_name' => 'Pengguna',
-            'description' => 'Role untuk pengguna umum'
-        ]);
+        $direkturRole = Role::firstOrCreate(
+            ['name' => 'direktur'],
+            [
+                'display_name' => 'Direktur',
+                'description' => 'Direktur dengan approval tertinggi'
+            ]
+        );
+
+        $keuanganRole = Role::firstOrCreate(
+            ['name' => 'keuangan'],
+            [
+                'display_name' => 'Keuangan',
+                'description' => 'Bagian Keuangan dengan hak approval'
+            ]
+        );
 
         // Assign permissions to roles
         $adminRole->permissions()->attach(Permission::all()); // Admin gets all permissions
         
-        
-        $userRole->permissions()->attach(
+        // Manager gets specific permissions
+        $managerRole->permissions()->attach(
             Permission::whereIn('name', [
-                'view_dashboard'
+                'view_dashboard',
+                'manage_pum',
+                'approve_pum'
+            ])->get()
+        );
+
+        // Direktur gets specific permissions
+        $direkturRole->permissions()->attach(
+            Permission::whereIn('name', [
+                'view_dashboard',
+                'approve_pum'
+            ])->get()
+        );
+
+        // Keuangan gets specific permissions
+        $keuanganRole->permissions()->attach(
+            Permission::whereIn('name', [
+                'view_dashboard',
+                'approve_pum'
             ])->get()
         );
     }

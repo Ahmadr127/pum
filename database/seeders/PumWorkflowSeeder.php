@@ -28,7 +28,7 @@ class PumWorkflowSeeder extends Seeder
         $workflow = PumApprovalWorkflow::firstOrCreate(
             ['name' => 'Default Approval Workflow'],
             [
-                'description' => 'Workflow persetujuan uang muka standar dengan 3 tingkat approval: Manager → Keuangan → Direktur',
+                'description' => 'Workflow persetujuan uang muka standar dengan 3 tingkat approval: Manager Departemen → Keuangan → Direktur',
                 'is_active' => true,
                 'is_default' => true,
             ]

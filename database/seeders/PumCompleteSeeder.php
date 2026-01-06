@@ -11,7 +11,7 @@ class PumCompleteSeeder extends Seeder
      * 
      * This seeder will set up complete PUM system:
      * 1. Roles (Manager, Keuangan, Direktur, Staff)
-     * 2. Users (one for each role)
+     * 2. Users (Direktur only)
      * 3. Workflow (Default 3-level approval)
      */
     public function run(): void
@@ -27,7 +27,7 @@ class PumCompleteSeeder extends Seeder
         $this->command->line('');
 
         // Step 2: Create Users
-        $this->command->info('Step 2: Creating Users...');
+        $this->command->info('Step 2: Setting up Users...');
         $this->call(PumUserSeeder::class);
         $this->command->line('');
 
@@ -41,12 +41,12 @@ class PumCompleteSeeder extends Seeder
         $this->command->info('========================================');
         $this->command->line('');
         $this->command->info('Test Users Created:');
-        $this->command->line('  • manager@pum.test (Manager)');
-        $this->command->line('  • keuangan@pum.test (Keuangan)');
-        $this->command->line('  • direktur@pum.test (Direktur)');
-        $this->command->line('  • staff@pum.test (Staff)');
+        $this->command->line('  • direktur.utama (Direktur) - Dr. Ahmad Direktur');
         $this->command->line('');
         $this->command->info('Default Password: password');
+        $this->command->info('Note:');
+        $this->command->line('  • User Manager dan Staff PUM dihapus (tidak digunakan)');
+        $this->command->line('  • User Keuangan: siti.keuangan (Departemen Keuangan)');
         $this->command->line('');
     }
 }

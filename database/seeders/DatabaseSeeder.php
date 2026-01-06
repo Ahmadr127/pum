@@ -78,11 +78,12 @@ class DatabaseSeeder extends Seeder
         $this->command->line('');
         
         $this->command->info('PUM Test Users:');
-        $this->command->line('  • manager@pum.test (Manager)');
-        $this->command->line('  • keuangan@pum.test (Keuangan)');
-        $this->command->line('  • direktur@pum.test (Direktur)');
-        $this->command->line('  • staff@pum.test (Staff)');
+        $this->command->line('  • direktur.utama (Direktur) - Dr. Ahmad Direktur');
         $this->command->line('  Password: password');
+        $this->command->line('');
+        $this->command->info('Note:');
+        $this->command->line('  • User Manager PUM dan Staff PUM dihapus (tidak digunakan)');
+        $this->command->line('  • User Keuangan: siti.keuangan (Departemen Keuangan)');
         $this->command->line('');
     }
 }
