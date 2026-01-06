@@ -48,23 +48,23 @@ class OrganizationUnitSeeder extends Seeder
         );
 
         // ========================================
-        // 2. DEPARTEMEN SIRS (langsung dibawah Direktur Utama)
+        // 2. DEPARTEMEN IT (langsung dibawah Direktur Utama)
         // ========================================
-        $sirs = OrganizationUnit::create([
-            'name' => 'Departemen SIRS',
-            'code' => 'SIRS',
+        $it = OrganizationUnit::create([
+            'name' => 'Departemen IT',
+            'code' => 'IT',
             'type_id' => $departmentType->id,
             'parent_id' => $direkturUtama['unit']->id,
-            'description' => 'Sistem Informasi Rumah Sakit',
+            'description' => 'Teknologi Informasi',
             'is_active' => true,
         ]);
 
-        // Manager SIRS
-        $managerSirs = $this->createUser('Budi Manager SIRS', 'budi.sirs', 'manager.sirs@hospital.com', $managerRole->id, $sirs->id);
-        $sirs->update(['head_id' => $managerSirs->id]);
+        // Manager IT
+        $managerIT = $this->createUser('Budi Manager IT', 'budi.it', 'manager.it@hospital.com', $managerRole->id, $it->id);
+        $it->update(['head_id' => $managerIT->id]);
 
-        // Staff SIRS (1 user)
-        $this->createUser('Citra Staff SIRS', 'citra.sirs', 'citra.sirs@hospital.com', $staffRole->id, $sirs->id);
+        // Staff IT (1 user)
+        $this->createUser('Citra Staff IT', 'citra.it', 'citra.it@hospital.com', $staffRole->id, $it->id);
 
         // ========================================
         // 3. DEPARTEMEN KEUANGAN (langsung dibawah Direktur Utama)

@@ -30,28 +30,45 @@ class DashboardController extends Controller
             $data['pendingApprovals'] = $pendingApprovals;
             $data['pendingApprovalsCount'] = $pendingApprovals->count();
             
-            // Add PUM stats for approvers (if they don't have manage_pum permission)
+            // Stats for approvers - show requests they need to approve
             if (!$user->hasPermission('manage_pum')) {
+                // Count all requests that this user can approve or has approved
+                $allApprovalRequests = PumRequest::with(['approvals'])
+                    ->whereIn('status', [
+                        PumRequest::STATUS_PENDING, 
+                        PumRequest::STATUS_APPROVED, 
+                        PumRequest::STATUS_REJECTED
+                    ])
+                    ->get();
+                
+                $myApprovalRequests = $allApprovalRequests->filter(function($req) use ($user) {
+                    // Can approve this request
+                    if ($req->canBeApprovedBy($user)) return true;
+                    // Has already approved/rejected this request
+                    return $req->approvals->where('approver_id', $user->id)->count() > 0;
+                });
+                
                 $data['pumStats'] = [
-                    'total' => PumRequest::count(),
-                    'new' => PumRequest::where('status', 'new')->count(),
-                    'pending' => PumRequest::where('status', 'pending')->count(),
-                    'approved' => PumRequest::where('status', 'approved')->count(),
-                    'rejected' => PumRequest::where('status', 'rejected')->count(),
-                    'fulfilled' => PumRequest::where('status', 'fulfilled')->count(),
+                    'total' => $myApprovalRequests->count(),
+                    'pending' => $myApprovalRequests->where('status', 'pending')->count(),
+                    'approved' => $myApprovalRequests->where('status', 'approved')->count(),
                 ];
             }
         }
         
-        // PUM Request Stats (if user has manage_pum permission)
+        // PUM Request Stats (if user has manage_pum permission - for requesters/staff)
         if ($user->hasPermission('manage_pum')) {
+            // Show only requests created by or requested by this user
+            $myRequests = PumRequest::where('created_by', $user->id)
+                ->orWhere('requester_id', $user->id);
+            
             $data['pumStats'] = [
-                'total' => PumRequest::count(),
-                'new' => PumRequest::where('status', 'new')->count(),
-                'pending' => PumRequest::where('status', 'pending')->count(),
-                'approved' => PumRequest::where('status', 'approved')->count(),
-                'rejected' => PumRequest::where('status', 'rejected')->count(),
-                'fulfilled' => PumRequest::where('status', 'fulfilled')->count(),
+                'total' => (clone $myRequests)->count(),
+                'new' => (clone $myRequests)->where('status', 'new')->count(),
+                'pending' => (clone $myRequests)->where('status', 'pending')->count(),
+                'approved' => (clone $myRequests)->where('status', 'approved')->count(),
+                'rejected' => (clone $myRequests)->where('status', 'rejected')->count(),
+                'fulfilled' => (clone $myRequests)->where('status', 'fulfilled')->count(),
             ];
             
             $data['recentRequests'] = PumRequest::with('requester')

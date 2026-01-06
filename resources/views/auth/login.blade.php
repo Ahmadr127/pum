@@ -28,18 +28,18 @@
                 <form action="{{ route('login') }}" method="POST" class="space-y-5">
                     @csrf
 
-                    <!-- Username -->
+                    <!-- Email atau Username -->
                     <div>
-                        <label for="username" class="block text-sm font-semibold text-gray-700 mb-2">
-                            <i class="fas fa-user mr-2 text-green-600"></i>Username
+                        <label for="login" class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-user mr-2 text-green-600"></i>Email atau Username
                         </label>
                         <input 
-                            id="username" 
-                            name="username" 
+                            id="login" 
+                            name="login" 
                             type="text" 
                             required 
-                            placeholder="Masukkan username Anda" 
-                            value="{{ old('username') }}"
+                            placeholder="Masukkan email atau username Anda" 
+                            value="{{ old('login') }}"
                             class="w-full rounded-xl border-2 border-gray-200 px-4 py-3 bg-white text-gray-900 shadow-sm outline-none transition focus:ring-4 focus:ring-green-500/20 focus:border-green-600 hover:border-gray-300"
                         />
                     </div>

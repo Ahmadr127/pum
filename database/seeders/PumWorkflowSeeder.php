@@ -41,9 +41,9 @@ class PumWorkflowSeeder extends Seeder
         $steps = [
             [
                 'order' => 1,
-                'name' => 'Approval Manager',
-                'approver_type' => 'role',
-                'role_id' => $managerRole->id,
+                'name' => 'Approval Kepala Unit',
+                'approver_type' => 'organization_head', // Kepala unit dari pengaju
+                'role_id' => null,
                 'user_id' => null,
                 'is_required' => true,
             ],

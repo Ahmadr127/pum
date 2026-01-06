@@ -232,6 +232,15 @@
                                 </div>
                                 <div class="text-left hidden sm:block">
                                     <div class="text-sm font-medium text-gray-700"><?php echo e(auth()->user()->name); ?></div>
+                                    <div class="text-xs text-gray-500">
+                                        <?php echo e(auth()->user()->role->display_name ?? auth()->user()->role->name ?? '-'); ?>
+
+                                        <?php if(auth()->user()->organizationUnit): ?>
+                                            <span class="text-gray-400">•</span>
+                                            <?php echo e(auth()->user()->organizationUnit->name); ?>
+
+                                        <?php endif; ?>
+                                    </div>
                                 </div>
                                 <i class="fas fa-chevron-down text-xs text-gray-400 transition-transform duration-200" :class="{ 'rotate-180': open }"></i>
                             </button>

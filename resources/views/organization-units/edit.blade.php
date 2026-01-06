@@ -44,7 +44,7 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6" style="position: relative; z-index: 30;">
                     {{-- Tipe Organisasi - Searchable Dropdown --}}
                     <x-searchable-dropdown
                         name="type_id"
@@ -72,6 +72,7 @@
                 </div>
 
                 {{-- Kepala Unit - Searchable Dropdown --}}
+                <div style="position: relative; z-index: 20;">
                 <x-searchable-dropdown
                     name="head_id"
                     label="Kepala Unit"
@@ -82,6 +83,7 @@
                     placeholder="Pilih Kepala Unit..."
                     empty-option="Belum Ditentukan"
                 />
+                </div>
 
                 <div>
                     <label for="description" class="block text-sm font-medium text-gray-700">Deskripsi</label>

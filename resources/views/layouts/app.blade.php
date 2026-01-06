@@ -236,6 +236,13 @@
                                 </div>
                                 <div class="text-left hidden sm:block">
                                     <div class="text-sm font-medium text-gray-700">{{ auth()->user()->name }}</div>
+                                    <div class="text-xs text-gray-500">
+                                        {{ auth()->user()->role->display_name ?? auth()->user()->role->name ?? '-' }}
+                                        @if(auth()->user()->organizationUnit)
+                                            <span class="text-gray-400">•</span>
+                                            {{ auth()->user()->organizationUnit->name }}
+                                        @endif
+                                    </div>
                                 </div>
                                 <i class="fas fa-chevron-down text-xs text-gray-400 transition-transform duration-200" :class="{ 'rotate-180': open }"></i>
                             </button>

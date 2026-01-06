@@ -134,15 +134,7 @@
                     </button>
                 @endif
 
-                @if($pumRequest->status === 'approved')
-                    <form action="{{ route('pum-requests.fulfill', $pumRequest) }}" method="POST" class="inline">
-                        @csrf
-                        <button type="submit" class="px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 font-medium"
-                                onclick="return confirm('Tandai permintaan ini sebagai terpenuhi?')">
-                            <i class="fas fa-check-double mr-1"></i> Tandai Terpenuhi
-                        </button>
-                    </form>
-                @endif
+
             </div>
         </div>
 
