@@ -147,7 +147,7 @@
         </div>
 
         {{-- Riwayat Persetujuan - Hanya untuk Pengaju --}}
-        @if(auth()->id() === $pumRequest->requester_id || auth()->id() === $pumRequest->created_by)
+        @if(auth()->id() == $pumRequest->requester_id || auth()->id() == $pumRequest->created_by)
         <div class="p-6 bg-gray-50">
             <h3 class="text-sm font-medium text-blue-600 mb-4">Riwayat Persetujuan</h3>
             <div class="overflow-x-auto">

@@ -28,6 +28,10 @@ class PumRequest extends Model
         'request_date' => 'date',
         'amount' => 'decimal:2',
         'attachments' => 'array',
+        'requester_id' => 'integer',
+        'created_by' => 'integer',
+        'workflow_id' => 'integer',
+        'current_step_order' => 'integer',
     ];
 
     const STATUS_NEW = 'new';
