@@ -66,6 +66,8 @@ class PumRequestController extends Controller
             'submit_for_approval' => 'nullable|boolean',
             'attachments' => 'nullable|array',
             'attachments.*' => 'file|mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png|max:5120',
+            'attachments2' => 'nullable|array',
+            'attachments2.*' => 'file|mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png|max:5120',
         ]);
 
         // Handle file uploads
@@ -77,6 +79,14 @@ class PumRequestController extends Controller
             }
         }
 
+        $attachments2 = [];
+        if ($request->hasFile('attachments2')) {
+            foreach ($request->file('attachments2') as $file) {
+                $path = $file->store('pum-attachments', 'public');
+                $attachments2[] = $path;
+            }
+        }
+
         $pumRequest = PumRequest::create([
             'code' => PumRequest::generateCode(),
             'requester_id' => $validated['requester_id'],
@@ -84,6 +94,7 @@ class PumRequestController extends Controller
             'amount' => $validated['amount'],
             'description' => $validated['description'] ?? null,
             'attachments' => !empty($attachments) ? $attachments : null,
+            'attachments2' => !empty($attachments2) ? $attachments2 : null,
             'workflow_id' => $validated['workflow_id'] ?? null,
             'status' => PumRequest::STATUS_NEW,
             'created_by' => Auth::id(),
@@ -166,6 +177,9 @@ class PumRequestController extends Controller
             'attachments' => 'nullable|array',
             'attachments.*' => 'file|mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png|max:5120',
             'remove_attachments' => 'nullable|array',
+            'attachments2' => 'nullable|array',
+            'attachments2.*' => 'file|mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png|max:5120',
+            'remove_attachments2' => 'nullable|array',
         ]);
 
         // Handle existing attachments removal
@@ -188,12 +202,33 @@ class PumRequestController extends Controller
             }
         }
 
+        // Handle existing attachments2 removal
+        $currentAttachments2 = $pumRequest->attachments2 ?? [];
+        if ($request->has('remove_attachments2')) {
+            foreach ($request->remove_attachments2 as $index) {
+                if (isset($currentAttachments2[$index])) {
+                    Storage::disk('public')->delete($currentAttachments2[$index]);
+                    unset($currentAttachments2[$index]);
+                }
+            }
+            $currentAttachments2 = array_values($currentAttachments2);
+        }
+
+        // Handle new file uploads for attachments2
+        if ($request->hasFile('attachments2')) {
+            foreach ($request->file('attachments2') as $file) {
+                $path = $file->store('pum-attachments', 'public');
+                $currentAttachments2[] = $path;
+            }
+        }
+
         $pumRequest->update([
             'requester_id' => $validated['requester_id'],
             'request_date' => $validated['request_date'],
             'amount' => $validated['amount'],
             'description' => $validated['description'] ?? null,
             'attachments' => !empty($currentAttachments) ? $currentAttachments : null,
+            'attachments2' => !empty($currentAttachments2) ? $currentAttachments2 : null,
             'workflow_id' => $validated['workflow_id'] ?? null,
         ]);
 

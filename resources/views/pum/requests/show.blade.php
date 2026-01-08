@@ -27,7 +27,7 @@
             </div>
 
             <!-- Request Details -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
                 <!-- Left Column -->
                 <div class="space-y-4">
                     <div>
@@ -68,12 +68,44 @@
                     </div>
                 </div>
 
-                <!-- Right Column - Lampiran -->
+                <!-- Third Column - Lampiran 1 -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-500 mb-1">LAMPIRAN</label>
+                    <label class="block text-sm font-medium text-gray-500 mb-1">LAMPIRAN 1</label>
                     @if($pumRequest->attachments && count($pumRequest->attachments) > 0)
                     <div class="space-y-2">
                         @foreach($pumRequest->attachments as $attachment)
+                        <a href="{{ Storage::url($attachment) }}" target="_blank" 
+                           class="flex items-center gap-2 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                            @php
+                                $ext = pathinfo($attachment, PATHINFO_EXTENSION);
+                                $iconClass = match(strtolower($ext)) {
+                                    'pdf' => 'fa-file-pdf text-red-500',
+                                    'doc', 'docx' => 'fa-file-word text-blue-500',
+                                    'xls', 'xlsx' => 'fa-file-excel text-green-500',
+                                    'jpg', 'jpeg', 'png' => 'fa-file-image text-purple-500',
+                                    default => 'fa-file text-gray-500'
+                                };
+                            @endphp
+                            <i class="fas {{ $iconClass }} text-lg"></i>
+                            <span class="text-sm text-gray-700 flex-1 truncate">{{ basename($attachment) }}</span>
+                            <i class="fas fa-external-link-alt text-gray-400 text-xs"></i>
+                        </a>
+                        @endforeach
+                    </div>
+                    @else
+                    <div class="bg-gray-50 p-4 rounded-md text-center text-gray-400">
+                        <i class="fas fa-paperclip text-2xl mb-2"></i>
+                        <p class="text-sm">Tidak ada lampiran</p>
+                    </div>
+                    @endif
+                </div>
+
+                <!-- Fourth Column - Lampiran 2 -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-500 mb-1">LAMPIRAN 2</label>
+                    @if($pumRequest->attachments2 && count($pumRequest->attachments2) > 0)
+                    <div class="space-y-2">
+                        @foreach($pumRequest->attachments2 as $attachment)
                         <a href="{{ Storage::url($attachment) }}" target="_blank" 
                            class="flex items-center gap-2 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                             @php

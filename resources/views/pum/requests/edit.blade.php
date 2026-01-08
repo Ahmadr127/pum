@@ -18,7 +18,7 @@
                 @csrf
                 @method('PUT')
                 
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
                     <!-- Left Column -->
                     <div class="space-y-4">
                         <!-- Pengaju -->
@@ -95,10 +95,10 @@
                         @enderror
                     </div>
 
-                    <!-- Right Column - Lampiran -->
+                    <!-- Third Column - Lampiran 1 -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">
-                            LAMPIRAN
+                            LAMPIRAN 1
                         </label>
                         
                         <!-- Existing Attachments -->
@@ -122,7 +122,7 @@
                         </div>
                         @endif
 
-                        <div x-data="fileUpload()" class="space-y-3">
+                        <div x-data="fileUpload('attachments')" class="space-y-3">
                             <!-- Upload Area -->
                             <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-indigo-400 transition-colors cursor-pointer"
                                  @click="$refs.fileInput.click()"
@@ -158,6 +158,70 @@
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
                     </div>
+
+                    <!-- Fourth Column - Lampiran 2 -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            LAMPIRAN 2
+                        </label>
+                        
+                        <!-- Existing Attachments2 -->
+                        @if($pumRequest->attachments2 && count($pumRequest->attachments2) > 0)
+                        <div class="mb-3 space-y-2">
+                            <p class="text-xs text-gray-500 font-medium">File yang sudah diupload:</p>
+                            @foreach($pumRequest->attachments2 as $index => $attachment)
+                            <div class="flex items-center justify-between p-2 bg-blue-50 rounded-lg text-sm">
+                                <div class="flex items-center gap-2 flex-1 min-w-0">
+                                    <i class="fas fa-file text-blue-400"></i>
+                                    <a href="{{ Storage::url($attachment) }}" target="_blank" class="truncate text-blue-600 hover:underline">
+                                        {{ basename($attachment) }}
+                                    </a>
+                                </div>
+                                <label class="flex items-center gap-1 text-red-500 cursor-pointer">
+                                    <input type="checkbox" name="remove_attachments2[]" value="{{ $index }}" class="rounded">
+                                    <span class="text-xs">Hapus</span>
+                                </label>
+                            </div>
+                            @endforeach
+                        </div>
+                        @endif
+
+                        <div x-data="fileUpload('attachments2')" class="space-y-3">
+                            <!-- Upload Area -->
+                            <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-indigo-400 transition-colors cursor-pointer"
+                                 @click="$refs.fileInput.click()"
+                                 @dragover.prevent="dragover = true"
+                                 @dragleave.prevent="dragover = false"
+                                 @drop.prevent="handleDrop($event)"
+                                 :class="{ 'border-indigo-400 bg-indigo-50': dragover }">
+                                <input type="file" name="attachments2[]" multiple x-ref="fileInput" 
+                                       class="hidden" @change="handleFiles($event)"
+                                       accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png">
+                                <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
+                                <p class="text-sm text-gray-600">Tambah file baru</p>
+                                <p class="text-xs text-gray-400 mt-1">PDF, DOC, XLS, JPG, PNG (Max 5MB)</p>
+                            </div>
+
+                            <!-- File List -->
+                            <div class="space-y-2 max-h-32 overflow-y-auto">
+                                <template x-for="(file, index) in files" :key="index">
+                                    <div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg text-sm">
+                                        <div class="flex items-center gap-2 flex-1 min-w-0">
+                                            <i class="fas fa-file text-gray-400"></i>
+                                            <span class="truncate" x-text="file.name"></span>
+                                            <span class="text-xs text-gray-400" x-text="formatSize(file.size)"></span>
+                                        </div>
+                                        <button type="button" @click="removeFile(index)" class="text-red-500 hover:text-red-700 ml-2">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                        @error('attachments2')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
                 </div>
 
                 <!-- Actions -->
@@ -182,10 +246,11 @@
 
 @push('scripts')
 <script>
-function fileUpload() {
+function fileUpload(inputName = 'attachments') {
     return {
         files: [],
         dragover: false,
+        inputName: inputName,
         
         handleFiles(event) {
             const newFiles = Array.from(event.target.files);
