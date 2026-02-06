@@ -30,6 +30,14 @@ class PumApprovalWorkflow extends Model
     }
 
     /**
+     * Get workflow conditions
+     */
+    public function conditions()
+    {
+        return $this->hasMany(PumWorkflowCondition::class, 'workflow_id');
+    }
+
+    /**
      * Get the default workflow
      */
     public static function getDefault()
@@ -61,5 +69,21 @@ class PumApprovalWorkflow extends Model
     public function getRequiredStepsCountAttribute()
     {
         return $this->steps()->where('is_required', true)->count();
+    }
+
+    /**
+     * Check if this workflow matches the given parameters
+     */
+    public function matchesConditions($amount, $category): bool
+    {
+        // If no conditions, this is the default workflow
+        if ($this->conditions()->count() === 0) {
+            return $this->is_default;
+        }
+
+        // Check if any condition matches
+        return $this->conditions()->get()->contains(function ($condition) use ($amount, $category) {
+            return $condition->matches($amount, $category);
+        });
     }
 }

@@ -56,7 +56,7 @@
                 class="relative transform overflow-hidden rounded-lg bg-white shadow-xl transition-all sm:w-full sm:max-w-md"
                 @click.away="open = false"
             >
-                <form :action="formAction" method="POST">
+                <form :action="formAction" method="POST" enctype="multipart/form-data">
                     @csrf
                     <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                         <div class="sm:flex sm:items-start">
@@ -80,6 +80,31 @@
                                         class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm"
                                         placeholder="Tambahkan catatan persetujuan..."
                                     ></textarea>
+                                </div>
+
+                                <!-- FS Form Upload (Optional) -->
+                                <div class="mt-4">
+                                    <label for="fs_form_{{ $modalName }}" class="block text-sm font-medium text-gray-700 mb-1">
+                                        Form FS (Opsional)
+                                        <span class="text-xs text-gray-500 font-normal">- PDF, DOC, DOCX (Max 5MB)</span>
+                                    </label>
+                                    <input 
+                                        type="file" 
+                                        name="fs_form" 
+                                        id="fs_form_{{ $modalName }}"
+                                        accept=".pdf,.doc,.docx"
+                                        class="block w-full text-sm text-gray-500
+                                            file:mr-4 file:py-2 file:px-4
+                                            file:rounded-md file:border-0
+                                            file:text-sm file:font-medium
+                                            file:bg-green-50 file:text-green-700
+                                            hover:file:bg-green-100
+                                            cursor-pointer"
+                                    >
+                                    <p class="mt-1 text-xs text-gray-500">
+                                        <i class="fas fa-info-circle mr-1"></i>
+                                        Upload form FS jika diperlukan untuk approval ini
+                                    </p>
                                 </div>
                             </div>
                         </div>

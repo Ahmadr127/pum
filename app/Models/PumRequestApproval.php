@@ -16,6 +16,7 @@ class PumRequestApproval extends Model
         'approver_id',
         'status',
         'notes',
+        'fs_form_path',
         'responded_at',
     ];
 
@@ -83,5 +84,21 @@ class PumRequestApproval extends Model
     public function scopePending($query)
     {
         return $query->where('status', self::STATUS_PENDING);
+    }
+
+    /**
+     * Get FS form URL
+     */
+    public function getFsFormUrlAttribute()
+    {
+        return $this->fs_form_path ? \Storage::url($this->fs_form_path) : null;
+    }
+
+    /**
+     * Check if FS form is uploaded
+     */
+    public function hasFsForm(): bool
+    {
+        return !empty($this->fs_form_path);
     }
 }

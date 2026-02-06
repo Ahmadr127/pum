@@ -16,6 +16,7 @@ class PumRequest extends Model
         'requester_id',
         'request_date',
         'amount',
+        'procurement_category',
         'description',
         'attachments',
         'attachments2',
@@ -41,6 +42,9 @@ class PumRequest extends Model
     const STATUS_APPROVED = 'approved';
     const STATUS_REJECTED = 'rejected';
     const STATUS_FULFILLED = 'fulfilled';
+
+    const CATEGORY_BARANG_BARU = 'barang_baru';
+    const CATEGORY_PEREMAJAAN = 'peremajaan';
 
     /**
      * Status labels in Indonesian
@@ -394,5 +398,33 @@ class PumRequest extends Model
                       // Note: organization_head is handled differently
                   });
             });
+    }
+
+    /**
+     * Transition to appropriate workflow after Manager Pengaju approval
+     */
+    public function transitionWorkflow()
+    {
+        $workflowService = app(\App\Services\WorkflowSelectionService::class);
+        $workflowService->transitionWorkflowAfterManagerApproval($this);
+    }
+
+    /**
+     * Get procurement category labels
+     */
+    public static function getProcurementCategoryLabels()
+    {
+        return [
+            self::CATEGORY_BARANG_BARU => 'Barang Baru',
+            self::CATEGORY_PEREMAJAAN => 'Peremajaan',
+        ];
+    }
+
+    /**
+     * Get procurement category label
+     */
+    public function getProcurementCategoryLabelAttribute()
+    {
+        return self::getProcurementCategoryLabels()[$this->procurement_category] ?? $this->procurement_category;
     }
 }

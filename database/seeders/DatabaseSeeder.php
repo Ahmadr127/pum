@@ -55,16 +55,16 @@ class DatabaseSeeder extends Seeder
         $adminRole = \App\Models\Role::where('name', 'admin')->first();
         
         $admin = User::firstOrCreate(
-            ['email' => 'admin@example.com'],
+            ['username' => 'admin'],
             [
                 'name' => 'Administrator',
-                'username' => 'admin',
+                'email' => 'admin@azra.com',
                 'password' => \Hash::make('password'),
                 'role_id' => $adminRole?->id,
             ]
         );
 
-        $this->command->info('✓ Admin user created: admin@example.com');
+        $this->command->info('✓ Admin user processed: ' . $admin->email);
         $this->command->line('');
 
         $this->command->info('========================================');
@@ -73,7 +73,7 @@ class DatabaseSeeder extends Seeder
         $this->command->line('');
         
         $this->command->info('Admin Login:');
-        $this->command->line('  Email: admin@example.com');
+        $this->command->line('  Email: admin@azra.com');
         $this->command->line('  Password: password');
         $this->command->line('');
         

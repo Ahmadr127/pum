@@ -181,6 +181,7 @@
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tanggal</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Step</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Catatan</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Form FS</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Disetujui Oleh</th>
                             <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Status</th>
                         </tr>
@@ -203,6 +204,18 @@
                                 {{ $approval->notes ?? '-' }}
                             </td>
                             <td class="px-4 py-3 text-sm text-gray-900 whitespace-nowrap">
+                                @if($approval->fs_form_path)
+                                    <a href="{{ Storage::url($approval->fs_form_path) }}" target="_blank" 
+                                       class="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 hover:underline">
+                                        <i class="fas fa-file-pdf text-red-500"></i>
+                                        <span>Lihat FS</span>
+                                        <i class="fas fa-external-link-alt text-xs"></i>
+                                    </a>
+                                @else
+                                    <span class="text-gray-400">-</span>
+                                @endif
+                            </td>
+                            <td class="px-4 py-3 text-sm text-gray-900 whitespace-nowrap">
                                 {{ $approval->approver->name ?? '-' }}
                             </td>
                             <td class="px-4 py-3 text-center">
@@ -223,7 +236,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="5" class="px-4 py-4 text-center text-gray-400 text-sm">
+                            <td colspan="6" class="px-4 py-4 text-center text-gray-400 text-sm">
                                 Belum ada riwayat persetujuan
                             </td>
                         </tr>
