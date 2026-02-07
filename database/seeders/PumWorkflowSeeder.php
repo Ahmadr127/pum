@@ -18,160 +18,129 @@ class PumWorkflowSeeder extends Seeder
         // Clear existing workflows
         PumApprovalWorkflow::query()->delete();
 
-        // Get roles (assuming they exist from PumRoleSeeder)
-        $roles = [
-            'manager' => Role::where('name', 'manager')->first(),
-            'koordinator' => Role::where('name', 'koordinator')->first(),
-            'supervisor' => Role::where('name', 'supervisor')->first(),
-            'kepala_unit' => Role::where('name', 'kepala_unit')->first(),
-            'manajer_pembelian' => Role::where('name', 'manajer_pembelian')->first(),
-            'direktur_operasional' => Role::where('name', 'direktur_operasional')->first(),
-            'spv_1' => Role::where('name', 'spv_1')->first(),
-            'manajer_keuangan' => Role::where('name', 'manajer_keuangan')->first(),
-            'direktur_it' => Role::where('name', 'direktur_it')->first(),
-            'manajer_it' => Role::where('name', 'manajer_it')->first(),
-            'direktur_keuangan' => Role::where('name', 'direktur_keuangan')->first(),
-            'direktur_utama' => Role::where('name', 'direktur_utama')->first(),
-        ];
+        $this->command->info('Creating Workflows based on Design...');
 
-        // 1. Default Workflow (Manager Pengaju only)
-        $this->command->info('Creating default workflow...');
-        $defaultWorkflow = PumApprovalWorkflow::create([
-            'name' => 'Default - Manager Pengaju',
-            'description' => 'Workflow default untuk approval Manager Pengaju',
-            'is_active' => true,
-            'is_default' => true,
-        ]);
+        // ==========================================
+        // BARANG BARU
+        // ==========================================
 
-        PumApprovalStep::create([
-            'workflow_id' => $defaultWorkflow->id,
-            'order' => 1,
-            'name' => 'Approval Manager Pengaju',
-            'approver_type' => 'organization_head',
-            'is_required' => true,
-        ]);
-
-        // 2. Barang Baru - < 10 Juta
-        $this->command->info('Creating Barang Baru < 10M workflow...');
+        // 1. Barang Baru < 10 Juta
         $this->createWorkflow(
-            'Barang Baru - Kurang dari 10 Juta',
+            'Barang Baru - < 10 Juta',
             'barang_baru',
             null,
             10000000,
             [
-                ['name' => 'Manager Pengaju', 'type' => 'organization_head'],
-                ['name' => 'Koordinator', 'role' => $roles['koordinator']],
-                ['name' => 'Supervisor', 'role' => $roles['supervisor']],
-                ['name' => 'Kepala Unit', 'role' => $roles['kepala_unit']],
-                ['name' => 'Manajer Pembelian', 'role' => $roles['manajer_pembelian']],
-                ['name' => 'Direktur Operasional', 'role' => $roles['direktur_operasional']],
-                ['name' => 'SPV 1', 'role' => $roles['spv_1']],
+                ['name' => 'Manager Unit', 'type' => 'approval', 'approver_type' => 'organization_head'],
+                ['name' => 'Hospital Director', 'type' => 'approval', 'role' => 'direktur_operasional'],
+                ['name' => 'Manager PT', 'type' => 'approval', 'role' => 'manager'],
+                ['name' => 'Manager Pembelian', 'type' => 'approval', 'role' => 'manajer_pembelian'],
+                // Purchasing
+                ['name' => 'Proses Purchasing', 'type' => 'purchasing', 'role' => 'manajer_pembelian'],
+                // Release
+                ['name' => 'Release - Manager Pembelian', 'type' => 'release', 'role' => 'manajer_pembelian'],
+                ['name' => 'Release - Manager PT', 'type' => 'release', 'role' => 'manager'],
             ]
         );
 
-        // 3. Barang Baru - 10-50 Juta
-        $this->command->info('Creating Barang Baru 10-50M workflow...');
+        // 2. Barang Baru 10 - 50 Juta
         $this->createWorkflow(
-            'Barang Baru - 10 sampai 50 Juta',
+            'Barang Baru - 10 s/d 50 Juta',
             'barang_baru',
             10000000,
             50000000,
             [
-                ['name' => 'Manager Pengaju', 'type' => 'organization_head'],
-                ['name' => 'Koordinator', 'role' => $roles['koordinator']],
-                ['name' => 'Supervisor', 'role' => $roles['supervisor']],
-                ['name' => 'Kepala Unit', 'role' => $roles['kepala_unit']],
-                ['name' => 'Manajer Pembelian', 'role' => $roles['manajer_pembelian']],
-                ['name' => 'Direktur Operasional', 'role' => $roles['direktur_operasional']],
-                ['name' => 'SPV 1', 'role' => $roles['spv_1']],
-                ['name' => 'Manajer Keuangan', 'role' => $roles['manajer_keuangan']],
-                ['name' => 'Direktur IT', 'role' => $roles['direktur_it']],
+                ['name' => 'Manager Unit', 'type' => 'approval', 'approver_type' => 'organization_head'],
+                ['name' => 'Hospital Director', 'type' => 'approval', 'role' => 'direktur_operasional'],
+                ['name' => 'Manager PT', 'type' => 'approval', 'role' => 'manager'],
+                ['name' => 'Manager Pembelian', 'type' => 'approval', 'role' => 'manajer_pembelian'],
+                // Purchasing
+                ['name' => 'Proses Purchasing', 'type' => 'purchasing', 'role' => 'manajer_pembelian'],
+                // Release
+                ['name' => 'Release - Manager Pembelian', 'type' => 'release', 'role' => 'manajer_pembelian'],
+                ['name' => 'Release - Manager PT', 'type' => 'release', 'role' => 'manager'],
             ]
         );
 
-        // 4. Barang Baru - > 50 Juta
-        $this->command->info('Creating Barang Baru > 50M workflow...');
+        // 3. Barang Baru > 50 Juta
         $this->createWorkflow(
-            'Barang Baru - Lebih dari 50 Juta',
+            'Barang Baru - > 50 Juta',
             'barang_baru',
             50000000,
             null,
             [
-                ['name' => 'Manager Pengaju', 'type' => 'organization_head'],
-                ['name' => 'Koordinator', 'role' => $roles['koordinator']],
-                ['name' => 'Supervisor', 'role' => $roles['supervisor']],
-                ['name' => 'Kepala Unit', 'role' => $roles['kepala_unit']],
-                ['name' => 'Manajer Pembelian', 'role' => $roles['manajer_pembelian']],
-                ['name' => 'Direktur Operasional', 'role' => $roles['direktur_operasional']],
-                ['name' => 'SPV 1', 'role' => $roles['spv_1']],
-                ['name' => 'Manajer Keuangan', 'role' => $roles['manajer_keuangan']],
-                ['name' => 'Direktur IT', 'role' => $roles['direktur_it']],
-                ['name' => 'Manajer IT', 'role' => $roles['manajer_it']],
-                ['name' => 'Direktur Keuangan', 'role' => $roles['direktur_keuangan']],
-                ['name' => 'Direktur IT (2)', 'role' => $roles['direktur_it']],
-                ['name' => 'Direktur Utama', 'role' => $roles['direktur_utama']],
+                ['name' => 'Manager Unit', 'type' => 'approval', 'approver_type' => 'organization_head'],
+                ['name' => 'Manager Keuangan', 'type' => 'approval', 'role' => 'manajer_keuangan', 'fs' => true], // FS Required
+                ['name' => 'Hospital Director', 'type' => 'approval', 'role' => 'direktur_operasional'],
+                ['name' => 'Manager PT', 'type' => 'approval', 'role' => 'manager'],
+                ['name' => 'Manager Pembelian', 'type' => 'approval', 'role' => 'manajer_pembelian'],
+                // Purchasing
+                ['name' => 'Proses Purchasing', 'type' => 'purchasing', 'role' => 'manajer_pembelian'],
+                // Release
+                ['name' => 'Release - Manager Pembelian', 'type' => 'release', 'role' => 'manajer_pembelian'],
+                ['name' => 'Release - Manager PT', 'type' => 'release', 'role' => 'manager'],
+                ['name' => 'Release - Direktur PT', 'type' => 'release', 'role' => 'direktur_utama'],
             ]
         );
 
-        // 5. Peremajaan - < 10 Juta
-        $this->command->info('Creating Peremajaan < 10M workflow...');
+        // ==========================================
+        // PEREMAJAAN
+        // ==========================================
+
+        // 4. Peremajaan < 10 Juta
         $this->createWorkflow(
-            'Peremajaan - Kurang dari 10 Juta',
+            'Peremajaan - < 10 Juta',
             'peremajaan',
             null,
             10000000,
             [
-                ['name' => 'Manager Pengaju', 'type' => 'organization_head'],
-                ['name' => 'Koordinator', 'role' => $roles['koordinator']],
-                ['name' => 'Supervisor', 'role' => $roles['supervisor']],
-                ['name' => 'Kepala Unit', 'role' => $roles['kepala_unit']],
-                ['name' => 'Manajer Pembelian', 'role' => $roles['manajer_pembelian']],
-                ['name' => 'Direktur Operasional', 'role' => $roles['direktur_operasional']],
-                ['name' => 'SPV 1', 'role' => $roles['spv_1']],
+                ['name' => 'Manager Unit', 'type' => 'approval', 'approver_type' => 'organization_head'],
+                ['name' => 'Hospital Director', 'type' => 'approval', 'role' => 'direktur_operasional'],
+                ['name' => 'Manager Pembelian', 'type' => 'approval', 'role' => 'manajer_pembelian'],
+                // Purchasing
+                ['name' => 'Proses Purchasing', 'type' => 'purchasing', 'role' => 'manajer_pembelian'],
+                // Release
+                ['name' => 'Release - Manager Pembelian', 'type' => 'release', 'role' => 'manajer_pembelian'],
             ]
         );
 
-        // 6. Peremajaan - 10-50 Juta
-        $this->command->info('Creating Peremajaan 10-50M workflow...');
+        // 5. Peremajaan 10 - 50 Juta
         $this->createWorkflow(
-            'Peremajaan - 10 sampai 50 Juta',
+            'Peremajaan - 10 s/d 50 Juta',
             'peremajaan',
             10000000,
             50000000,
             [
-                ['name' => 'Manager Pengaju', 'type' => 'organization_head'],
-                ['name' => 'Koordinator', 'role' => $roles['koordinator']],
-                ['name' => 'Supervisor', 'role' => $roles['supervisor']],
-                ['name' => 'Kepala Unit', 'role' => $roles['kepala_unit']],
-                ['name' => 'Manajer Pembelian', 'role' => $roles['manajer_pembelian']],
-                ['name' => 'Direktur Operasional', 'role' => $roles['direktur_operasional']],
-                ['name' => 'SPV 1', 'role' => $roles['spv_1']],
-                ['name' => 'Manajer Keuangan', 'role' => $roles['manajer_keuangan']],
-                ['name' => 'Direktur IT', 'role' => $roles['direktur_it']],
+                ['name' => 'Manager Unit', 'type' => 'approval', 'approver_type' => 'organization_head'],
+                ['name' => 'Hospital Director', 'type' => 'approval', 'role' => 'direktur_operasional'],
+                ['name' => 'Manager PT', 'type' => 'approval', 'role' => 'manager'],
+                ['name' => 'Manager Pembelian', 'type' => 'approval', 'role' => 'manajer_pembelian'],
+                // Purchasing
+                ['name' => 'Proses Purchasing', 'type' => 'purchasing', 'role' => 'manajer_pembelian'],
+                // Release
+                ['name' => 'Release - Manager Pembelian', 'type' => 'release', 'role' => 'manajer_pembelian'],
+                ['name' => 'Release - Manager PT', 'type' => 'release', 'role' => 'manager'],
             ]
         );
 
-        // 7. Peremajaan - > 50 Juta
-        $this->command->info('Creating Peremajaan > 50M workflow...');
+        // 6. Peremajaan > 50 Juta
         $this->createWorkflow(
-            'Peremajaan - Lebih dari 50 Juta',
+            'Peremajaan - > 50 Juta',
             'peremajaan',
             50000000,
             null,
             [
-                ['name' => 'Manager Pengaju', 'type' => 'organization_head'],
-                ['name' => 'Koordinator', 'role' => $roles['koordinator']],
-                ['name' => 'Supervisor', 'role' => $roles['supervisor']],
-                ['name' => 'Kepala Unit', 'role' => $roles['kepala_unit']],
-                ['name' => 'Manajer Pembelian', 'role' => $roles['manajer_pembelian']],
-                ['name' => 'Direktur Operasional', 'role' => $roles['direktur_operasional']],
-                ['name' => 'SPV 1', 'role' => $roles['spv_1']],
-                ['name' => 'Manajer Keuangan', 'role' => $roles['manajer_keuangan']],
-                ['name' => 'Direktur IT', 'role' => $roles['direktur_it']],
-                ['name' => 'Manajer IT', 'role' => $roles['manajer_it']],
-                ['name' => 'Direktur Keuangan', 'role' => $roles['direktur_keuangan']],
-                ['name' => 'Direktur IT (2)', 'role' => $roles['direktur_it']],
-                ['name' => 'Direktur Utama', 'role' => $roles['direktur_utama']],
+                ['name' => 'Manager Unit', 'type' => 'approval', 'approver_type' => 'organization_head'],
+                ['name' => 'Manager Keuangan', 'type' => 'approval', 'role' => 'manajer_keuangan', 'fs' => true], // FS Required
+                ['name' => 'Hospital Director', 'type' => 'approval', 'role' => 'direktur_operasional'],
+                ['name' => 'Manager PT', 'type' => 'approval', 'role' => 'manager'],
+                ['name' => 'Manager Pembelian', 'type' => 'approval', 'role' => 'manajer_pembelian'],
+                // Purchasing
+                ['name' => 'Proses Purchasing', 'type' => 'purchasing', 'role' => 'manajer_pembelian'],
+                // Release
+                ['name' => 'Release - Manager Pembelian', 'type' => 'release', 'role' => 'manajer_pembelian'],
+                ['name' => 'Release - Manager PT', 'type' => 'release', 'role' => 'manager'],
+                ['name' => 'Release - Direktur PT', 'type' => 'release', 'role' => 'direktur_utama'],
             ]
         );
 
@@ -181,33 +150,39 @@ class PumWorkflowSeeder extends Seeder
     /**
      * Create a workflow with conditions and steps
      */
-    private function createWorkflow($name, $category, $amountMin, $amountMax, $steps)
+    private function createWorkflow($name, $category, $min, $max, $steps)
     {
         $workflow = PumApprovalWorkflow::create([
             'name' => $name,
-            'description' => "Workflow untuk {$name}",
+            'description' => "Workflow {$name}",
             'is_active' => true,
             'is_default' => false,
         ]);
 
-        // Create condition
         PumWorkflowCondition::create([
             'workflow_id' => $workflow->id,
             'procurement_category' => $category,
-            'amount_min' => $amountMin,
-            'amount_max' => $amountMax,
+            'amount_min' => $min,
+            'amount_max' => $max,
             'priority' => 1,
         ]);
 
-        // Create steps
-        foreach ($steps as $index => $stepData) {
+        foreach ($steps as $index => $step) {
+            $roleId = null;
+            if (isset($step['role'])) {
+                $role = Role::where('name', $step['role'])->first();
+                $roleId = $role ? $role->id : null;
+            }
+
             PumApprovalStep::create([
                 'workflow_id' => $workflow->id,
                 'order' => $index + 1,
-                'name' => $stepData['name'],
-                'approver_type' => $stepData['type'] ?? 'role',
-                'role_id' => isset($stepData['role']) ? $stepData['role']->id : null,
+                'name' => $step['name'],
+                'type' => $step['type'],
+                'approver_type' => $step['approver_type'] ?? 'role',
+                'role_id' => $roleId,
                 'is_required' => true,
+                'is_upload_fs_required' => $step['fs'] ?? false,
             ]);
         }
     }

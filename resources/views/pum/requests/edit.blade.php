@@ -4,246 +4,231 @@
 
 @section('content')
 <div class="w-full">
-    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-        <div class="p-6 bg-white border-b border-gray-200">
-            <div class="flex justify-between items-center mb-6">
-                <div>
-                    <h2 class="text-xl font-bold text-gray-900 text-blue-600">EDIT PENGAJUAN</h2>
-                    <p class="text-sm text-gray-500">{{ $pumRequest->code }}</p>
+    <div class="max-w-full px-6">
+        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="p-6 bg-white border-b border-gray-200">
+                <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-6 gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-900 tracking-tight">Edit Pengajuan</h2>
+                        <p class="text-sm text-gray-500 mt-1">Kode Pengajuan: <span class="font-mono font-medium text-gray-700">{{ $pumRequest->code }}</span></p>
+                    </div>
+                    <x-status-badge :status="$pumRequest->status" />
                 </div>
-                <x-status-badge :status="$pumRequest->status" />
-            </div>
 
-            <form action="{{ route('pum-requests.update', $pumRequest) }}" method="POST" enctype="multipart/form-data">
-                @csrf
-                @method('PUT')
-                
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <!-- Left Column -->
-                    <div class="space-y-4">
-                        <!-- Pengaju -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">
-                                PENGAJU <span class="text-red-500">*</span>
-                            </label>
-                            <input type="hidden" name="requester_id" value="{{ $pumRequest->requester_id }}">
-                            <input type="text" 
-                                   value="{{ $pumRequest->requester->name ?? '-' }}" 
-                                   class="block w-full px-3 py-2 border border-gray-300 rounded-md text-sm bg-gray-100 cursor-not-allowed"
-                                   readonly>
+                <form action="{{ route('pum-requests.update', $pumRequest) }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    @method('PUT')
+                    
+                    <!-- Section 1: Informasi Dasar & Keuangan -->
+                    <div class="bg-gray-50 p-6 rounded-xl border border-gray-200 mb-6">
+                        <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4 border-b border-gray-200 pb-2">Informasi Pengajuan</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <!-- Pengaju -->
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-500 mb-1 uppercase">Pengaju</label>
+                                <input type="hidden" name="requester_id" value="{{ $pumRequest->requester_id }}">
+                                <div class="flex items-center px-3 py-2 bg-white border border-gray-200 rounded-lg shadow-sm">
+                                    <div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold mr-3 text-xs">
+                                        {{ substr($pumRequest->requester->name ?? 'User', 0, 2) }}
+                                    </div>
+                                    <span class="text-sm font-medium text-gray-900 truncate">{{ $pumRequest->requester->name ?? '-' }}</span>
+                                </div>
+                            </div>
+
+                            <!-- Tanggal -->
+                            <div>
+                                <label for="request_date" class="block text-xs font-semibold text-gray-500 mb-1 uppercase">Tanggal <span class="text-red-500">*</span></label>
+                                <input type="date" name="request_date" id="request_date" 
+                                       value="{{ old('request_date', $pumRequest->request_date->format('Y-m-d')) }}"
+                                       class="block w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm transition-all">
+                                @error('request_date')
+                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <!-- Kategori -->
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-500 mb-2 uppercase">Kategori <span class="text-red-500">*</span></label>
+                                <div class="flex flex-col sm:flex-row gap-4">
+                                    <label class="inline-flex items-center">
+                                        <input type="radio" name="procurement_category" value="barang_baru" 
+                                               {{ old('procurement_category', $pumRequest->procurement_category) === 'barang_baru' ? 'checked' : '' }} required 
+                                               class="form-radio text-indigo-600 h-4 w-4 focus:ring-indigo-500 border-gray-300">
+                                        <span class="ml-2 text-sm text-gray-700">Barang Baru</span>
+                                    </label>
+                                    <label class="inline-flex items-center">
+                                        <input type="radio" name="procurement_category" value="peremajaan" 
+                                               {{ old('procurement_category', $pumRequest->procurement_category) === 'peremajaan' ? 'checked' : '' }} required 
+                                               class="form-radio text-indigo-600 h-4 w-4 focus:ring-indigo-500 border-gray-300">
+                                        <span class="ml-2 text-sm text-gray-700">Peremajaan</span>
+                                    </label>
+                                </div>
+                                @error('procurement_category')
+                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
                         </div>
+                    </div>
 
-                        <!-- Tanggal -->
-                        <div>
-                            <label for="request_date" class="block text-sm font-medium text-gray-700 mb-1">
-                                TANGGAL <span class="text-red-500">*</span>
-                            </label>
-                            <input type="date" name="request_date" id="request_date" 
-                                   value="{{ old('request_date', $pumRequest->request_date->format('Y-m-d')) }}"
-                                   class="block w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500">
-                            @error('request_date')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <!-- Jumlah -->
-                        <div>
-                            <label for="amount" class="block text-sm font-medium text-gray-700 mb-1">
-                                JUMLAH <span class="text-red-500">*</span>
-                            </label>
-                            <x-currency-input 
-                                name="amount" 
-                                :value="old('amount', $pumRequest->amount)" 
-                                label=""
-                                placeholder="0"
-                                required
-                            />
+                    <!-- Section 2: Nominal & Keterangan -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                        <!-- Nominal (Emphasis) -->
+                        <div class="lg:col-span-1 bg-indigo-50 p-6 rounded-xl border border-indigo-100">
+                            <label for="amount" class="block text-xs font-semibold text-indigo-600 mb-2 uppercase">Total Nominal <span class="text-red-500">*</span></label>
+                            <div class="relative">
+                                <x-currency-input 
+                                    name="amount" 
+                                    :value="old('amount', $pumRequest->amount)" 
+                                    label=""
+                                    placeholder="0"
+                                    required
+                                    class="text-2xl font-bold text-indigo-700 bg-white border-indigo-200 focus:border-indigo-500 focus:ring-indigo-200 rounded-lg py-3 px-4 w-full"
+                                />
+                            </div>
+                            <p class="text-xs text-indigo-400 mt-2">Masukkan nominal sesuai estimasi kebutuhan.</p>
                             @error('amount')
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                             @enderror
                         </div>
 
-                        <!-- Procurement Category -->
-                        <div>
-                            <label for="procurement_category" class="block text-sm font-medium text-gray-700 mb-1">
-                                KATEGORI PENGADAAN <span class="text-red-500">*</span>
-                            </label>
-                            <select name="procurement_category" id="procurement_category" required
-                                    class="block w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500">
-                                <option value="">Pilih Kategori</option>
-                                <option value="barang_baru" {{ old('procurement_category', $pumRequest->procurement_category) === 'barang_baru' ? 'selected' : '' }}>
-                                    Barang Baru
-                                </option>
-                                <option value="peremajaan" {{ old('procurement_category', $pumRequest->procurement_category) === 'peremajaan' ? 'selected' : '' }}>
-                                    Peremajaan
-                                </option>
-                            </select>
-                            @error('procurement_category')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <!-- Workflow (Optional) -->
-                        @if($workflows->count() > 1)
-                        <div>
-                            <label for="workflow_id" class="block text-sm font-medium text-gray-700 mb-1">
-                                WORKFLOW APPROVAL
-                            </label>
-                            <select name="workflow_id" id="workflow_id" 
-                                    class="block w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500">
-                                <option value="">Default</option>
-                                @foreach($workflows as $workflow)
-                                    <option value="{{ $workflow->id }}" {{ old('workflow_id', $pumRequest->workflow_id) == $workflow->id ? 'selected' : '' }}>
-                                        {{ $workflow->name }} ({{ $workflow->steps->count() }} step)
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                        @endif
-
                         <!-- Keterangan -->
-                        <div>
-                            <label for="description" class="block text-sm font-medium text-gray-700 mb-1">
-                                KETERANGAN
-                            </label>
-                            <textarea name="description" id="description" rows="6"
-                                      class="block w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                      placeholder="Masukkan keterangan atau deskripsi permintaan...">{{ old('description', $pumRequest->description) }}</textarea>
+                        <div class="lg:col-span-2">
+                            <label for="description" class="block text-xs font-semibold text-gray-500 mb-1 uppercase">Keterangan / Keperluan</label>
+                            <textarea name="description" id="description" rows="5"
+                                      class="block w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm transition-all resize-none"
+                                      placeholder="Jelaskan secara rinci tujuan permintaan uang muka ini...">{{ old('description', $pumRequest->description) }}</textarea>
                             @error('description')
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                             @enderror
                         </div>
                     </div>
 
-                    <!-- Right Column - Lampiran -->
-                    <div class="space-y-4">
-                        <!-- Lampiran 1 -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">
-                                LAMPIRAN 1
-                            </label>
-                            
-                            <!-- Existing Files -->
-                            @if($pumRequest->attachments && count($pumRequest->attachments) > 0)
-                            <div class="mb-2 space-y-1">
-                                @foreach($pumRequest->attachments as $index => $attachment)
-                                <div class="flex items-center justify-between p-2 bg-blue-50 rounded text-xs">
-                                    <div class="flex items-center gap-2 flex-1 min-w-0">
-                                        <i class="fas fa-file text-blue-500 text-sm"></i>
-                                        <a href="{{ Storage::url($attachment) }}" target="_blank" class="truncate text-blue-600 hover:underline">
-                                            {{ basename($attachment) }}
-                                        </a>
-                                    </div>
-                                    <label class="flex items-center gap-1 text-red-500 cursor-pointer">
-                                        <input type="checkbox" name="remove_attachments[]" value="{{ $index }}" class="rounded text-xs">
-                                        <span class="text-xs">Hapus</span>
-                                    </label>
-                                </div>
-                                @endforeach
-                            </div>
-                            @endif
-
-                            <div x-data="fileUpload('attachments')" class="space-y-2">
-                                <!-- Compact Upload Area -->
-                                <div class="border-2 border-dashed border-gray-300 rounded-lg p-3 text-center hover:border-indigo-400 transition-colors cursor-pointer"
-                                     @click="$refs.fileInput.click()"
-                                     @dragover.prevent="dragover = true"
-                                     @dragleave.prevent="dragover = false"
-                                     @drop.prevent="handleDrop($event)"
-                                     :class="{ 'border-indigo-400 bg-indigo-50': dragover }">
-                                    <input type="file" name="attachments[]" multiple x-ref="fileInput" 
-                                           class="hidden" @change="handleFiles($event)"
-                                           accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png">
-                                    <div class="flex items-center justify-center gap-2">
-                                        <i class="fas fa-cloud-upload-alt text-2xl text-gray-400"></i>
-                                        <div class="text-left">
-                                            <p class="text-sm text-gray-600">Tambah file baru</p>
-                                            <p class="text-xs text-gray-400">PDF, DOC, XLS, JPG, PNG (Max 5MB)</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- File List -->
-                                <div class="space-y-1 max-h-24 overflow-y-auto" x-show="files.length > 0">
-                                    <template x-for="(file, index) in files" :key="index">
-                                        <div class="flex items-center justify-between p-2 bg-gray-50 rounded text-xs">
-                                            <div class="flex items-center gap-2 flex-1 min-w-0">
-                                                <i class="fas fa-file text-gray-400 text-sm"></i>
-                                                <span class="truncate" x-text="file.name"></span>
-                                                <span class="text-gray-400" x-text="formatSize(file.size)"></span>
+                    <!-- Section 3: Lampiran -->
+                    <div class="border-t border-gray-100 pt-6 mb-8">
+                        <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">Dokumen Pendukung</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Lampiran 1 -->
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-500 mb-2 uppercase">Lampiran Utama (Dokumen/Invoice)</label>
+                                
+                                <!-- Existing Attachments -->
+                                @if($pumRequest->attachments && count($pumRequest->attachments) > 0)
+                                    <div class="mb-3 space-y-2">
+                                        @foreach($pumRequest->attachments as $index => $attachment)
+                                        <div class="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg text-sm shadow-sm group hover:border-indigo-200 transition-all">
+                                            <div class="flex items-center gap-3 overflow-hidden">
+                                                <div class="w-8 h-8 rounded bg-indigo-50 flex items-center justify-center text-indigo-500">
+                                                    <i class="fas fa-file"></i>
+                                                </div>
+                                                <a href="{{ Storage::url($attachment) }}" target="_blank" class="truncate text-gray-700 hover:text-indigo-600 font-medium">
+                                                    {{ basename($attachment) }}
+                                                </a>
                                             </div>
-                                            <button type="button" @click="removeFile(index)" class="text-red-500 hover:text-red-700">
-                                                <i class="fas fa-times text-sm"></i>
-                                            </button>
+                                            <label class="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-600 rounded-md cursor-pointer hover:bg-red-100 transition-colors">
+                                                <input type="checkbox" name="remove_attachments[]" value="{{ $index }}" class="rounded text-red-600 border-red-300 focus:ring-red-500 w-4 h-4">
+                                                <span class="text-xs font-semibold">Hapus</span>
+                                            </label>
                                         </div>
-                                    </template>
+                                        @endforeach
+                                    </div>
+                                @endif
+
+                                <div x-data="fileUpload('attachments')" class="w-full">
+                                    <div class="relative flex items-center justify-center w-full">
+                                        <label class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors"
+                                               :class="{ 'border-indigo-500 bg-indigo-50': dragover }"
+                                               @dragover.prevent="dragover = true"
+                                               @dragleave.prevent="dragover = false"
+                                               @drop.prevent="handleDrop($event)">
+                                            
+                                            <div class="flex flex-col items-center justify-center pt-5 pb-6" x-show="files.length === 0">
+                                                <i class="fas fa-cloud-upload-alt text-2xl text-gray-400 mb-2"></i>
+                                                <p class="mb-1 text-sm text-gray-500"><span class="font-semibold">Klik untuk upload</span> atau drag & drop</p>
+                                                <p class="text-xs text-gray-500">PDF, DOC, XLS, JPG, PNG (Max 5MB)</p>
+                                            </div>
+
+                                            <div class="w-full px-4" x-show="files.length > 0">
+                                                <template x-for="(file, index) in files" :key="index">
+                                                    <div class="flex items-center justify-between p-2 mb-1 bg-white rounded border border-gray-200 shadow-sm text-sm">
+                                                        <div class="flex items-center gap-2 overflow-hidden">
+                                                            <i class="fas fa-file text-gray-400"></i>
+                                                            <span class="truncate font-medium text-gray-700" x-text="file.name"></span>
+                                                        </div>
+                                                        <button type="button" @click="removeFile(index)" class="text-red-400 hover:text-red-600"><i class="fas fa-times"></i></button>
+                                                    </div>
+                                                </template>
+                                                <div class="text-center mt-2">
+                                                    <span class="text-xs text-blue-600 font-medium">+ Tambah file lain</span>
+                                                </div>
+                                            </div>
+
+                                            <input type="file" name="attachments[]" multiple x-ref="fileInput" class="hidden" @change="handleFiles($event)" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png">
+                                        </label>
+                                    </div>
                                 </div>
                                 @error('attachments')
                                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                                 @enderror
                             </div>
-                        </div>
 
-                        <!-- Lampiran 2 -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">
-                                LAMPIRAN 2
-                            </label>
-                            
-                            <!-- Existing Files -->
-                            @if($pumRequest->attachments2 && count($pumRequest->attachments2) > 0)
-                            <div class="mb-2 space-y-1">
-                                @foreach($pumRequest->attachments2 as $index => $attachment)
-                                <div class="flex items-center justify-between p-2 bg-blue-50 rounded text-xs">
-                                    <div class="flex items-center gap-2 flex-1 min-w-0">
-                                        <i class="fas fa-file text-blue-500 text-sm"></i>
-                                        <a href="{{ Storage::url($attachment) }}" target="_blank" class="truncate text-blue-600 hover:underline">
-                                            {{ basename($attachment) }}
-                                        </a>
-                                    </div>
-                                    <label class="flex items-center gap-1 text-red-500 cursor-pointer">
-                                        <input type="checkbox" name="remove_attachments2[]" value="{{ $index }}" class="rounded text-xs">
-                                        <span class="text-xs">Hapus</span>
-                                    </label>
-                                </div>
-                                @endforeach
-                            </div>
-                            @endif
-
-                            <div x-data="fileUpload('attachments2')" class="space-y-2">
-                                <!-- Compact Upload Area -->
-                                <div class="border-2 border-dashed border-gray-300 rounded-lg p-3 text-center hover:border-indigo-400 transition-colors cursor-pointer"
-                                     @click="$refs.fileInput.click()"
-                                     @dragover.prevent="dragover = true"
-                                     @dragleave.prevent="dragover = false"
-                                     @drop.prevent="handleDrop($event)"
-                                     :class="{ 'border-indigo-400 bg-indigo-50': dragover }">
-                                    <input type="file" name="attachments2[]" multiple x-ref="fileInput" 
-                                           class="hidden" @change="handleFiles($event)"
-                                           accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png">
-                                    <div class="flex items-center justify-center gap-2">
-                                        <i class="fas fa-cloud-upload-alt text-2xl text-gray-400"></i>
-                                        <div class="text-left">
-                                            <p class="text-sm text-gray-600">Tambah file baru</p>
-                                            <p class="text-xs text-gray-400">PDF, DOC, XLS, JPG, PNG (Max 5MB)</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- File List -->
-                                <div class="space-y-1 max-h-24 overflow-y-auto" x-show="files.length > 0">
-                                    <template x-for="(file, index) in files" :key="index">
-                                        <div class="flex items-center justify-between p-2 bg-gray-50 rounded text-xs">
-                                            <div class="flex items-center gap-2 flex-1 min-w-0">
-                                                <i class="fas fa-file text-gray-400 text-sm"></i>
-                                                <span class="truncate" x-text="file.name"></span>
-                                                <span class="text-gray-400" x-text="formatSize(file.size)"></span>
+                            <!-- Lampiran 2 -->
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-500 mb-2 uppercase">Lampiran Tambahan (Opsional)</label>
+                                
+                                <!-- Existing Attachments 2 -->
+                                @if($pumRequest->attachments2 && count($pumRequest->attachments2) > 0)
+                                    <div class="mb-3 space-y-2">
+                                        @foreach($pumRequest->attachments2 as $index => $attachment)
+                                        <div class="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg text-sm shadow-sm group hover:border-indigo-200 transition-all">
+                                            <div class="flex items-center gap-3 overflow-hidden">
+                                                <div class="w-8 h-8 rounded bg-indigo-50 flex items-center justify-center text-indigo-500">
+                                                    <i class="fas fa-paperclip"></i>
+                                                </div>
+                                                <a href="{{ Storage::url($attachment) }}" target="_blank" class="truncate text-gray-700 hover:text-indigo-600 font-medium">
+                                                    {{ basename($attachment) }}
+                                                </a>
                                             </div>
-                                            <button type="button" @click="removeFile(index)" class="text-red-500 hover:text-red-700">
-                                                <i class="fas fa-times text-sm"></i>
-                                            </button>
+                                            <label class="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-600 rounded-md cursor-pointer hover:bg-red-100 transition-colors">
+                                                <input type="checkbox" name="remove_attachments2[]" value="{{ $index }}" class="rounded text-red-600 border-red-300 focus:ring-red-500 w-4 h-4">
+                                                <span class="text-xs font-semibold">Hapus</span>
+                                            </label>
                                         </div>
-                                    </template>
+                                        @endforeach
+                                    </div>
+                                @endif
+
+                                <div x-data="fileUpload('attachments2')" class="w-full">
+                                    <div class="relative flex items-center justify-center w-full">
+                                        <label class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors"
+                                               :class="{ 'border-indigo-500 bg-indigo-50': dragover }"
+                                               @dragover.prevent="dragover = true"
+                                               @dragleave.prevent="dragover = false"
+                                               @drop.prevent="handleDrop($event)">
+                                            
+                                            <div class="flex flex-col items-center justify-center pt-5 pb-6" x-show="files.length === 0">
+                                                <i class="fas fa-paperclip text-2xl text-gray-400 mb-2"></i>
+                                                <p class="mb-1 text-sm text-gray-500"><span class="font-semibold">Klik untuk upload</span> atau drag & drop</p>
+                                                <p class="text-xs text-gray-500">PDF, DOC, XLS, JPG, PNG (Max 5MB)</p>
+                                            </div>
+
+                                            <div class="w-full px-4" x-show="files.length > 0">
+                                                <template x-for="(file, index) in files" :key="index">
+                                                    <div class="flex items-center justify-between p-2 mb-1 bg-white rounded border border-gray-200 shadow-sm text-sm">
+                                                        <div class="flex items-center gap-2 overflow-hidden">
+                                                            <i class="fas fa-file text-gray-400"></i>
+                                                            <span class="truncate font-medium text-gray-700" x-text="file.name"></span>
+                                                        </div>
+                                                        <button type="button" @click="removeFile(index)" class="text-red-400 hover:text-red-600"><i class="fas fa-times"></i></button>
+                                                    </div>
+                                                </template>
+                                                <div class="text-center mt-2">
+                                                    <span class="text-xs text-blue-600 font-medium">+ Tambah file lain</span>
+                                                </div>
+                                            </div>
+
+                                            <input type="file" name="attachments2[]" multiple x-ref="fileInput" class="hidden" @change="handleFiles($event)" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png">
+                                        </label>
+                                    </div>
                                 </div>
                                 @error('attachments2')
                                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -251,24 +236,24 @@
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Actions -->
-                <div class="mt-6 flex justify-end gap-3 border-t border-gray-200 pt-6">
-                    <a href="{{ route('pum-requests.show', $pumRequest) }}" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 font-medium">
-                        Batal
-                    </a>
-                    <button type="submit" name="submit_for_approval" value="0" 
-                            class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 font-medium">
-                        Simpan Draft
-                    </button>
-                    <button type="submit" name="submit_for_approval" value="1" 
-                            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium">
-                        <i class="fas fa-paper-plane mr-1"></i>
-                        Simpan & Ajukan
-                    </button>
-                </div>
-            </form>
+                    <!-- Actions -->
+                    <div class="flex items-center justify-end gap-3 pt-6 border-t border-gray-100">
+                        <a href="{{ route('pum-requests.show', $pumRequest) }}" class="px-5 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors text-sm">
+                            Batal
+                        </a>
+                        <button type="submit" name="submit_for_approval" value="0" 
+                                class="px-5 py-2.5 bg-gray-600 text-white rounded-lg hover:bg-gray-700 font-medium transition-colors text-sm shadow-sm">
+                            Simpan Draft
+                        </button>
+                        <button type="submit" name="submit_for_approval" value="1" 
+                                class="px-5 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium transition-colors text-sm shadow-md hover:shadow-lg flex items-center gap-2">
+                            <i class="fas fa-paper-plane text-xs"></i>
+                            <span>Simpan & Ajukan</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>

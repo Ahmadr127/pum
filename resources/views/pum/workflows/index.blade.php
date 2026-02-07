@@ -3,7 +3,7 @@
 @section('title', 'Kelola Workflow Approval')
 
 @section('content')
-<div class="w-full mx-auto">
+<div class="w-full">
     <!-- Flash Messages -->
     @if(session('success'))
         <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
@@ -82,18 +82,21 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-center">
                             <div class="flex items-center justify-center gap-2">
-                                <a href="{{ route('pum-workflows.show', $workflow) }}" class="text-indigo-600 hover:text-indigo-900" title="Lihat Detail">
-                                    <i class="fas fa-eye"></i>
+                                <a href="{{ route('pum-workflows.show', $workflow) }}" 
+                                   class="inline-flex items-center px-2 py-1 bg-indigo-100 text-indigo-700 rounded text-xs hover:bg-indigo-200" title="Lihat Detail">
+                                    <i class="fas fa-eye mr-1"></i> Detail
                                 </a>
-                                <a href="{{ route('pum-workflows.edit', $workflow) }}" class="text-yellow-600 hover:text-yellow-900" title="Edit">
-                                    <i class="fas fa-edit"></i>
+                                <a href="{{ route('pum-workflows.edit', $workflow) }}" 
+                                   class="inline-flex items-center px-2 py-1 bg-yellow-100 text-yellow-700 rounded text-xs hover:bg-yellow-200" title="Edit">
+                                    <i class="fas fa-edit mr-1"></i> Edit
                                 </a>
                                 <form action="{{ route('pum-workflows.destroy', $workflow) }}" method="POST" class="inline" 
                                       onsubmit="return confirm('Yakin ingin menghapus workflow ini?')">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="text-red-600 hover:text-red-900" title="Hapus">
-                                        <i class="fas fa-trash"></i>
+                                    <button type="submit" 
+                                            class="inline-flex items-center px-2 py-1 bg-red-100 text-red-700 rounded text-xs hover:bg-red-200" title="Hapus">
+                                        <i class="fas fa-trash mr-1"></i> Hapus
                                     </button>
                                 </form>
                             </div>

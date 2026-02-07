@@ -194,10 +194,17 @@ class PumRequest extends Model
      */
     public function submitForApproval()
     {
-        $workflow = $this->workflow ?? PumApprovalWorkflow::getDefault();
+        $workflow = null;
+        
+        if ($this->workflow_id) {
+            $workflow = $this->workflow;
+        } else {
+            $workflowService = app(\App\Services\WorkflowSelectionService::class);
+            $workflow = $workflowService->getMatchingWorkflow($this->amount, $this->procurement_category);
+        }
         
         if (!$workflow) {
-            throw new \Exception('Tidak ada workflow approval yang tersedia');
+            throw new \Exception('Tidak ada workflow approval yang cocok untuk nominal Rp ' . number_format($this->amount, 0, ',', '.') . ' dan kategori ' . $this->procurement_category_label);
         }
 
         $this->update([
@@ -254,10 +261,18 @@ class PumRequest extends Model
             $this->update(['current_step_order' => $nextApproval->step_order]);
         } else {
             // All steps approved
-            $this->update([
-                'status' => self::STATUS_APPROVED,
-                'current_step_order' => null,
-            ]);
+            // Check if the last step was a 'release' step
+            if ($currentApproval->step->type === PumApprovalStep::TYPE_RELEASE) {
+                $this->update([
+                    'status' => self::STATUS_FULFILLED,
+                    'current_step_order' => null,
+                ]);
+            } else {
+                $this->update([
+                    'status' => self::STATUS_APPROVED,
+                    'current_step_order' => null,
+                ]);
+            }
         }
 
         return $this;
@@ -385,29 +400,30 @@ class PumRequest extends Model
         return $query->whereIn('status', [self::STATUS_NEW, self::STATUS_PENDING])
             ->whereHas('approvals', function ($q) use ($user) {
                 $q->where('status', 'pending')
-                  ->whereHas('step', function ($sq) use ($user) {
-                      $sq->where(function ($ssq) use ($user) {
-                          // Role-based
-                          $ssq->where('approver_type', 'role')
-                              ->where('role_id', $user->role_id);
-                      })->orWhere(function ($ssq) use ($user) {
-                          // User-specific
-                          $ssq->where('approver_type', 'user')
-                              ->where('user_id', $user->id);
+                  ->where(function ($approvalQuery) use ($user) {
+                      // Option 1: Role or User based step
+                      $approvalQuery->whereHas('step', function ($sq) use ($user) {
+                          $sq->where(function ($ssq) use ($user) {
+                              $ssq->where('approver_type', 'role')
+                                  ->where('role_id', $user->role_id);
+                          })->orWhere(function ($ssq) use ($user) {
+                              $ssq->where('approver_type', 'user')
+                                  ->where('user_id', $user->id);
+                          });
+                      })
+                      // Option 2: Organization Head based step
+                      ->orWhere(function ($approvalQuery2) use ($user) {
+                          $approvalQuery2->whereHas('step', function ($sq) {
+                              $sq->where('approver_type', 'organization_head');
+                          })->whereHas('request.requester.organizationUnit', function ($uq) use ($user) {
+                              $uq->where('head_id', $user->id);
+                          });
                       });
-                      // Note: organization_head is handled differently
                   });
             });
     }
 
-    /**
-     * Transition to appropriate workflow after Manager Pengaju approval
-     */
-    public function transitionWorkflow()
-    {
-        $workflowService = app(\App\Services\WorkflowSelectionService::class);
-        $workflowService->transitionWorkflowAfterManagerApproval($this);
-    }
+
 
     /**
      * Get procurement category labels

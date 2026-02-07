@@ -41,12 +41,17 @@ class PumApprovalWorkflowController extends Controller
             'description' => 'nullable|string|max:1000',
             'is_active' => 'boolean',
             'is_default' => 'boolean',
+            'procurement_category' => 'nullable|string',
+            'amount_min' => 'nullable|numeric|min:0',
+            'amount_max' => 'nullable|numeric|gt:amount_min',
             'steps' => 'required|array|min:1',
             'steps.*.name' => 'required|string|max:255',
+            'steps.*.type' => 'required|in:approval,purchasing,release',
             'steps.*.approver_type' => 'required|in:role,user,organization_head',
             'steps.*.role_id' => 'nullable|required_if:steps.*.approver_type,role|exists:roles,id',
             'steps.*.user_id' => 'nullable|required_if:steps.*.approver_type,user|exists:users,id',
             'steps.*.is_required' => 'boolean',
+            'steps.*.is_upload_fs_required' => 'boolean',
         ]);
 
         // If setting as default, unset other defaults
@@ -61,16 +66,29 @@ class PumApprovalWorkflowController extends Controller
             'is_default' => $request->boolean('is_default'),
         ]);
 
+        // Create condition if provided
+        if ($validated['procurement_category'] || $validated['amount_min'] !== null || $validated['amount_max'] !== null) {
+            \App\Models\PumWorkflowCondition::create([
+                'workflow_id' => $workflow->id,
+                'procurement_category' => $validated['procurement_category'],
+                'amount_min' => $validated['amount_min'],
+                'amount_max' => $validated['amount_max'],
+                'priority' => 1,
+            ]);
+        }
+
         // Create steps
         foreach ($validated['steps'] as $index => $stepData) {
             PumApprovalStep::create([
                 'workflow_id' => $workflow->id,
                 'order' => $index + 1,
                 'name' => $stepData['name'],
+                'type' => $stepData['type'] ?? 'approval',
                 'approver_type' => $stepData['approver_type'],
                 'role_id' => $stepData['approver_type'] === 'role' ? $stepData['role_id'] : null,
                 'user_id' => $stepData['approver_type'] === 'user' ? $stepData['user_id'] : null,
                 'is_required' => $stepData['is_required'] ?? true,
+                'is_upload_fs_required' => $stepData['is_upload_fs_required'] ?? false,
             ]);
         }
 
@@ -84,7 +102,7 @@ class PumApprovalWorkflowController extends Controller
      */
     public function show(PumApprovalWorkflow $pumWorkflow)
     {
-        $pumWorkflow->load('steps.role', 'steps.user');
+        $pumWorkflow->load('steps.role', 'steps.user', 'conditions');
         
         return view('pum.workflows.show', compact('pumWorkflow'));
     }
@@ -94,23 +112,28 @@ class PumApprovalWorkflowController extends Controller
      */
     public function edit(PumApprovalWorkflow $pumWorkflow)
     {
-        $pumWorkflow->load('steps');
+        $pumWorkflow->load('steps', 'conditions');
         $roles = Role::orderBy('display_name')->get();
         $users = User::orderBy('name')->get();
         
+        // Get first condition for editing
+        $condition = $pumWorkflow->conditions->first();
+
         // Prepare steps data for JavaScript
         $stepsData = $pumWorkflow->steps->map(function($step) {
             return [
                 'id' => $step->id,
                 'name' => $step->name,
+                'type' => $step->type,
                 'approver_type' => $step->approver_type,
                 'role_id' => $step->role_id ? (string)$step->role_id : '',
                 'user_id' => $step->user_id ? (string)$step->user_id : '',
                 'is_required' => $step->is_required,
+                'is_upload_fs_required' => $step->is_upload_fs_required,
             ];
         })->values()->toArray();
         
-        return view('pum.workflows.edit', compact('pumWorkflow', 'roles', 'users', 'stepsData'));
+        return view('pum.workflows.edit', compact('pumWorkflow', 'roles', 'users', 'stepsData', 'condition'));
     }
 
     /**
@@ -123,13 +146,18 @@ class PumApprovalWorkflowController extends Controller
             'description' => 'nullable|string|max:1000',
             'is_active' => 'boolean',
             'is_default' => 'boolean',
+            'procurement_category' => 'nullable|string',
+            'amount_min' => 'nullable|numeric|min:0',
+            'amount_max' => 'nullable|numeric|gt:amount_min',
             'steps' => 'required|array|min:1',
             'steps.*.id' => 'nullable|exists:pum_approval_steps,id',
             'steps.*.name' => 'required|string|max:255',
+            'steps.*.type' => 'required|in:approval,purchasing,release',
             'steps.*.approver_type' => 'required|in:role,user,organization_head',
             'steps.*.role_id' => 'nullable|required_if:steps.*.approver_type,role|exists:roles,id',
             'steps.*.user_id' => 'nullable|required_if:steps.*.approver_type,user|exists:users,id',
             'steps.*.is_required' => 'boolean',
+            'steps.*.is_upload_fs_required' => 'boolean',
         ]);
 
         // If setting as default, unset other defaults
@@ -143,6 +171,18 @@ class PumApprovalWorkflowController extends Controller
             'is_active' => $request->boolean('is_active', true),
             'is_default' => $request->boolean('is_default'),
         ]);
+
+        // Update Condition (Delete all and recreate/update first one)
+        $pumWorkflow->conditions()->delete();
+        if ($validated['procurement_category'] || $validated['amount_min'] !== null || $validated['amount_max'] !== null) {
+            \App\Models\PumWorkflowCondition::create([
+                'workflow_id' => $pumWorkflow->id,
+                'procurement_category' => $validated['procurement_category'],
+                'amount_min' => $validated['amount_min'],
+                'amount_max' => $validated['amount_max'],
+                'priority' => 1,
+            ]);
+        }
 
         // Get existing step IDs
         $existingStepIds = $pumWorkflow->steps->pluck('id')->toArray();
@@ -161,10 +201,12 @@ class PumApprovalWorkflowController extends Controller
                 'workflow_id' => $pumWorkflow->id,
                 'order' => $index + 1,
                 'name' => $stepData['name'],
+                'type' => $stepData['type'] ?? 'approval',
                 'approver_type' => $stepData['approver_type'],
                 'role_id' => $stepData['approver_type'] === 'role' ? $stepData['role_id'] : null,
                 'user_id' => $stepData['approver_type'] === 'user' ? $stepData['user_id'] : null,
                 'is_required' => $stepData['is_required'] ?? true,
+                'is_upload_fs_required' => $stepData['is_upload_fs_required'] ?? false,
             ];
 
             if (!empty($stepData['id'])) {

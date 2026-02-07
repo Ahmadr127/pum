@@ -75,11 +75,20 @@ class PumApprovalController extends Controller
             return $hasActioned;
         });
 
+        // Calculate summary counts from filtered request
+        $summary = [
+            'new' => $requests->where('status', 'new')->count(),
+            'pending' => $requests->where('status', 'pending')->count(),
+            'approved' => $requests->where('status', 'approved')->count(),
+            'rejected' => $requests->where('status', 'rejected')->count(),
+            'fulfilled' => $requests->where('status', 'fulfilled')->count(),
+        ];
+
         // Manual pagination for filtered collection
         $page = $request->get('page', 1);
         $perPage = 15;
         $total = $requests->count();
-        $requests = new \Illuminate\Pagination\LengthAwarePaginator(
+        $paginatedRequests = new \Illuminate\Pagination\LengthAwarePaginator(
             $requests->forPage($page, $perPage),
             $total,
             $perPage,
@@ -87,6 +96,9 @@ class PumApprovalController extends Controller
             ['path' => $request->url(), 'query' => $request->query()]
         );
 
-        return view('pum.approvals.index', compact('requests'));
+        return view('pum.approvals.index', [
+            'requests' => $paginatedRequests,
+            'summary' => $summary
+        ]);
     }
 }

@@ -6,7 +6,6 @@
     <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
     <title><?php echo $__env->yieldContent('title', 'Sistem'); ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- <?php echo app('Illuminate\Foundation\Vite')(['resources/css/app.css', 'resources/js/app.js']); ?> -->
     <link rel="icon" type="image/x-icon" href="<?php echo e(asset('images/logo.png')); ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
@@ -144,7 +143,7 @@
                 <?php endif; ?>
 
                 
-                <?php if(auth()->user()->hasPermission('manage_pum') || auth()->user()->hasPermission('manage_pum_workflows') || auth()->user()->hasPermission('approve_pum')): ?>
+                <?php if(auth()->user()->hasPermission('manage_pum') || auth()->user()->hasPermission('manage_pum_workflows') || auth()->user()->hasPermission('approve_pum') || auth()->user()->hasPermission('create_pum')): ?>
                 <div class="mb-4" x-data="{ open: <?php echo e(request()->routeIs('pum-requests.*') || request()->routeIs('pum-workflows.*') || request()->routeIs('pum-approvals.*') ? 'true' : 'false'); ?> }">
                 <button @click="open = !open" 
                         class="w-full flex items-center justify-between px-4 py-3 text-white rounded-lg hover:bg-green-800 transition-colors">
@@ -164,6 +163,15 @@
                          x-transition:leave-end="opacity-0 -translate-y-2"
                          class="mt-1 ml-4 pl-4 border-l-2 border-green-600 space-y-1">
                         
+                        <?php if(auth()->user()->hasPermission('create_pum')): ?>
+                        <a href="<?php echo e(route('pum-requests.my-requests')); ?>" 
+                           class="flex items-center px-3 py-2 text-green-100 rounded-lg hover:bg-green-800 hover:text-white transition-colors text-sm <?php echo e(request()->routeIs('pum-requests.my-requests') || request()->routeIs('pum-requests.create') ? 'bg-green-800 text-white' : ''); ?>"
+                           title="Permintaan Saya">
+                            <i class="fas fa-file-signature w-4 mr-2"></i>
+                            <span class="sidebar-text">Permintaan Saya</span>
+                        </a>
+                        <?php endif; ?>
+
                         <?php if(auth()->user()->hasPermission('approve_pum')): ?>
                         <a href="<?php echo e(route('pum-approvals.index')); ?>" 
                            class="flex items-center px-3 py-2 text-green-100 rounded-lg hover:bg-green-800 hover:text-white transition-colors text-sm <?php echo e(request()->routeIs('pum-approvals.*') ? 'bg-green-800 text-white' : ''); ?>"
@@ -175,7 +183,7 @@
                         
                         <?php if(auth()->user()->hasPermission('manage_pum')): ?>
                         <a href="<?php echo e(route('pum-requests.index')); ?>" 
-                           class="flex items-center px-3 py-2 text-green-100 rounded-lg hover:bg-green-800 hover:text-white transition-colors text-sm <?php echo e(request()->routeIs('pum-requests.*') ? 'bg-green-800 text-white' : ''); ?>"
+                           class="flex items-center px-3 py-2 text-green-100 rounded-lg hover:bg-green-800 hover:text-white transition-colors text-sm <?php echo e((request()->routeIs('pum-requests.*') && !request()->routeIs('pum-requests.my-requests') && !request()->routeIs('pum-requests.create')) ? 'bg-green-800 text-white' : ''); ?>"
                            title="Daftar Permintaan">
                             <i class="fas fa-file-invoice-dollar w-4 mr-2"></i>
                             <span class="sidebar-text">Daftar Permintaan</span>

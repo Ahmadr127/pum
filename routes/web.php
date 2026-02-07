@@ -74,10 +74,10 @@ Route::middleware('auth')->group(function () {
             ->name('organization-units.update-head');
     });
 
-    // PUM (Permintaan Uang Muka) Routes - Management (create, edit, delete)
-    Route::middleware('permission:manage_pum')->group(function () {
-        Route::get('pum-requests', [PumRequestController::class, 'index'])
-            ->name('pum-requests.index');
+    // PUM Routes - Standard User (Create, View Own, Edit Own, Delete Own)
+    Route::middleware('permission:create_pum,manage_pum')->group(function () {
+        Route::get('my-pum-requests', [PumRequestController::class, 'myRequests'])
+            ->name('pum-requests.my-requests');
         Route::get('pum-requests/create', [PumRequestController::class, 'create'])
             ->name('pum-requests.create');
         Route::post('pum-requests', [PumRequestController::class, 'store'])
@@ -91,14 +91,20 @@ Route::middleware('auth')->group(function () {
             ->name('pum-requests.destroy');
         Route::post('pum-requests/{pum_request}/submit', [PumRequestController::class, 'submit'])
             ->name('pum-requests.submit');
+    });
+
+    // PUM Routes - Management (index, fulfill, export - for admins/managers)
+    Route::middleware('permission:manage_pum')->group(function () {
+        Route::get('pum-requests', [PumRequestController::class, 'index'])
+            ->name('pum-requests.index');
         Route::post('pum-requests/{pum_request}/fulfill', [PumRequestController::class, 'fulfill'])
             ->name('pum-requests.fulfill');
         Route::get('pum-requests-export', [PumRequestController::class, 'export'])
             ->name('pum-requests.export');
     });
 
-    // PUM Routes - View detail (for both manage_pum and approve_pum)
-    Route::middleware('permission:manage_pum,approve_pum')->group(function () {
+    // PUM Routes - View detail (for manage_pum, approve_pum, AND create_pum)
+    Route::middleware('permission:manage_pum,approve_pum,create_pum')->group(function () {
         Route::get('pum-requests/{pum_request}', [PumRequestController::class, 'show'])
             ->name('pum-requests.show');
     });

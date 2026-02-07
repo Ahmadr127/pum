@@ -30,8 +30,8 @@ class AssignPumPermissionsToAllRolesSeeder extends Seeder
             'manager' => ['approve_pum'], // Only approve
             'director' => ['approve_pum'], // Only approve
             'finance' => ['approve_pum', 'manage_pum'], // Approve and manage requests
-            'staff' => ['manage_pum'], // Only create/manage requests
-            'user' => ['manage_pum'], // Only create/manage requests
+            'staff' => [], // No management permissions, only create (handled by PumPegawaiPermissionSeeder)
+            'user' => [], // No management permissions
         ];
 
         foreach ($rolePermissions as $roleName => $permNames) {

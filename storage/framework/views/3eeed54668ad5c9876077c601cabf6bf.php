@@ -1,3 +1,5 @@
+
+
 <?php $__env->startSection('title', 'Permintaan Uang Muka'); ?>
 
 <?php $__env->startSection('content'); ?>
@@ -13,7 +15,7 @@
 
         <!-- Filters - Single Row -->
         <div class="bg-gray-50 px-4 py-3 border-b border-gray-200">
-            <form action="<?php echo e(route('pum-requests.index')); ?>" method="GET">
+            <form action="<?php echo e(route('pum-requests.my-requests')); ?>" method="GET">
                 <div class="flex flex-wrap items-end gap-3">
                     <!-- Dari Tanggal -->
                     <div class="w-36">
@@ -27,31 +29,6 @@
                         <label class="block text-xs font-medium text-gray-600 mb-1">Sampai Tanggal</label>
                         <input type="date" name="date_to" value="<?php echo e(request('date_to')); ?>" 
                                class="block w-full px-2 py-1.5 border border-gray-300 rounded text-sm">
-                    </div>
-
-                    <!-- Nama Pengaju - Searchable -->
-                    <div class="w-48">
-                        <label class="block text-xs font-medium text-gray-600 mb-1">Nama Pengaju</label>
-                        <?php if (isset($component)) { $__componentOriginal0728ba7b37b7eda62f62767c5dccebf3 = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginal0728ba7b37b7eda62f62767c5dccebf3 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.searchable-dropdown','data' => ['name' => 'requester_id','options' => $users,'valueField' => 'id','labelField' => 'name','selected' => request('requester_id'),'placeholder' => 'Semua','emptyOption' => 'Semua']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
-<?php $component->withName('searchable-dropdown'); ?>
-<?php if ($component->shouldRender()): ?>
-<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
-<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
-<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
-<?php endif; ?>
-<?php $component->withAttributes(['name' => 'requester_id','options' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($users),'value-field' => 'id','label-field' => 'name','selected' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(request('requester_id')),'placeholder' => 'Semua','empty-option' => 'Semua']); ?>
-<?php echo $__env->renderComponent(); ?>
-<?php endif; ?>
-<?php if (isset($__attributesOriginal0728ba7b37b7eda62f62767c5dccebf3)): ?>
-<?php $attributes = $__attributesOriginal0728ba7b37b7eda62f62767c5dccebf3; ?>
-<?php unset($__attributesOriginal0728ba7b37b7eda62f62767c5dccebf3); ?>
-<?php endif; ?>
-<?php if (isset($__componentOriginal0728ba7b37b7eda62f62767c5dccebf3)): ?>
-<?php $component = $__componentOriginal0728ba7b37b7eda62f62767c5dccebf3; ?>
-<?php unset($__componentOriginal0728ba7b37b7eda62f62767c5dccebf3); ?>
-<?php endif; ?>
                     </div>
 
                     <!-- Status - Searchable -->
@@ -91,31 +68,9 @@
                         <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-1.5 px-3 rounded text-sm inline-flex items-center">
                             <i class="fas fa-search mr-1"></i> Cari
                         </button>
-                        <a href="<?php echo e(route('pum-requests.index')); ?>" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-1.5 px-3 rounded text-sm">
+                        <a href="<?php echo e(route('pum-requests.my-requests')); ?>" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-1.5 px-3 rounded text-sm">
                             Reset
                         </a>
-                    </div>
-
-                    <!-- Export Dropdown -->
-                    <div class="relative" x-data="{ open: false }">
-                        <button type="button" @click="open = !open" 
-                                class="bg-green-600 hover:bg-green-700 text-white font-medium py-1.5 px-3 rounded text-sm inline-flex items-center">
-                            <i class="fas fa-download mr-1"></i> Export
-                            <i class="fas fa-chevron-down ml-1 text-xs"></i>
-                        </button>
-                        <div x-show="open" @click.away="open = false"
-                             x-transition
-                             x-cloak
-                             class="absolute right-0 mt-1 w-40 bg-white rounded shadow-lg border border-gray-200 z-50">
-                            <a href="<?php echo e(route('pum-requests.export', array_merge(request()->query(), ['format' => 'excel']))); ?>" 
-                               class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                <i class="fas fa-file-excel text-green-600 mr-2"></i> Excel
-                            </a>
-                            <a href="<?php echo e(route('pum-requests.export', array_merge(request()->query(), ['format' => 'csv']))); ?>" 
-                               class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                <i class="fas fa-file-csv text-blue-600 mr-2"></i> CSV
-                            </a>
-                        </div>
                     </div>
                 </div>
             </form>
@@ -150,7 +105,6 @@
                     <tr>
                         <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">No</th>
                         <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Kode</th>
-                        <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nama Pengaju</th>
                         <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Tanggal</th>
                         <th class="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">Jumlah</th>
                         <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Keterangan</th>
@@ -170,10 +124,6 @@
                                 <?php echo e($request->code); ?>
 
                             </a>
-                        </td>
-                        <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
-                            <?php echo e($request->requester->name ?? '-'); ?>
-
                         </td>
                         <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
                             <?php echo e($request->request_date->format('d/m/Y')); ?>
@@ -236,7 +186,7 @@
                     </tr>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <tr>
-                        <td colspan="8" class="px-4 py-8 text-center text-gray-500">
+                        <td colspan="7" class="px-4 py-8 text-center text-gray-500">
                             <i class="fas fa-inbox text-4xl mb-2"></i>
                             <p>Tidak ada data permintaan.</p>
                         </td>
@@ -257,4 +207,4 @@
 </div>
 <?php $__env->stopSection(); ?>
 
-<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /mnt/data/Education/Pemrograman/magang/pum/pum/resources/views/pum/requests/index.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH D:\Pemrograman\magang\pum\resources\views/pum/requests/myrequest.blade.php ENDPATH**/ ?>

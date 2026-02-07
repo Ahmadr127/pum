@@ -3,7 +3,8 @@
 @section('title', 'Detail Workflow - ' . $pumWorkflow->name)
 
 @section('content')
-<div class="w-full max-w-4xl mx-auto">
+@section('content')
+<div class="w-full">
     <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
         <div class="p-6 bg-white border-b border-gray-200">
             <div class="flex justify-between items-start mb-6">
@@ -63,6 +64,11 @@
                                         @else
                                             <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600">
                                                 Opsional
+                                            </span>
+                                        @endif
+                                        @if($step->is_upload_fs_required)
+                                            <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                                                <i class="fas fa-file-upload mr-1"></i> Wajib FS
                                             </span>
                                         @endif
                                     </div>

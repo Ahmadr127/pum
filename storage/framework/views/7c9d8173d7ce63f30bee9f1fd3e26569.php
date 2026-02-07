@@ -42,6 +42,29 @@
         </div>
 
         <!-- Table -->
+
+        <!-- Status Legend -->
+        <div class="bg-white px-4 py-2 border-b border-gray-200">
+            <div class="flex flex-wrap items-center gap-4 text-xs">
+                <span class="font-medium text-gray-600">KETERANGAN:</span>
+                <span class="inline-flex items-center">
+                    <i class="fas fa-times-circle text-red-500 mr-1"></i> Ditolak [<?php echo e($summary['rejected']); ?>]
+                </span>
+                <span class="inline-flex items-center">
+                    <i class="fas fa-file-alt text-yellow-500 mr-1"></i> Baru [<?php echo e($summary['new']); ?>]
+                </span>
+                <span class="inline-flex items-center">
+                    <i class="fas fa-clock text-blue-500 mr-1"></i> Menunggu [<?php echo e($summary['pending']); ?>]
+                </span>
+                <span class="inline-flex items-center">
+                    <i class="fas fa-check-circle text-green-500 mr-1"></i> Disetujui [<?php echo e($summary['approved']); ?>]
+                </span>
+                <span class="inline-flex items-center">
+                    <i class="fas fa-check-double text-emerald-600 mr-1"></i> Terpenuhi [<?php echo e($summary['fulfilled']); ?>]
+                </span>
+            </div>
+        </div>
+
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
@@ -52,6 +75,7 @@
                         <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Tanggal</th>
                         <th class="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">Jumlah</th>
                         <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Keterangan</th>
+                        <th class="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase">Status</th>
                         <th class="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase">Aksi</th>
                     </tr>
                 </thead>
@@ -85,51 +109,43 @@
 
                         </td>
                         <td class="px-3 py-2 whitespace-nowrap text-center">
+                            <?php
+                                $userApproval = $request->approvals->where('approver_id', auth()->id())->first();
+                                $hasActioned = $userApproval && in_array($userApproval->status, ['approved', 'rejected']);
+                            ?>
+
+                            <?php if($hasActioned): ?>
+                                <?php if($userApproval->status === 'approved'): ?>
+                                    <span class="inline-flex items-center px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium border border-green-200">
+                                        <i class="fas fa-check-circle mr-1"></i> Disetujui
+                                    </span>
+                                <?php else: ?>
+                                    <span class="inline-flex items-center px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium border border-red-200">
+                                        <i class="fas fa-times-circle mr-1"></i> Ditolak
+                                    </span>
+                                <?php endif; ?>
+                            <?php elseif($request->canBeApprovedBy(auth()->user())): ?>
+                                <span class="inline-flex items-center px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium border border-yellow-200">
+                                    <i class="fas fa-clock mr-1"></i> Menunggu Persetujuan Anda
+                                </span>
+                            <?php else: ?>
+                                <span class="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-xs font-medium border border-gray-200">
+                                    <i class="fas fa-hourglass-half mr-1"></i> Menunggu
+                                </span>
+                            <?php endif; ?>
+                        </td>
+                        <td class="px-3 py-2 whitespace-nowrap text-center">
                             <div class="flex items-center justify-center gap-1">
                                 <a href="<?php echo e(route('pum-requests.show', $request)); ?>" 
                                    class="inline-flex items-center px-2 py-1 bg-indigo-100 text-indigo-700 rounded text-xs hover:bg-indigo-200">
                                     <i class="fas fa-eye mr-1"></i> Detail
                                 </a>
-                                
-                                <?php
-                                    $userApproval = $request->approvals->where('approver_id', auth()->id())->first();
-                                    $hasActioned = $userApproval && in_array($userApproval->status, ['approved', 'rejected']);
-                                ?>
-                                
-                                <?php if(!$hasActioned && $request->canBeApprovedBy(auth()->user())): ?>
-                                    
-                                    <button 
-                                        type="button" 
-                                        @click="$dispatch('open-quick-approve', { id: <?php echo e($request->id); ?>, code: '<?php echo e($request->code); ?>', amount: <?php echo e($request->amount); ?> })"
-                                        class="inline-flex items-center px-2 py-1 bg-green-100 text-green-700 rounded text-xs hover:bg-green-200"
-                                    >
-                                        <i class="fas fa-check mr-1"></i> Approve
-                                    </button>
-                                    <button 
-                                        type="button"
-                                        @click="$dispatch('open-quick-reject', { id: <?php echo e($request->id); ?>, code: '<?php echo e($request->code); ?>' })"
-                                        class="inline-flex items-center px-2 py-1 bg-red-100 text-red-700 rounded text-xs hover:bg-red-200"
-                                    >
-                                        <i class="fas fa-times mr-1"></i> Reject
-                                    </button>
-                                <?php elseif($hasActioned): ?>
-                                    
-                                    <?php if($userApproval->status === 'approved'): ?>
-                                        <span class="inline-flex items-center px-2 py-1 bg-green-50 text-green-700 rounded text-xs border border-green-200">
-                                            <i class="fas fa-check-circle mr-1"></i> Sudah Approve
-                                        </span>
-                                    <?php else: ?>
-                                        <span class="inline-flex items-center px-2 py-1 bg-red-50 text-red-700 rounded text-xs border border-red-200">
-                                            <i class="fas fa-times-circle mr-1"></i> Sudah Reject
-                                        </span>
-                                    <?php endif; ?>
-                                <?php endif; ?>
                             </div>
                         </td>
                     </tr>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <tr>
-                        <td colspan="7" class="px-4 py-8 text-center text-gray-500">
+                        <td colspan="8" class="px-4 py-8 text-center text-gray-500">
                             <i class="fas fa-check-circle text-4xl mb-2 text-green-300"></i>
                             <p>Tidak ada permintaan yang menunggu persetujuan Anda.</p>
                         </td>
@@ -148,48 +164,6 @@
         <?php endif; ?>
     </div>
 </div>
-
-
-<?php if (isset($component)) { $__componentOriginal12676ed3d863d220f39ba739b04e436c = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginal12676ed3d863d220f39ba739b04e436c = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.pum.approve-modal','data' => ['action' => '','modalName' => 'quick-approve-modal','showDetails' => true]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
-<?php $component->withName('pum.approve-modal'); ?>
-<?php if ($component->shouldRender()): ?>
-<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
-<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
-<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
-<?php endif; ?>
-<?php $component->withAttributes(['action' => '','modal-name' => 'quick-approve-modal','show-details' => true]); ?>
-<?php echo $__env->renderComponent(); ?>
-<?php endif; ?>
-<?php if (isset($__attributesOriginal12676ed3d863d220f39ba739b04e436c)): ?>
-<?php $attributes = $__attributesOriginal12676ed3d863d220f39ba739b04e436c; ?>
-<?php unset($__attributesOriginal12676ed3d863d220f39ba739b04e436c); ?>
-<?php endif; ?>
-<?php if (isset($__componentOriginal12676ed3d863d220f39ba739b04e436c)): ?>
-<?php $component = $__componentOriginal12676ed3d863d220f39ba739b04e436c; ?>
-<?php unset($__componentOriginal12676ed3d863d220f39ba739b04e436c); ?>
-<?php endif; ?>
-<?php if (isset($component)) { $__componentOriginalee330e19988b2e7820d43252c533cd9a = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginalee330e19988b2e7820d43252c533cd9a = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.pum.reject-modal','data' => ['action' => '','modalName' => 'quick-reject-modal','showDetails' => true]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
-<?php $component->withName('pum.reject-modal'); ?>
-<?php if ($component->shouldRender()): ?>
-<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
-<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
-<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
-<?php endif; ?>
-<?php $component->withAttributes(['action' => '','modal-name' => 'quick-reject-modal','show-details' => true]); ?>
-<?php echo $__env->renderComponent(); ?>
-<?php endif; ?>
-<?php if (isset($__attributesOriginalee330e19988b2e7820d43252c533cd9a)): ?>
-<?php $attributes = $__attributesOriginalee330e19988b2e7820d43252c533cd9a; ?>
-<?php unset($__attributesOriginalee330e19988b2e7820d43252c533cd9a); ?>
-<?php endif; ?>
-<?php if (isset($__componentOriginalee330e19988b2e7820d43252c533cd9a)): ?>
-<?php $component = $__componentOriginalee330e19988b2e7820d43252c533cd9a; ?>
-<?php unset($__componentOriginalee330e19988b2e7820d43252c533cd9a); ?>
-<?php endif; ?>
 
 <?php $__env->stopSection(); ?>
 

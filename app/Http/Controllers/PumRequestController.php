@@ -42,6 +42,25 @@ class PumRequestController extends Controller
     }
 
     /**
+     * Display a listing of the resource for current user.
+     */
+    public function myRequests(Request $request)
+    {
+        $query = PumRequest::with(['requester', 'workflow', 'approvals.approver'])
+            ->where('requester_id', Auth::id())
+            ->search($request->search)
+            ->byStatus($request->status)
+            ->byDateRange($request->date_from, $request->date_to);
+
+        $requests = $query->orderBy('created_at', 'desc')->paginate(15);
+        
+        // Get status options
+        $statuses = PumRequest::getStatusLabels();
+
+        return view('pum.requests.myrequest', compact('requests', 'statuses'));
+    }
+
+    /**
      * Show the form for creating a new resource.
      */
     public function create()
@@ -70,6 +89,11 @@ class PumRequestController extends Controller
             'attachments2' => 'nullable|array',
             'attachments2.*' => 'file|mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png|max:5120',
         ]);
+
+        // Check authorization to create for others
+        if (!Auth::user()->hasPermission('manage_pum') && $validated['requester_id'] != Auth::id()) {
+            abort(403, 'Anda hanya dapat membuat permintaan untuk diri sendiri.');
+        }
 
         // Handle file uploads
         $attachments = [];
@@ -133,6 +157,18 @@ class PumRequestController extends Controller
             'approvals.step', 
             'approvals.approver'
         ]);
+
+        // Check view permission
+        // 1. Has manage_pum permission
+        // 2. Is the requester
+        // 3. Is an approver (current or past)
+        $isApprover = $pumRequest->approvals->contains('approver_id', Auth::id());
+        
+        if (!Auth::user()->hasPermission('manage_pum') && 
+            $pumRequest->requester_id !== Auth::id() && 
+            !$isApprover) {
+            abort(403, 'Anda tidak memiliki hak akses untuk melihat permintaan ini.');
+        }
         
         $canApprove = $pumRequest->canBeApprovedBy(Auth::user());
         
@@ -144,6 +180,11 @@ class PumRequestController extends Controller
      */
     public function edit(PumRequest $pumRequest)
     {
+        // Check authorization
+        if (!Auth::user()->hasPermission('manage_pum') && $pumRequest->requester_id !== Auth::id()) {
+            abort(403, 'Anda tidak memiliki hak akses untuk mengedit permintaan ini.');
+        }
+
         // Can only edit if status is 'new'
         if ($pumRequest->status !== PumRequest::STATUS_NEW) {
             return redirect()
@@ -162,6 +203,11 @@ class PumRequestController extends Controller
      */
     public function update(Request $request, PumRequest $pumRequest)
     {
+        // Check authorization
+        if (!Auth::user()->hasPermission('manage_pum') && $pumRequest->requester_id !== Auth::id()) {
+            abort(403, 'Anda tidak memiliki hak akses untuk mengubah permintaan ini.');
+        }
+
         // Can only update if status is 'new'
         if ($pumRequest->status !== PumRequest::STATUS_NEW) {
             return redirect()
@@ -260,6 +306,11 @@ class PumRequestController extends Controller
      */
     public function destroy(PumRequest $pumRequest)
     {
+        // Check authorization
+        if (!Auth::user()->hasPermission('manage_pum') && $pumRequest->requester_id !== Auth::id()) {
+            abort(403, 'Anda tidak memiliki hak akses untuk menghapus permintaan ini.');
+        }
+
         // Can only delete if status is 'new' or 'rejected'
         if (!in_array($pumRequest->status, [PumRequest::STATUS_NEW, PumRequest::STATUS_REJECTED])) {
             return redirect()
@@ -279,6 +330,11 @@ class PumRequestController extends Controller
      */
     public function submit(PumRequest $pumRequest)
     {
+        // Check authorization
+        if (!Auth::user()->hasPermission('manage_pum') && $pumRequest->requester_id !== Auth::id()) {
+            abort(403, 'Anda tidak memiliki hak akses untuk mengajukan permintaan ini.');
+        }
+
         if ($pumRequest->status !== PumRequest::STATUS_NEW) {
             return redirect()
                 ->route('pum-requests.show', $pumRequest)
@@ -325,16 +381,7 @@ class PumRequestController extends Controller
                 }
             }
 
-            // Check if this was Manager Pengaju approval (first step)
-            $approvedCount = $pumRequest->approvals()
-                ->where('status', 'approved')
-                ->count();
 
-            if ($approvedCount === 1) {
-                // This was the first approval (Manager Pengaju)
-                // Transition to appropriate workflow
-                $pumRequest->transitionWorkflow();
-            }
 
             return redirect()
                 ->route('pum-requests.show', $pumRequest)
