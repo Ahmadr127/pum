@@ -109,10 +109,16 @@ class PumRequest extends Model
     /**
      * Generate unique code for new request
      */
-    public static function generateCode()
+    public static function generateCode($user = null)
     {
         $year = Carbon::now()->format('Y');
         $month = Carbon::now()->format('m');
+        
+        // Get Unit Code
+        $unitCode = 'PNJ'; // Default fallback
+        if ($user && $user->loadMissing('organizationUnit') && $user->organizationUnit) {
+            $unitCode = strtoupper($user->organizationUnit->code);
+        }
         
         // Get the last code for this month
         $lastRequest = static::withTrashed()
@@ -127,7 +133,7 @@ class PumRequest extends Model
             $sequence = 1;
         }
         
-        return sprintf('%05d/ADV/PNJ/%s/%s', $sequence, $month, $year);
+        return sprintf('%05d/RSAZRA/%s/%s/%s', $sequence, $unitCode, $month, $year);
     }
 
     /**

@@ -12,25 +12,70 @@
         </div>
     </div>
 
-    <!-- Stats Cards Row -->
-    @if(isset($pumStats) || isset($userCount) || isset($roleCount) || isset($permissionCount) || isset($orgTypeCount) || isset($orgUnitCount))
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        @if(isset($pumStats))
-            <x-stat-card :value="$pumStats['total']" label="Total Permintaan" icon="fas fa-file-invoice-dollar" color="blue" :href="route('pum-requests.index')" />
-            <x-stat-card :value="$pumStats['pending']" label="Menunggu" icon="fas fa-clock" color="yellow" :href="route('pum-requests.index')" />
-            <x-stat-card :value="$pumStats['approved']" label="Disetujui" icon="fas fa-check-circle" color="green" :href="route('pum-requests.index')" />
-        @endif
-        @if(isset($userCount))
-            <x-stat-card :value="$userCount" label="Pengguna" icon="fas fa-users" color="indigo" :href="route('users.index')" />
-        @endif
-        @if(isset($roleCount))
-            <x-stat-card :value="$roleCount" label="Role" icon="fas fa-user-tag" color="purple" :href="route('roles.index')" />
-        @endif
-        @if(isset($orgUnitCount))
-            <x-stat-card :value="$orgUnitCount" label="Unit Organisasi" icon="fas fa-building" color="teal" :href="route('organization-units.index')" />
-        @endif
+    {{-- Approval Stats Section - For Approvers (approve_pum) --}}
+    @if(isset($approvalStats))
+    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-5">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <i class="fas fa-tasks text-orange-600 mr-2"></i> Tugas Approval Saya
+        </h3>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <x-stat-card 
+                :value="$approvalStats['total']" 
+                label="Total Tugas Approval" 
+                icon="fas fa-clipboard-list" 
+                color="blue" 
+                :href="route('pum-requests.index')" 
+            />
+            <x-stat-card 
+                :value="$approvalStats['pending']" 
+                label="Menunggu Approval Saya" 
+                icon="fas fa-clock" 
+                color="yellow" 
+                :href="route('pum-requests.index')" 
+            />
+            <x-stat-card 
+                :value="$approvalStats['approved']" 
+                label="Sudah Saya Approve" 
+                icon="fas fa-check-circle" 
+                color="green" 
+                :href="route('pum-requests.index')" 
+            />
+        </div>
     </div>
     @endif
+
+    {{-- My Request Stats Section - For Request Creators (create_pum) --}}
+    @if(isset($myRequestStats))
+    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-5">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <i class="fas fa-user-circle text-blue-600 mr-2"></i> Permintaan Saya
+        </h3>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <x-stat-card 
+                :value="$myRequestStats['total']" 
+                label="Total Permintaan Saya" 
+                icon="fas fa-file-invoice-dollar" 
+                color="blue" 
+                :href="route('pum-requests.index')" 
+            />
+            <x-stat-card 
+                :value="$myRequestStats['pending']" 
+                label="Sedang Diproses" 
+                icon="fas fa-hourglass-half" 
+                color="yellow" 
+                :href="route('pum-requests.index')" 
+            />
+            <x-stat-card 
+                :value="$myRequestStats['completed']" 
+                label="Selesai" 
+                icon="fas fa-check-double" 
+                color="green" 
+                :href="route('pum-requests.index')" 
+            />
+        </div>
+    </div>
+    @endif
+
 
     @php
         $hasApprovals = isset($pendingApprovals) || $user->hasPermission('approve_pum');

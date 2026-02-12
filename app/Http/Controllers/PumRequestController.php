@@ -113,7 +113,7 @@ class PumRequestController extends Controller
         }
 
         $pumRequest = PumRequest::create([
-            'code' => PumRequest::generateCode(),
+            'code' => PumRequest::generateCode(User::find($validated['requester_id'])),
             'requester_id' => $validated['requester_id'],
             'request_date' => $validated['request_date'],
             'amount' => $validated['amount'],

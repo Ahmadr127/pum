@@ -50,18 +50,14 @@
                 <span class="inline-flex items-center">
                     <i class="fas fa-times-circle text-red-500 mr-1"></i> Ditolak [{{ $summary['rejected'] }}]
                 </span>
-                <span class="inline-flex items-center">
-                    <i class="fas fa-file-alt text-yellow-500 mr-1"></i> Baru [{{ $summary['new'] }}]
-                </span>
+
                 <span class="inline-flex items-center">
                     <i class="fas fa-clock text-blue-500 mr-1"></i> Menunggu [{{ $summary['pending'] }}]
                 </span>
                 <span class="inline-flex items-center">
                     <i class="fas fa-check-circle text-green-500 mr-1"></i> Disetujui [{{ $summary['approved'] }}]
                 </span>
-                <span class="inline-flex items-center">
-                    <i class="fas fa-check-double text-emerald-600 mr-1"></i> Terpenuhi [{{ $summary['fulfilled'] }}]
-                </span>
+
             </div>
         </div>
 

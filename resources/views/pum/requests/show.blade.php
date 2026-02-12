@@ -117,8 +117,38 @@
                                         <p class="text-sm text-gray-400 italic">Tidak ada lampiran tambahan.</p>
                                     @endif
                                 </div>
+
+                                </div>
                             </div>
-                        </div>
+                            
+                            <!-- Dokumen FS -->
+                            <div class="mt-4 pt-4 border-t border-gray-100">
+                                <label class="block text-xs font-medium text-gray-500 mb-2 uppercase">Dokumen FS</label>
+                                @php
+                                    // Collect all approvals with FS forms
+                                    $fsApprovals = $pumRequest->approvals->whereNotNull('fs_form_path');
+                                @endphp
+                                
+                                @if($fsApprovals->count() > 0)
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        @foreach($fsApprovals as $approval)
+                                        <a href="{{ Storage::url($approval->fs_form_path) }}" target="_blank" class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200 hover:border-indigo-300 hover:bg-indigo-50 transition-all group">
+                                            <div class="w-8 h-8 rounded bg-white flex items-center justify-center text-indigo-500 shadow-sm shrink-0">
+                                                <i class="fas fa-file-contract"></i>
+                                            </div>
+                                            <span class="text-sm text-gray-700 group-hover:text-indigo-700 truncate flex-1 font-medium" title="{{ basename($approval->fs_form_path) }}">{{ basename($approval->fs_form_path) }}</span>
+                                            <i class="fas fa-external-link-alt text-gray-300 group-hover:text-indigo-400 text-xs"></i>
+                                        </a>
+                                        @endforeach
+                                    </div>
+                                @else
+                                    <div class="flex items-center gap-2 text-sm text-gray-400 italic bg-gray-50 p-3 rounded-lg border border-gray-100">
+                                        <i class="fas fa-info-circle text-gray-300"></i>
+                                        Tidak ada dokumen FS yang diunggah.
+                                    </div>
+                                @endif
+                            </div>
+
 
                         <!-- Metadata Footer -->
                         <div class="border-t border-gray-100 pt-4 flex flex-wrap gap-4 text-xs text-gray-400">
@@ -134,7 +164,6 @@
                 </div>
 
                 <!-- Approval History -->
-                 @if(auth()->id() == $pumRequest->requester_id || auth()->id() == $pumRequest->created_by || $canApprove)
                 <div class="bg-white overflow-hidden shadow-sm rounded-xl border border-gray-200">
                     <div class="px-6 py-4 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
                         <h3 class="font-semibold text-gray-900">Riwayat Persetujuan</h3>
@@ -156,14 +185,21 @@
                             <tbody class="divide-y divide-gray-100">
                                 @forelse($pumRequest->approvals as $approval)
                                 <tr class="{{ $approval->status === 'pending' && $pumRequest->current_step_order === $approval->step_order ? 'bg-indigo-50/50' : 'hover:bg-gray-50/50' }} transition-colors">
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        <div class="flex items-center gap-2">
-                                            <span class="font-medium">{{ $approval->step->name ?? '-' }}</span>
-                                            @if($approval->fs_form_path)
-                                                <a href="{{ Storage::url($approval->fs_form_path) }}" target="_blank" class="text-blue-600 hover:text-blue-800" title="Lihat FS Form">
-                                                    <i class="fas fa-file-contract"></i>
-                                                </a>
-                                            @endif
+                                    <td class="px-6 py-4 text-sm text-gray-900">
+                                        <div class="space-y-2">
+                                            <div class="flex items-center gap-2">
+                                                <span class="font-medium">{{ $approval->step->name ?? '-' }}</span>
+                                                @if($approval->fs_form_path)
+                                                    <a href="{{ Storage::url($approval->fs_form_path) }}" target="_blank" 
+                                                       class="inline-flex items-center gap-1.5 px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-xs hover:bg-blue-100 transition-colors" 
+                                                       title="Download FS Form">
+                                                        <i class="fas fa-file-contract"></i>
+                                                        <span class="max-w-[150px] truncate">{{ basename($approval->fs_form_path) }}</span>
+                                                        <i class="fas fa-download text-[10px]"></i>
+                                                    </a>
+                                                @endif
+                                            </div>
+                                            
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
@@ -208,7 +244,6 @@
                         </table>
                     </div>
                 </div>
-                @endif
             </div>
 
             <!-- Right Column: Sidebar -->

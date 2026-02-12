@@ -84,16 +84,10 @@
                     <i class="fas fa-times-circle text-red-500 mr-1"></i> Ditolak [<?php echo e($requests->where('status', 'rejected')->count()); ?>]
                 </span>
                 <span class="inline-flex items-center">
-                    <i class="fas fa-file-alt text-yellow-500 mr-1"></i> Baru [<?php echo e($requests->where('status', 'new')->count()); ?>]
-                </span>
-                <span class="inline-flex items-center">
                     <i class="fas fa-clock text-blue-500 mr-1"></i> Menunggu [<?php echo e($requests->where('status', 'pending')->count()); ?>]
                 </span>
                 <span class="inline-flex items-center">
                     <i class="fas fa-check-circle text-green-500 mr-1"></i> Disetujui [<?php echo e($requests->where('status', 'approved')->count()); ?>]
-                </span>
-                <span class="inline-flex items-center">
-                    <i class="fas fa-check-double text-emerald-600 mr-1"></i> Terpenuhi [<?php echo e($requests->where('status', 'fulfilled')->count()); ?>]
                 </span>
             </div>
         </div>
