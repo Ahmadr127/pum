@@ -12,18 +12,18 @@
 
     <!-- Stats Cards Row -->
     <?php if(isset($pumStats) || isset($userCount) || isset($roleCount) || isset($permissionCount) || isset($orgTypeCount) || isset($orgUnitCount)): ?>
-    <div class="flex flex-wrap gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <?php if(isset($pumStats)): ?>
             <?php if (isset($component)) { $__componentOriginal527fae77f4db36afc8c8b7e9f5f81682 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal527fae77f4db36afc8c8b7e9f5f81682 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.stat-card','data' => ['value' => $pumStats['total'],'label' => 'Total Permintaan','icon' => 'fas fa-file-invoice-dollar','color' => 'blue']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.stat-card','data' => ['value' => $pumStats['total'],'label' => 'Total Permintaan','icon' => 'fas fa-file-invoice-dollar','color' => 'blue','href' => route('pum-requests.index')]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('stat-card'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['value' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($pumStats['total']),'label' => 'Total Permintaan','icon' => 'fas fa-file-invoice-dollar','color' => 'blue']); ?>
+<?php $component->withAttributes(['value' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($pumStats['total']),'label' => 'Total Permintaan','icon' => 'fas fa-file-invoice-dollar','color' => 'blue','href' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(route('pum-requests.index'))]); ?>
 <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal527fae77f4db36afc8c8b7e9f5f81682)): ?>
@@ -36,14 +36,14 @@
 <?php endif; ?>
             <?php if (isset($component)) { $__componentOriginal527fae77f4db36afc8c8b7e9f5f81682 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal527fae77f4db36afc8c8b7e9f5f81682 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.stat-card','data' => ['value' => $pumStats['pending'],'label' => 'Menunggu','icon' => 'fas fa-clock','color' => 'yellow']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.stat-card','data' => ['value' => $pumStats['pending'],'label' => 'Menunggu','icon' => 'fas fa-clock','color' => 'yellow','href' => route('pum-requests.index')]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('stat-card'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['value' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($pumStats['pending']),'label' => 'Menunggu','icon' => 'fas fa-clock','color' => 'yellow']); ?>
+<?php $component->withAttributes(['value' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($pumStats['pending']),'label' => 'Menunggu','icon' => 'fas fa-clock','color' => 'yellow','href' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(route('pum-requests.index'))]); ?>
 <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal527fae77f4db36afc8c8b7e9f5f81682)): ?>
@@ -56,14 +56,14 @@
 <?php endif; ?>
             <?php if (isset($component)) { $__componentOriginal527fae77f4db36afc8c8b7e9f5f81682 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal527fae77f4db36afc8c8b7e9f5f81682 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.stat-card','data' => ['value' => $pumStats['approved'],'label' => 'Disetujui','icon' => 'fas fa-check-circle','color' => 'green']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.stat-card','data' => ['value' => $pumStats['approved'],'label' => 'Disetujui','icon' => 'fas fa-check-circle','color' => 'green','href' => route('pum-requests.index')]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('stat-card'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['value' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($pumStats['approved']),'label' => 'Disetujui','icon' => 'fas fa-check-circle','color' => 'green']); ?>
+<?php $component->withAttributes(['value' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($pumStats['approved']),'label' => 'Disetujui','icon' => 'fas fa-check-circle','color' => 'green','href' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(route('pum-requests.index'))]); ?>
 <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal527fae77f4db36afc8c8b7e9f5f81682)): ?>
@@ -78,14 +78,14 @@
         <?php if(isset($userCount)): ?>
             <?php if (isset($component)) { $__componentOriginal527fae77f4db36afc8c8b7e9f5f81682 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal527fae77f4db36afc8c8b7e9f5f81682 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.stat-card','data' => ['value' => $userCount,'label' => 'Pengguna','icon' => 'fas fa-users','color' => 'indigo']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.stat-card','data' => ['value' => $userCount,'label' => 'Pengguna','icon' => 'fas fa-users','color' => 'indigo','href' => route('users.index')]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('stat-card'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['value' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($userCount),'label' => 'Pengguna','icon' => 'fas fa-users','color' => 'indigo']); ?>
+<?php $component->withAttributes(['value' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($userCount),'label' => 'Pengguna','icon' => 'fas fa-users','color' => 'indigo','href' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(route('users.index'))]); ?>
 <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal527fae77f4db36afc8c8b7e9f5f81682)): ?>
@@ -100,14 +100,14 @@
         <?php if(isset($roleCount)): ?>
             <?php if (isset($component)) { $__componentOriginal527fae77f4db36afc8c8b7e9f5f81682 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal527fae77f4db36afc8c8b7e9f5f81682 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.stat-card','data' => ['value' => $roleCount,'label' => 'Role','icon' => 'fas fa-user-tag','color' => 'purple']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.stat-card','data' => ['value' => $roleCount,'label' => 'Role','icon' => 'fas fa-user-tag','color' => 'purple','href' => route('roles.index')]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('stat-card'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['value' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($roleCount),'label' => 'Role','icon' => 'fas fa-user-tag','color' => 'purple']); ?>
+<?php $component->withAttributes(['value' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($roleCount),'label' => 'Role','icon' => 'fas fa-user-tag','color' => 'purple','href' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(route('roles.index'))]); ?>
 <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal527fae77f4db36afc8c8b7e9f5f81682)): ?>
@@ -122,14 +122,14 @@
         <?php if(isset($orgUnitCount)): ?>
             <?php if (isset($component)) { $__componentOriginal527fae77f4db36afc8c8b7e9f5f81682 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal527fae77f4db36afc8c8b7e9f5f81682 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.stat-card','data' => ['value' => $orgUnitCount,'label' => 'Unit Organisasi','icon' => 'fas fa-building','color' => 'teal']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.stat-card','data' => ['value' => $orgUnitCount,'label' => 'Unit Organisasi','icon' => 'fas fa-building','color' => 'teal','href' => route('organization-units.index')]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('stat-card'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['value' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($orgUnitCount),'label' => 'Unit Organisasi','icon' => 'fas fa-building','color' => 'teal']); ?>
+<?php $component->withAttributes(['value' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($orgUnitCount),'label' => 'Unit Organisasi','icon' => 'fas fa-building','color' => 'teal','href' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(route('organization-units.index'))]); ?>
 <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal527fae77f4db36afc8c8b7e9f5f81682)): ?>
@@ -146,7 +146,7 @@
 
     <?php
         $hasApprovals = isset($pendingApprovals) || $user->hasPermission('approve_pum');
-        $hasRequests = isset($recentRequests) || $user->hasPermission('manage_pum');
+        $hasRequests = isset($recentRequests) || $user->hasPermission('manage_pum') || $user->hasPermission('create_pum');
         $showTwoColumns = $hasApprovals && $hasRequests;
     ?>
 
@@ -270,7 +270,7 @@
                 </a>
             </div>
         </div>
-        <?php elseif($user->hasPermission('manage_pum')): ?>
+        <?php elseif($user->hasPermission('manage_pum') || $user->hasPermission('create_pum')): ?>
         <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
             <div class="p-6 text-center">
                 <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -289,13 +289,22 @@
     <!-- Quick Actions Card -->
     <?php
         $quickActions = collect([
-            ['permission' => 'manage_pum', 'href' => route('pum-requests.create'), 'icon' => 'fas fa-plus', 'title' => 'Buat Permintaan', 'subtitle' => 'Ajukan uang muka', 'color' => 'green'],
+            ['permission' => 'manage_pum|create_pum', 'href' => route('pum-requests.create'), 'icon' => 'fas fa-plus', 'title' => 'Buat Permintaan', 'subtitle' => 'Ajukan uang muka', 'color' => 'green'],
             ['permission' => 'approve_pum', 'href' => route('pum-approvals.index'), 'icon' => 'fas fa-clipboard-check', 'title' => 'Approval', 'subtitle' => ($pendingApprovalsCount ?? 0) . ' menunggu', 'color' => 'orange'],
             ['permission' => 'manage_users', 'href' => route('users.index'), 'icon' => 'fas fa-users', 'title' => 'Kelola Pengguna', 'subtitle' => ($userCount ?? 0) . ' pengguna', 'color' => 'blue'],
             ['permission' => 'manage_roles', 'href' => route('roles.index'), 'icon' => 'fas fa-user-tag', 'title' => 'Kelola Role', 'subtitle' => ($roleCount ?? 0) . ' role', 'color' => 'purple'],
             ['permission' => 'manage_organization_units', 'href' => route('organization-units.index'), 'icon' => 'fas fa-building', 'title' => 'Unit Organisasi', 'subtitle' => ($orgUnitCount ?? 0) . ' unit', 'color' => 'teal'],
             ['permission' => 'manage_pum_workflows', 'href' => route('pum-workflows.index'), 'icon' => 'fas fa-project-diagram', 'title' => 'Workflow PUM', 'subtitle' => 'Kelola approval', 'color' => 'indigo'],
-        ])->filter(fn($action) => $user->hasPermission($action['permission']));
+        ])->filter(function($action) use ($user) {
+            // Handle multiple permissions separated by |
+            $permissions = explode('|', $action['permission']);
+            foreach ($permissions as $perm) {
+                if ($user->hasPermission(trim($perm))) {
+                    return true;
+                }
+            }
+            return false;
+        });
         
         $actionGridClass = match($quickActions->count()) {
             1 => 'grid-cols-1',

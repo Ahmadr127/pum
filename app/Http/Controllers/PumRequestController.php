@@ -158,17 +158,17 @@ class PumRequestController extends Controller
             'approvals.approver'
         ]);
 
-        // Check view permission
+        // Check view permission - Relaxed as per request
         // 1. Has manage_pum permission
         // 2. Is the requester
         // 3. Is an approver (current or past)
-        $isApprover = $pumRequest->approvals->contains('approver_id', Auth::id());
+        // $isApprover = $pumRequest->approvals->contains('approver_id', Auth::id());
         
-        if (!Auth::user()->hasPermission('manage_pum') && 
-            $pumRequest->requester_id !== Auth::id() && 
-            !$isApprover) {
-            abort(403, 'Anda tidak memiliki hak akses untuk melihat permintaan ini.');
-        }
+        // if (!Auth::user()->hasPermission('manage_pum') && 
+        //     $pumRequest->requester_id !== Auth::id() && 
+        //     !$isApprover) {
+        //     abort(403, 'Anda tidak memiliki hak akses untuk melihat permintaan ini.');
+        // }
         
         $canApprove = $pumRequest->canBeApprovedBy(Auth::user());
         

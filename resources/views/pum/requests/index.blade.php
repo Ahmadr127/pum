@@ -134,67 +134,29 @@
                         <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Tanggal</th>
                         <th class="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">Jumlah</th>
                         <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Keterangan</th>
+                        <th class="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase">Progress</th>
                         <th class="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase">Status</th>
                         <th class="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
-                    @forelse($requests as $index => $request)
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
-                            {{ ($requests->currentPage() - 1) * $requests->perPage() + $index + 1 }}
-                        </td>
-                        <td class="px-3 py-2 whitespace-nowrap">
-                            <a href="{{ route('pum-requests.show', $request) }}" class="text-indigo-600 hover:text-indigo-900 font-medium text-sm">
-                                {{ $request->code }}
-                            </a>
-                        </td>
+                    @forelse($requests as $request)
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        @include('pum.requests.columns.no', ['requests' => $requests, 'loop' => $loop])
+                        @include('pum.requests.columns.kode', ['request' => $request])
                         <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
                             {{ $request->requester->name ?? '-' }}
                         </td>
-                        <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
-                            {{ $request->request_date->format('d/m/Y') }}
-                        </td>
-                        <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-900 text-right font-medium">
-                            Rp {{ number_format($request->amount, 0, ',', '.') }}
-                        </td>
-                        <td class="px-3 py-2 text-sm text-gray-900 max-w-xs truncate" title="{{ $request->description }}">
-                            {{ Str::limit($request->description, 40) ?? '-' }}
-                        </td>
-                        <td class="px-3 py-2 whitespace-nowrap text-center">
-                            <x-status-badge :status="$request->status" size="sm" />
-                        </td>
-                        <td class="px-3 py-2 whitespace-nowrap text-center">
-                            <div class="flex items-center justify-center gap-1">
-                                <a href="{{ route('pum-requests.show', $request) }}" 
-                                   class="inline-flex items-center px-2 py-1 bg-indigo-100 text-indigo-700 rounded text-xs hover:bg-indigo-200">
-                                    <i class="fas fa-eye mr-1"></i> Detail
-                                </a>
-                                
-                                @if($request->status === 'new')
-                                <a href="{{ route('pum-requests.edit', $request) }}" 
-                                   class="inline-flex items-center px-2 py-1 bg-yellow-100 text-yellow-700 rounded text-xs hover:bg-yellow-200">
-                                    <i class="fas fa-edit mr-1"></i> Edit
-                                </a>
-                                @endif
-
-                                @if(in_array($request->status, ['new', 'rejected']))
-                                <form action="{{ route('pum-requests.destroy', $request) }}" method="POST" class="inline" 
-                                      onsubmit="return confirm('Yakin ingin menghapus?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" 
-                                            class="inline-flex items-center px-2 py-1 bg-red-100 text-red-700 rounded text-xs hover:bg-red-200">
-                                        <i class="fas fa-trash mr-1"></i> Hapus
-                                    </button>
-                                </form>
-                                @endif
-                            </div>
-                        </td>
+                        @include('pum.requests.columns.tanggal', ['request' => $request])
+                        @include('pum.requests.columns.jumlah', ['request' => $request])
+                        @include('pum.requests.columns.keterangan', ['request' => $request])
+                        @include('pum.requests.columns.progress', ['request' => $request])
+                        @include('pum.requests.columns.status', ['request' => $request])
+                        @include('pum.requests.columns.aksi', ['request' => $request])
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="8" class="px-4 py-8 text-center text-gray-500">
+                        <td colspan="9" class="px-4 py-8 text-center text-gray-500">
                             <i class="fas fa-inbox text-4xl mb-2"></i>
                             <p>Tidak ada data permintaan.</p>
                         </td>

@@ -32,14 +32,10 @@ class PumWorkflowSeeder extends Seeder
             10000000,
             [
                 ['name' => 'Manager Unit', 'type' => 'approval', 'approver_type' => 'organization_head'],
-                ['name' => 'Hospital Director', 'type' => 'approval', 'role' => 'direktur_operasional'],
-                ['name' => 'Manager PT', 'type' => 'approval', 'role' => 'manager'],
+                ['name' => 'Hospital Director', 'type' => 'approval', 'role' => 'hospital_director'],
+                ['name' => 'Manager PT', 'type' => 'approval', 'role' => 'manager_pt'],
                 ['name' => 'Manager Pembelian', 'type' => 'approval', 'role' => 'manajer_pembelian'],
-                // Purchasing
-                ['name' => 'Proses Purchasing', 'type' => 'purchasing', 'role' => 'manajer_pembelian'],
-                // Release
-                ['name' => 'Release - Manager Pembelian', 'type' => 'release', 'role' => 'manajer_pembelian'],
-                ['name' => 'Release - Manager PT', 'type' => 'release', 'role' => 'manager'],
+
             ]
         );
 
@@ -51,14 +47,10 @@ class PumWorkflowSeeder extends Seeder
             50000000,
             [
                 ['name' => 'Manager Unit', 'type' => 'approval', 'approver_type' => 'organization_head'],
-                ['name' => 'Hospital Director', 'type' => 'approval', 'role' => 'direktur_operasional'],
-                ['name' => 'Manager PT', 'type' => 'approval', 'role' => 'manager'],
+                ['name' => 'Hospital Director', 'type' => 'approval', 'role' => 'hospital_director'],
+                ['name' => 'Manager PT', 'type' => 'approval', 'role' => 'manager_pt'],
                 ['name' => 'Manager Pembelian', 'type' => 'approval', 'role' => 'manajer_pembelian'],
-                // Purchasing
-                ['name' => 'Proses Purchasing', 'type' => 'purchasing', 'role' => 'manajer_pembelian'],
-                // Release
-                ['name' => 'Release - Manager Pembelian', 'type' => 'release', 'role' => 'manajer_pembelian'],
-                ['name' => 'Release - Manager PT', 'type' => 'release', 'role' => 'manager'],
+
             ]
         );
 
@@ -71,15 +63,10 @@ class PumWorkflowSeeder extends Seeder
             [
                 ['name' => 'Manager Unit', 'type' => 'approval', 'approver_type' => 'organization_head'],
                 ['name' => 'Manager Keuangan', 'type' => 'approval', 'role' => 'manajer_keuangan', 'fs' => true], // FS Required
-                ['name' => 'Hospital Director', 'type' => 'approval', 'role' => 'direktur_operasional'],
-                ['name' => 'Manager PT', 'type' => 'approval', 'role' => 'manager'],
+                ['name' => 'Hospital Director', 'type' => 'approval', 'role' => 'hospital_director'],
+                ['name' => 'Manager PT', 'type' => 'approval', 'role' => 'manager_pt'],
                 ['name' => 'Manager Pembelian', 'type' => 'approval', 'role' => 'manajer_pembelian'],
-                // Purchasing
-                ['name' => 'Proses Purchasing', 'type' => 'purchasing', 'role' => 'manajer_pembelian'],
-                // Release
-                ['name' => 'Release - Manager Pembelian', 'type' => 'release', 'role' => 'manajer_pembelian'],
-                ['name' => 'Release - Manager PT', 'type' => 'release', 'role' => 'manager'],
-                ['name' => 'Release - Direktur PT', 'type' => 'release', 'role' => 'direktur_utama'],
+
             ]
         );
 
@@ -95,12 +82,9 @@ class PumWorkflowSeeder extends Seeder
             10000000,
             [
                 ['name' => 'Manager Unit', 'type' => 'approval', 'approver_type' => 'organization_head'],
-                ['name' => 'Hospital Director', 'type' => 'approval', 'role' => 'direktur_operasional'],
+                ['name' => 'Hospital Director', 'type' => 'approval', 'role' => 'hospital_director'],
                 ['name' => 'Manager Pembelian', 'type' => 'approval', 'role' => 'manajer_pembelian'],
-                // Purchasing
-                ['name' => 'Proses Purchasing', 'type' => 'purchasing', 'role' => 'manajer_pembelian'],
-                // Release
-                ['name' => 'Release - Manager Pembelian', 'type' => 'release', 'role' => 'manajer_pembelian'],
+
             ]
         );
 
@@ -112,14 +96,10 @@ class PumWorkflowSeeder extends Seeder
             50000000,
             [
                 ['name' => 'Manager Unit', 'type' => 'approval', 'approver_type' => 'organization_head'],
-                ['name' => 'Hospital Director', 'type' => 'approval', 'role' => 'direktur_operasional'],
-                ['name' => 'Manager PT', 'type' => 'approval', 'role' => 'manager'],
+                ['name' => 'Hospital Director', 'type' => 'approval', 'role' => 'hospital_director'],
+                ['name' => 'Manager PT', 'type' => 'approval', 'role' => 'manager_pt'],
                 ['name' => 'Manager Pembelian', 'type' => 'approval', 'role' => 'manajer_pembelian'],
-                // Purchasing
-                ['name' => 'Proses Purchasing', 'type' => 'purchasing', 'role' => 'manajer_pembelian'],
-                // Release
-                ['name' => 'Release - Manager Pembelian', 'type' => 'release', 'role' => 'manajer_pembelian'],
-                ['name' => 'Release - Manager PT', 'type' => 'release', 'role' => 'manager'],
+
             ]
         );
 
@@ -132,15 +112,10 @@ class PumWorkflowSeeder extends Seeder
             [
                 ['name' => 'Manager Unit', 'type' => 'approval', 'approver_type' => 'organization_head'],
                 ['name' => 'Manager Keuangan', 'type' => 'approval', 'role' => 'manajer_keuangan', 'fs' => true], // FS Required
-                ['name' => 'Hospital Director', 'type' => 'approval', 'role' => 'direktur_operasional'],
-                ['name' => 'Manager PT', 'type' => 'approval', 'role' => 'manager'],
+                ['name' => 'Hospital Director', 'type' => 'approval', 'role' => 'hospital_director'],
+                ['name' => 'Manager PT', 'type' => 'approval', 'role' => 'manager_pt'],
                 ['name' => 'Manager Pembelian', 'type' => 'approval', 'role' => 'manajer_pembelian'],
-                // Purchasing
-                ['name' => 'Proses Purchasing', 'type' => 'purchasing', 'role' => 'manajer_pembelian'],
-                // Release
-                ['name' => 'Release - Manager Pembelian', 'type' => 'release', 'role' => 'manajer_pembelian'],
-                ['name' => 'Release - Manager PT', 'type' => 'release', 'role' => 'manager'],
-                ['name' => 'Release - Direktur PT', 'type' => 'release', 'role' => 'direktur_utama'],
+
             ]
         );
 

@@ -14,27 +14,27 @@
 
     <!-- Stats Cards Row -->
     @if(isset($pumStats) || isset($userCount) || isset($roleCount) || isset($permissionCount) || isset($orgTypeCount) || isset($orgUnitCount))
-    <div class="flex flex-wrap gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         @if(isset($pumStats))
-            <x-stat-card :value="$pumStats['total']" label="Total Permintaan" icon="fas fa-file-invoice-dollar" color="blue" />
-            <x-stat-card :value="$pumStats['pending']" label="Menunggu" icon="fas fa-clock" color="yellow" />
-            <x-stat-card :value="$pumStats['approved']" label="Disetujui" icon="fas fa-check-circle" color="green" />
+            <x-stat-card :value="$pumStats['total']" label="Total Permintaan" icon="fas fa-file-invoice-dollar" color="blue" :href="route('pum-requests.index')" />
+            <x-stat-card :value="$pumStats['pending']" label="Menunggu" icon="fas fa-clock" color="yellow" :href="route('pum-requests.index')" />
+            <x-stat-card :value="$pumStats['approved']" label="Disetujui" icon="fas fa-check-circle" color="green" :href="route('pum-requests.index')" />
         @endif
         @if(isset($userCount))
-            <x-stat-card :value="$userCount" label="Pengguna" icon="fas fa-users" color="indigo" />
+            <x-stat-card :value="$userCount" label="Pengguna" icon="fas fa-users" color="indigo" :href="route('users.index')" />
         @endif
         @if(isset($roleCount))
-            <x-stat-card :value="$roleCount" label="Role" icon="fas fa-user-tag" color="purple" />
+            <x-stat-card :value="$roleCount" label="Role" icon="fas fa-user-tag" color="purple" :href="route('roles.index')" />
         @endif
         @if(isset($orgUnitCount))
-            <x-stat-card :value="$orgUnitCount" label="Unit Organisasi" icon="fas fa-building" color="teal" />
+            <x-stat-card :value="$orgUnitCount" label="Unit Organisasi" icon="fas fa-building" color="teal" :href="route('organization-units.index')" />
         @endif
     </div>
     @endif
 
     @php
         $hasApprovals = isset($pendingApprovals) || $user->hasPermission('approve_pum');
-        $hasRequests = isset($recentRequests) || $user->hasPermission('manage_pum');
+        $hasRequests = isset($recentRequests) || $user->hasPermission('manage_pum') || $user->hasPermission('create_pum');
         $showTwoColumns = $hasApprovals && $hasRequests;
     @endphp
 
@@ -137,7 +137,7 @@
                 </a>
             </div>
         </div>
-        @elseif($user->hasPermission('manage_pum'))
+        @elseif($user->hasPermission('manage_pum') || $user->hasPermission('create_pum'))
         <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
             <div class="p-6 text-center">
                 <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -156,13 +156,22 @@
     <!-- Quick Actions Card -->
     @php
         $quickActions = collect([
-            ['permission' => 'manage_pum', 'href' => route('pum-requests.create'), 'icon' => 'fas fa-plus', 'title' => 'Buat Permintaan', 'subtitle' => 'Ajukan uang muka', 'color' => 'green'],
+            ['permission' => 'manage_pum|create_pum', 'href' => route('pum-requests.create'), 'icon' => 'fas fa-plus', 'title' => 'Buat Permintaan', 'subtitle' => 'Ajukan uang muka', 'color' => 'green'],
             ['permission' => 'approve_pum', 'href' => route('pum-approvals.index'), 'icon' => 'fas fa-clipboard-check', 'title' => 'Approval', 'subtitle' => ($pendingApprovalsCount ?? 0) . ' menunggu', 'color' => 'orange'],
             ['permission' => 'manage_users', 'href' => route('users.index'), 'icon' => 'fas fa-users', 'title' => 'Kelola Pengguna', 'subtitle' => ($userCount ?? 0) . ' pengguna', 'color' => 'blue'],
             ['permission' => 'manage_roles', 'href' => route('roles.index'), 'icon' => 'fas fa-user-tag', 'title' => 'Kelola Role', 'subtitle' => ($roleCount ?? 0) . ' role', 'color' => 'purple'],
             ['permission' => 'manage_organization_units', 'href' => route('organization-units.index'), 'icon' => 'fas fa-building', 'title' => 'Unit Organisasi', 'subtitle' => ($orgUnitCount ?? 0) . ' unit', 'color' => 'teal'],
             ['permission' => 'manage_pum_workflows', 'href' => route('pum-workflows.index'), 'icon' => 'fas fa-project-diagram', 'title' => 'Workflow PUM', 'subtitle' => 'Kelola approval', 'color' => 'indigo'],
-        ])->filter(fn($action) => $user->hasPermission($action['permission']));
+        ])->filter(function($action) use ($user) {
+            // Handle multiple permissions separated by |
+            $permissions = explode('|', $action['permission']);
+            foreach ($permissions as $perm) {
+                if ($user->hasPermission(trim($perm))) {
+                    return true;
+                }
+            }
+            return false;
+        });
         
         $actionGridClass = match($quickActions->count()) {
             1 => 'grid-cols-1',

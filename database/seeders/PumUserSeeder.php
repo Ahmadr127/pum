@@ -16,35 +16,33 @@ class PumUserSeeder extends Seeder
     {
         $password = Hash::make('password');
         
-        // 1. Specific Users from provided text
+        // 1. Specific Users
         $specificUsers = [
             // PT Board / High Level
-            ['name' => 'Budi Manager PT', 'username' => 'manager.pt', 'email' => 'manager.pt@example.com', 'role_name' => 'manager', 'unit' => 'DIRUT'], // Assumed DIRUT/Holding
-            ['name' => 'Siti Direktur PT', 'username' => 'direktur.pt', 'email' => 'direktur.pt@example.com', 'role_name' => 'direktur_utama', 'unit' => 'DIRUT'],
+            ['name' => 'Budi Manager PT', 'username' => 'manager.pt', 'email' => 'manager.pt@example.com', 'role_name' => 'manager_pt', 'unit' => 'DIRUT'],
+            ['name' => 'Siti Direktur PT', 'username' => 'direktur.pt', 'email' => 'direktur.pt@example.com', 'role_name' => 'direktur_pt', 'unit' => 'DIRUT'],
             
             // RS Executives
-            ['name' => 'dr. Irma Rismayanti, MM', 'username' => 'irma.rismayanti', 'email' => 'irma@azra.com', 'role_name' => 'direktur_utama', 'unit' => 'DIRUT'], // Direktur RS -> Direktur Utama
+            ['name' => 'dr. Irma Rismayanti, MM', 'username' => 'irma.rismayanti', 'email' => 'irma@azra.com', 'role_name' => 'hospital_director', 'unit' => 'DIRUT'],
             
             // Admin
             ['name' => 'Muhamad Miftahudin', 'username' => 'admin', 'email' => 'admin@azra.com', 'role_name' => 'admin', 'unit' => 'IT'],
             
             // Keuangan Team
             ['name' => 'Ria Fajarrohmi', 'username' => 'ria.fajarrohmi', 'email' => 'ria@azra.com', 'role_name' => 'manajer_keuangan', 'unit' => 'KEUANGAN'],
-            ['name' => 'Indah Triyani', 'username' => 'indah.triyani', 'email' => 'indah@azra.com', 'role_name' => 'manajer_pembelian', 'unit' => 'KEUANGAN'], // Purchasing -> Manajer Pembelian? Or Staff?
+            ['name' => 'Indah Triyani', 'username' => 'indah.triyani', 'email' => 'indah@azra.com', 'role_name' => 'manajer_pembelian', 'unit' => 'KEUANGAN'],
             
             // General Manager / Other
-            ['name' => 'Seni Maulida', 'username' => 'seni.maulida', 'email' => 'seni@azra.com', 'role_name' => 'manager', 'unit' => 'SEKR'], // Assigning to SEKR as filler/manager
+            ['name' => 'Seni Maulida', 'username' => 'seni.maulida', 'email' => 'seni@azra.com', 'role_name' => 'manager', 'unit' => 'SEKR'],
             
             // Staff / Pengguna
             ['name' => 'Eka Setia', 'username' => 'eka.setia', 'email' => 'eka@azra.com', 'role_name' => 'staff', 'unit' => 'SEKR'],
             ['name' => 'Umar', 'username' => 'umar', 'email' => 'umar@azra.com', 'role_name' => 'staff', 'unit' => 'IT'],
         ];
 
-        // 2. Workflow Users (if not already in specific list)
-        $workflowUsers = [
-
-            'direktur_utama' => ['name' => 'Direktur Utama PUM', 'username' => 'dirut.pum', 'unit' => 'DIRUT'],
-        ];
+        // 2. Remove old users
+        $usersToRemove = ['dirut.pum', 'direktur.utama', 'siti.keuangan']; // Siti is now direktur.pt/correct role if needed, or just remove old username if it was 'siti.keuangan'
+        User::whereIn('username', $usersToRemove)->delete();
 
         $this->command->info('Processing specific users...');
         foreach ($specificUsers as $data) {
@@ -78,24 +76,7 @@ class PumUserSeeder extends Seeder
             }
         }
 
-        $this->command->info('Processing workflow users...');
-        foreach ($workflowUsers as $roleName => $data) {
-            $role = Role::where('name', $roleName)->first();
-            if ($role) {
-                $unit = \App\Models\OrganizationUnit::where('code', $data['unit'])->first();
-                User::updateOrCreate(
-                    ['username' => $data['username']],
-                    [
-                        'name' => $data['name'],
-                        'email' => "{$data['username']}@pum.test",
-                        'role_id' => $role->id,
-                        'organization_unit_id' => $unit?->id,
-                        'password' => $password,
-                    ]
-                );
-                $this->command->info("✓ Workflow user {$data['username']} processed.");
-            }
-        }
+
 
         $this->command->info('PUM users setup completed.');
     }

@@ -24,15 +24,17 @@ class RolePermissionSeeder extends Seeder
         ];
 
         foreach ($permissions as $permission) {
-            Permission::create($permission);
+            Permission::firstOrCreate(['name' => $permission['name']], $permission);
         }
 
         // Create Roles
-        $adminRole = Role::create([
-            'name' => 'admin',
-            'display_name' => 'Administrator',
-            'description' => 'Role dengan akses penuh ke sistem'
-        ]);
+        $adminRole = Role::firstOrCreate(
+            ['name' => 'admin'],
+            [
+                'display_name' => 'Administrator',
+                'description' => 'Role dengan akses penuh ke sistem'
+            ]
+        );
 
         $managerRole = Role::firstOrCreate(
             ['name' => 'manager'],
@@ -43,10 +45,26 @@ class RolePermissionSeeder extends Seeder
         );
 
         $direkturRole = Role::firstOrCreate(
-            ['name' => 'direktur'],
+            ['name' => 'hospital_director'],
             [
-                'display_name' => 'Direktur',
-                'description' => 'Direktur dengan approval tertinggi'
+                'display_name' => 'Hospital Director',
+                'description' => 'Hospital Director'
+            ]
+        );
+
+        $managerPtRole = Role::firstOrCreate(
+            ['name' => 'manager_pt'],
+            [
+                'display_name' => 'Manager PT',
+                'description' => 'Manager PT'
+            ]
+        );
+
+        $direkturPtRole = Role::firstOrCreate(
+            ['name' => 'direktur_pt'],
+            [
+                'display_name' => 'Direktur PT',
+                'description' => 'Direktur PT'
             ]
         );
 
@@ -71,12 +89,26 @@ class RolePermissionSeeder extends Seeder
         );
 
         // Direktur gets specific permissions
-        $direkturRole->permissions()->attach(
+        $direkturRole->permissions()->sync(
             Permission::whereIn('name', [
                 'view_dashboard',
                 'approve_pum'
             ])->get()
         );
+
+        $managerPtRole->permissions()->sync(
+            Permission::whereIn('name', [
+                'view_dashboard',
+                'approve_pum'
+            ])->get()
+        );
+
+        $direkturPtRole->permissions()->sync(
+             Permission::whereIn('name', [
+                 'view_dashboard',
+                 'approve_pum'
+             ])->get()
+         );
 
         // Keuangan gets specific permissions
         $keuanganRole->permissions()->attach(

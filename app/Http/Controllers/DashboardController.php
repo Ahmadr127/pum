@@ -56,8 +56,8 @@ class DashboardController extends Controller
             }
         }
         
-        // PUM Request Stats (if user has manage_pum permission - for requesters/staff)
-        if ($user->hasPermission('manage_pum')) {
+        // PUM Request Stats (if user has manage_pum OR create_pum permission - for requesters/staff)
+        if ($user->hasPermission('manage_pum') || $user->hasPermission('create_pum')) {
             // Show only requests created by or requested by this user
             $myRequests = PumRequest::where('created_by', $user->id)
                 ->orWhere('requester_id', $user->id);

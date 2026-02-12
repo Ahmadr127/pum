@@ -156,92 +156,30 @@
                         <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Tanggal</th>
                         <th class="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">Jumlah</th>
                         <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Keterangan</th>
+                        <th class="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase">Progress</th>
                         <th class="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase">Status</th>
                         <th class="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
-                    <?php $__empty_1 = true; $__currentLoopData = $requests; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $request): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
-                            <?php echo e(($requests->currentPage() - 1) * $requests->perPage() + $index + 1); ?>
-
-                        </td>
-                        <td class="px-3 py-2 whitespace-nowrap">
-                            <a href="<?php echo e(route('pum-requests.show', $request)); ?>" class="text-indigo-600 hover:text-indigo-900 font-medium text-sm">
-                                <?php echo e($request->code); ?>
-
-                            </a>
-                        </td>
+                    <?php $__empty_1 = true; $__currentLoopData = $requests; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $request): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <?php echo $__env->make('pum.requests.columns.no', ['requests' => $requests, 'loop' => $loop], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+                        <?php echo $__env->make('pum.requests.columns.kode', ['request' => $request], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
                         <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
                             <?php echo e($request->requester->name ?? '-'); ?>
 
                         </td>
-                        <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
-                            <?php echo e($request->request_date->format('d/m/Y')); ?>
-
-                        </td>
-                        <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-900 text-right font-medium">
-                            Rp <?php echo e(number_format($request->amount, 0, ',', '.')); ?>
-
-                        </td>
-                        <td class="px-3 py-2 text-sm text-gray-900 max-w-xs truncate" title="<?php echo e($request->description); ?>">
-                            <?php echo e(Str::limit($request->description, 40) ?? '-'); ?>
-
-                        </td>
-                        <td class="px-3 py-2 whitespace-nowrap text-center">
-                            <?php if (isset($component)) { $__componentOriginal8c81617a70e11bcf247c4db924ab1b62 = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginal8c81617a70e11bcf247c4db924ab1b62 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.status-badge','data' => ['status' => $request->status,'size' => 'sm']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
-<?php $component->withName('status-badge'); ?>
-<?php if ($component->shouldRender()): ?>
-<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
-<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
-<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
-<?php endif; ?>
-<?php $component->withAttributes(['status' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($request->status),'size' => 'sm']); ?>
-<?php echo $__env->renderComponent(); ?>
-<?php endif; ?>
-<?php if (isset($__attributesOriginal8c81617a70e11bcf247c4db924ab1b62)): ?>
-<?php $attributes = $__attributesOriginal8c81617a70e11bcf247c4db924ab1b62; ?>
-<?php unset($__attributesOriginal8c81617a70e11bcf247c4db924ab1b62); ?>
-<?php endif; ?>
-<?php if (isset($__componentOriginal8c81617a70e11bcf247c4db924ab1b62)): ?>
-<?php $component = $__componentOriginal8c81617a70e11bcf247c4db924ab1b62; ?>
-<?php unset($__componentOriginal8c81617a70e11bcf247c4db924ab1b62); ?>
-<?php endif; ?>
-                        </td>
-                        <td class="px-3 py-2 whitespace-nowrap text-center">
-                            <div class="flex items-center justify-center gap-1">
-                                <a href="<?php echo e(route('pum-requests.show', $request)); ?>" 
-                                   class="inline-flex items-center px-2 py-1 bg-indigo-100 text-indigo-700 rounded text-xs hover:bg-indigo-200">
-                                    <i class="fas fa-eye mr-1"></i> Detail
-                                </a>
-                                
-                                <?php if($request->status === 'new'): ?>
-                                <a href="<?php echo e(route('pum-requests.edit', $request)); ?>" 
-                                   class="inline-flex items-center px-2 py-1 bg-yellow-100 text-yellow-700 rounded text-xs hover:bg-yellow-200">
-                                    <i class="fas fa-edit mr-1"></i> Edit
-                                </a>
-                                <?php endif; ?>
-
-                                <?php if(in_array($request->status, ['new', 'rejected'])): ?>
-                                <form action="<?php echo e(route('pum-requests.destroy', $request)); ?>" method="POST" class="inline" 
-                                      onsubmit="return confirm('Yakin ingin menghapus?')">
-                                    <?php echo csrf_field(); ?>
-                                    <?php echo method_field('DELETE'); ?>
-                                    <button type="submit" 
-                                            class="inline-flex items-center px-2 py-1 bg-red-100 text-red-700 rounded text-xs hover:bg-red-200">
-                                        <i class="fas fa-trash mr-1"></i> Hapus
-                                    </button>
-                                </form>
-                                <?php endif; ?>
-                            </div>
-                        </td>
+                        <?php echo $__env->make('pum.requests.columns.tanggal', ['request' => $request], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+                        <?php echo $__env->make('pum.requests.columns.jumlah', ['request' => $request], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+                        <?php echo $__env->make('pum.requests.columns.keterangan', ['request' => $request], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+                        <?php echo $__env->make('pum.requests.columns.progress', ['request' => $request], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+                        <?php echo $__env->make('pum.requests.columns.status', ['request' => $request], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+                        <?php echo $__env->make('pum.requests.columns.aksi', ['request' => $request], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
                     </tr>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <tr>
-                        <td colspan="8" class="px-4 py-8 text-center text-gray-500">
+                        <td colspan="9" class="px-4 py-8 text-center text-gray-500">
                             <i class="fas fa-inbox text-4xl mb-2"></i>
                             <p>Tidak ada data permintaan.</p>
                         </td>

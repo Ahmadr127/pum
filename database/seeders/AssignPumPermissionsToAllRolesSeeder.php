@@ -24,27 +24,41 @@ class AssignPumPermissionsToAllRolesSeeder extends Seeder
             );
         }
 
+        // Create create_pum permission if it doesn't exist
+        Permission::firstOrCreate(
+            ['name' => 'create_pum'],
+            ['display_name' => 'Buat PUM', 'description' => 'Membuat dan melihat pengajuan PUM sendiri']
+        );
+
         // Define role-specific permissions
+        // Note: All roles except directors (hospital_director, direktur_pt) can create PUM
         $rolePermissions = [
-            'admin' => ['manage_pum', 'manage_pum_workflows', 'approve_pum'], // All permissions
-            'manager' => ['approve_pum'], // Only approve
-            'director' => ['approve_pum'], // Only approve
-            'finance' => ['approve_pum', 'manage_pum'], // Approve and manage requests
-            'staff' => [], // No management permissions, only create (handled by PumPegawaiPermissionSeeder)
-            'user' => [], // No management permissions
+            'admin' => ['manage_pum', 'manage_pum_workflows', 'approve_pum', 'create_pum'],
+            'hospital_director' => ['approve_pum'], // Director only approves, doesn't create
+            'manager_pt' => ['approve_pum', 'create_pum'], // Manager PT can approve and create
+            'direktur_pt' => ['approve_pum'], // Direktur PT only approves, doesn't create
+            'manajer_keuangan' => ['approve_pum', 'create_pum'], // Can approve and create
+            'manajer_pembelian' => ['approve_pum', 'create_pum'], // Can approve and create
+            'manager' => ['approve_pum', 'create_pum'], // Generic manager can approve and create
+            'staff' => ['create_pum'], // Staff can only create PUM requests
+            'keuangan' => ['approve_pum', 'create_pum'], // Keuangan can approve and create
         ];
 
         foreach ($rolePermissions as $roleName => $permNames) {
             $role = Role::where('name', $roleName)->first();
             if ($role) {
                 // First, remove all PUM permissions
-                $allPumPerms = Permission::whereIn('name', ['manage_pum', 'manage_pum_workflows', 'approve_pum'])->pluck('id');
+                $allPumPerms = Permission::whereIn('name', ['manage_pum', 'manage_pum_workflows', 'approve_pum', 'create_pum'])->pluck('id');
                 $role->permissions()->detach($allPumPerms);
                 
                 // Then assign the correct ones
-                $perms = Permission::whereIn('name', $permNames)->pluck('id');
-                $role->permissions()->attach($perms);
-                echo "Role '{$roleName}': " . implode(', ', $permNames) . "\n";
+                if (!empty($permNames)) {
+                    $perms = Permission::whereIn('name', $permNames)->pluck('id');
+                    $role->permissions()->attach($perms);
+                    echo "Role '{$roleName}': " . implode(', ', $permNames) . "\n";
+                } else {
+                    echo "Role '{$roleName}': (no PUM permissions)\n";
+                }
             }
         }
         

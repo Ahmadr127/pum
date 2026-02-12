@@ -21,10 +21,8 @@ class PumCompleteSeeder extends Seeder
         $this->command->info('========================================');
         $this->command->line('');
 
-        // Step 1: Create Roles
-        $this->command->info('Step 1: Creating Roles...');
-        $this->call(PumRoleSeeder::class);
-        $this->command->line('');
+        // Step 1: Roles already created in DatabaseSeeder
+        $this->command->info('Step 1: Roles verified.');
 
         // Step 2: Create Users
         $this->command->info('Step 2: Setting up Users...');
@@ -41,12 +39,13 @@ class PumCompleteSeeder extends Seeder
         $this->command->info('========================================');
         $this->command->line('');
         $this->command->info('Test Users Created:');
-        $this->command->line('  • direktur.utama (Direktur) - Dr. Ahmad Direktur');
+        $this->command->line('  • irma.rismayanti (Hospital Director)');
+        $this->command->line('  • manager.pt (Manager PT)');
+        $this->command->line('  • direktur.pt (Direktur PT)');
         $this->command->line('');
         $this->command->info('Default Password: password');
         $this->command->info('Note:');
-        $this->command->line('  • User Manager dan Staff PUM dihapus (tidak digunakan)');
-        $this->command->line('  • User Keuangan: siti.keuangan (Departemen Keuangan)');
+        $this->command->line('  • Roles updated to match approval workflow.');
         $this->command->line('');
     }
 }

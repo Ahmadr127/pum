@@ -25,7 +25,10 @@ class DatabaseSeeder extends Seeder
 
         // Step 1: Roles and Permissions
         $this->command->info('Step 1: Setting up Roles and Permissions...');
-        $this->call(RolePermissionSeeder::class);
+        $this->call([
+            RolePermissionSeeder::class,
+            PumRoleSeeder::class, // Run this early to ensure PUM roles exist
+        ]);
         $this->command->line('');
 
         // Step 2: Organization Structure
@@ -42,6 +45,7 @@ class DatabaseSeeder extends Seeder
             AddPumPermissionsSeeder::class,
             AssignDashboardPermissionSeeder::class,
             AssignPumPermissionsToAllRolesSeeder::class,
+            PumPegawaiPermissionSeeder::class,
         ]);
         $this->command->line('');
 

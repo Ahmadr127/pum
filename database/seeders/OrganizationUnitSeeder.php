@@ -35,16 +35,25 @@ class OrganizationUnitSeeder extends Seeder
         // ========================================
         // 1. DIREKTUR UTAMA (Top Level)
         // ========================================
+        // Get or create hospital_director role
+        $hospitalDirectorRole = Role::firstOrCreate(
+            ['name' => 'hospital_director'],
+            ['display_name' => 'Hospital Director', 'description' => 'Direktur Rumah Sakit']
+        );
+
+        // ========================================
+        // 1. DIREKTUR UTAMA (Top Level)
+        // ========================================
         $direkturUtama = $this->createUserWithUnit(
-            'Dr. Ahmad Direktur',
-            'direktur.utama',
-            'direktur.utama@hospital.com',
+            'dr. Irma Rismayanti, MM',
+            'irma.rismayanti',
+            'irma@azra.com',
             'Direktur Utama',
             'DIRUT',
             $holdingType->id,
             null,
             'Direktur Utama Rumah Sakit',
-            $managerRole->id
+            $hospitalDirectorRole->id
         );
 
         // ========================================
@@ -80,12 +89,12 @@ class OrganizationUnitSeeder extends Seeder
 
         // Get keuangan role
         $keuanganRole = Role::firstOrCreate(
-            ['name' => 'keuangan'],
-            ['display_name' => 'Keuangan', 'description' => 'Bagian Keuangan']
+            ['name' => 'manajer_keuangan'],
+            ['display_name' => 'Manajer Keuangan', 'description' => 'Bagian Keuangan']
         );
 
         // Manager Keuangan
-        $managerKeuangan = $this->createUser('Siti Manager Keuangan', 'siti.keuangan', 'manager.keuangan@hospital.com', $keuanganRole->id, $keuangan->id);
+        $managerKeuangan = $this->createUser('Ria Fajarrohmi', 'ria.fajarrohmi', 'ria.fajarrohmi@hospital.com', $keuanganRole->id, $keuangan->id);
         $keuangan->update(['head_id' => $managerKeuangan->id]);
 
         // Staff Keuangan (1 user)

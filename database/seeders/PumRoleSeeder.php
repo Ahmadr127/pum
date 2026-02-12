@@ -19,34 +19,19 @@ class PumRoleSeeder extends Seeder
                 'description' => 'Manager dengan hak approval permintaan uang muka',
             ],
             [
-                'name' => 'koordinator',
-                'display_name' => 'Koordinator',
-                'description' => 'Koordinator yang mengelola approval',
-            ],
-            [
-                'name' => 'supervisor',
-                'display_name' => 'Supervisor',
-                'description' => 'Supervisor yang mengelola approval',
-            ],
-            [
-                'name' => 'kepala_unit',
-                'display_name' => 'Kepala Unit',
-                'description' => 'Kepala Unit yang mengelola approval',
-            ],
-            [
                 'name' => 'manajer_pembelian',
                 'display_name' => 'Manajer Pembelian',
                 'description' => 'Manajer Pembelian yang mengelola approval',
             ],
             [
-                'name' => 'direktur_operasional',
-                'display_name' => 'Direktur Operasional',
-                'description' => 'Direktur Operasional yang mengelola approval',
+                'name' => 'hospital_director',
+                'display_name' => 'Hospital Director',
+                'description' => 'Direktur Rumah Sakit',
             ],
             [
-                'name' => 'spv_1',
-                'display_name' => 'SPV 1',
-                'description' => 'Supervisor 1 yang mengelola approval',
+                'name' => 'manager_pt',
+                'display_name' => 'Manager PT',
+                'description' => 'Manager PT',
             ],
             [
                 'name' => 'manajer_keuangan',
@@ -54,24 +39,9 @@ class PumRoleSeeder extends Seeder
                 'description' => 'Manajer Keuangan yang mengelola approval',
             ],
             [
-                'name' => 'direktur_it',
-                'display_name' => 'Direktur IT',
-                'description' => 'Direktur IT yang mengelola approval',
-            ],
-            [
-                'name' => 'manajer_it',
-                'display_name' => 'Manajer IT',
-                'description' => 'Manajer IT yang mengelola approval',
-            ],
-            [
-                'name' => 'direktur_keuangan',
-                'display_name' => 'Direktur Keuangan',
-                'description' => 'Direktur Keuangan yang mengelola approval',
-            ],
-            [
-                'name' => 'direktur_utama',
-                'display_name' => 'Direktur Utama',
-                'description' => 'Direktur Utama dengan approval tertinggi',
+                'name' => 'direktur_pt',
+                'display_name' => 'Direktur PT',
+                'description' => 'Direktur PT',
             ],
             [
                 'name' => 'staff',
