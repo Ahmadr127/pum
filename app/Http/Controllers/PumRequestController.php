@@ -183,8 +183,8 @@ class PumRequestController extends Controller
             abort(403, 'Anda tidak memiliki hak akses untuk mengedit permintaan ini.');
         }
 
-        // Can only edit if status is 'new'
-        if ($pumRequest->status !== PumRequest::STATUS_NEW) {
+        // Admin can edit any status, regular users can only edit 'new' status
+        if (!Auth::user()->hasPermission('manage_pum') && $pumRequest->status !== PumRequest::STATUS_NEW) {
             return redirect()
                 ->route('pum-requests.show', $pumRequest)
                 ->with('error', 'Hanya permintaan dengan status "Baru" yang dapat diedit.');
@@ -207,8 +207,8 @@ class PumRequestController extends Controller
             abort(403, 'Anda tidak memiliki hak akses untuk mengubah permintaan ini.');
         }
 
-        // Can only update if status is 'new'
-        if ($pumRequest->status !== PumRequest::STATUS_NEW) {
+        // Admin can update any status, regular users can only update 'new' status
+        if (!Auth::user()->hasPermission('manage_pum') && $pumRequest->status !== PumRequest::STATUS_NEW) {
             return redirect()
                 ->route('pum-requests.show', $pumRequest)
                 ->with('error', 'Hanya permintaan dengan status "Baru" yang dapat diedit.');
