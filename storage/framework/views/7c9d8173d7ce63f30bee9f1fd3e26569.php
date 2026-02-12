@@ -50,18 +50,14 @@
                 <span class="inline-flex items-center">
                     <i class="fas fa-times-circle text-red-500 mr-1"></i> Ditolak [<?php echo e($summary['rejected']); ?>]
                 </span>
-                <span class="inline-flex items-center">
-                    <i class="fas fa-file-alt text-yellow-500 mr-1"></i> Baru [<?php echo e($summary['new']); ?>]
-                </span>
+
                 <span class="inline-flex items-center">
                     <i class="fas fa-clock text-blue-500 mr-1"></i> Menunggu [<?php echo e($summary['pending']); ?>]
                 </span>
                 <span class="inline-flex items-center">
                     <i class="fas fa-check-circle text-green-500 mr-1"></i> Disetujui [<?php echo e($summary['approved']); ?>]
                 </span>
-                <span class="inline-flex items-center">
-                    <i class="fas fa-check-double text-emerald-600 mr-1"></i> Terpenuhi [<?php echo e($summary['fulfilled']); ?>]
-                </span>
+
             </div>
         </div>
 

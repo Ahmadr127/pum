@@ -24,21 +24,21 @@
                 label="Total Tugas Approval" 
                 icon="fas fa-clipboard-list" 
                 color="blue" 
-                :href="route('pum-requests.index')" 
+                :href="route('pum-approvals.index')" 
             />
             <x-stat-card 
                 :value="$approvalStats['pending']" 
                 label="Menunggu Approval Saya" 
                 icon="fas fa-clock" 
                 color="yellow" 
-                :href="route('pum-requests.index')" 
+                :href="route('pum-approvals.index')" 
             />
             <x-stat-card 
                 :value="$approvalStats['approved']" 
                 label="Sudah Saya Approve" 
                 icon="fas fa-check-circle" 
                 color="green" 
-                :href="route('pum-requests.index')" 
+                :href="route('pum-approvals.index')" 
             />
         </div>
     </div>
@@ -56,21 +56,21 @@
                 label="Total Permintaan Saya" 
                 icon="fas fa-file-invoice-dollar" 
                 color="blue" 
-                :href="route('pum-requests.index')" 
+                :href="route('pum-requests.my-requests')" 
             />
             <x-stat-card 
                 :value="$myRequestStats['pending']" 
                 label="Sedang Diproses" 
                 icon="fas fa-hourglass-half" 
                 color="yellow" 
-                :href="route('pum-requests.index')" 
+                :href="route('pum-requests.my-requests')" 
             />
             <x-stat-card 
                 :value="$myRequestStats['completed']" 
                 label="Selesai" 
                 icon="fas fa-check-double" 
                 color="green" 
-                :href="route('pum-requests.index')" 
+                :href="route('pum-requests.my-requests')" 
             />
         </div>
     </div>
@@ -153,7 +153,7 @@
                         <p class="text-xs text-blue-600">5 permintaan terakhir</p>
                     </div>
                 </div>
-                <a href="{{ route('pum-requests.index') }}" class="text-sm text-blue-600 hover:text-blue-800">
+                <a href="{{ route('pum-requests.my-requests') }}" class="text-sm text-blue-600 hover:text-blue-800">
                     Lihat Semua <i class="fas fa-arrow-right ml-1"></i>
                 </a>
             </div>

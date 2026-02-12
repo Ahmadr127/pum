@@ -1,0 +1,53 @@
+DAFTAR AKUN USER PUM
+==================================================
+Semua password default: password
+
+1. Username: manager.pt
+   Role: Manager PT
+   Unit: DIRUT
+   Password: password
+
+2. Username: direktur.pt
+   Role: Direktur PT
+   Unit: DIRUT
+   Password: password
+
+3. Username: admin
+   Role: Administrator
+   Unit: IT
+   Password: password
+
+4. Username: indah.triyani
+   Role: Manajer Pembelian
+   Unit: KEUANGAN
+   Password: password
+
+5. Username: seni.maulida
+   Role: Manager
+   Unit: SEKR
+   Password: password
+
+6. Username: eka.setia
+   Role: Staff
+   Unit: SEKR
+   Password: password
+
+7. Username: umar
+   Role: Staff
+   Unit: IT
+   Password: password
+
+8. Username: irma.rismayanti
+   Role: Hospital Director
+   Unit: DIRUT
+   Password: password
+
+9. Username: ria.fajarrohmi
+   Role: Manajer Keuangan
+   Unit: KEUANGAN
+   Password: password
+
+10. Username: rina.keuangan
+    Role: Staff
+    Unit: -
+    Password: password
