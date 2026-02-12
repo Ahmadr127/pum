@@ -80,7 +80,6 @@ class PumRequestController extends Controller
             'requester_id' => 'required|exists:users,id',
             'request_date' => 'required|date',
             'amount' => 'required|numeric|min:0',
-            'procurement_category' => 'required|in:barang_baru,peremajaan',
             'description' => 'nullable|string|max:1000',
             'workflow_id' => 'nullable|exists:pum_approval_workflows,id',
             'submit_for_approval' => 'nullable|boolean',
@@ -117,7 +116,6 @@ class PumRequestController extends Controller
             'requester_id' => $validated['requester_id'],
             'request_date' => $validated['request_date'],
             'amount' => $validated['amount'],
-            'procurement_category' => $validated['procurement_category'],
             'description' => $validated['description'] ?? null,
             'attachments' => !empty($attachments) ? $attachments : null,
             'attachments2' => !empty($attachments2) ? $attachments2 : null,
@@ -192,6 +190,7 @@ class PumRequestController extends Controller
                 ->with('error', 'Hanya permintaan dengan status "Baru" yang dapat diedit.');
         }
 
+
         $users = User::orderBy('name')->get();
         $workflows = PumApprovalWorkflow::active()->with('steps')->get();
         
@@ -215,11 +214,11 @@ class PumRequestController extends Controller
                 ->with('error', 'Hanya permintaan dengan status "Baru" yang dapat diedit.');
         }
 
+
         $validated = $request->validate([
             'requester_id' => 'required|exists:users,id',
             'request_date' => 'required|date',
             'amount' => 'required|numeric|min:0',
-            'procurement_category' => 'required|in:barang_baru,peremajaan',
             'description' => 'nullable|string|max:1000',
             'workflow_id' => 'nullable|exists:pum_approval_workflows,id',
             'submit_for_approval' => 'nullable|boolean',
@@ -275,7 +274,6 @@ class PumRequestController extends Controller
             'requester_id' => $validated['requester_id'],
             'request_date' => $validated['request_date'],
             'amount' => $validated['amount'],
-            'procurement_category' => $validated['procurement_category'],
             'description' => $validated['description'] ?? null,
             'attachments' => !empty($currentAttachments) ? $currentAttachments : null,
             'attachments2' => !empty($currentAttachments2) ? $currentAttachments2 : null,

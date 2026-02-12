@@ -49,48 +49,23 @@
 
                     <div class="border-t border-gray-100"></div>
 
-                    <!-- Section 2: Kategori & Nominal -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Kategori Pengadaan <span class="text-red-500">*</span></label>
-                            <div class="grid grid-cols-2 gap-4">
-                                <label class="relative flex items-center p-4 border rounded-xl cursor-pointer hover:bg-gray-50 transition-colors {{ old('procurement_category') === 'barang_baru' ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200' }}">
-                                    <input type="radio" name="procurement_category" value="barang_baru" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300" {{ old('procurement_category') === 'barang_baru' ? 'checked' : '' }} required>
-                                    <span class="ml-3 flex items-center">
-                                        <i class="fas fa-box text-lg mr-3 {{ old('procurement_category') === 'barang_baru' ? 'text-indigo-600' : 'text-gray-400' }}"></i>
-                                        <span class="text-sm font-medium text-gray-900">Barang Baru</span>
-                                    </span>
-                                </label>
-                                <label class="relative flex items-center p-4 border rounded-xl cursor-pointer hover:bg-gray-50 transition-colors {{ old('procurement_category') === 'peremajaan' ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200' }}">
-                                    <input type="radio" name="procurement_category" value="peremajaan" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300" {{ old('procurement_category') === 'peremajaan' ? 'checked' : '' }} required>
-                                    <span class="ml-3 flex items-center">
-                                        <i class="fas fa-sync-alt text-lg mr-3 {{ old('procurement_category') === 'peremajaan' ? 'text-indigo-600' : 'text-gray-400' }}"></i>
-                                        <span class="text-sm font-medium text-gray-900">Peremajaan</span>
-                                    </span>
-                                </label>
-                            </div>
-                            @error('procurement_category')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <div>
-                            <label for="amount" class="block text-sm font-medium text-gray-700 mb-2">Total Nominal (Rp) <span class="text-red-500">*</span></label>
-                            <div class="relative">
-                                <x-currency-input 
-                                    name="amount" 
-                                    :value="old('amount', '')" 
-                                    label=""
-                                    placeholder="0"
-                                    required
-                                    class="text-xl font-semibold text-gray-900 border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-lg py-3 px-4 w-full"
-                                />
-                            </div>
-                            @error('amount')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
+                    <!-- Section 2: Nominal -->
+                <div>
+                    <label for="amount" class="block text-sm font-medium text-gray-700 mb-2">Total Nominal (Rp) <span class="text-red-500">*</span></label>
+                    <div class="relative">
+                        <x-currency-input 
+                            name="amount" 
+                            :value="old('amount', '')" 
+                            label=""
+                            placeholder="0"
+                            required
+                            class="text-xl font-semibold text-gray-900 border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-lg py-3 px-4 w-full"
+                        />
                     </div>
+                    @error('amount')
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
 
                     <!-- Section 3: Keterangan -->
                     <div>

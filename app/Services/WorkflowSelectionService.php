@@ -19,9 +19,9 @@ class WorkflowSelectionService
     }
 
     /**
-     * Get matching workflow based on amount and category
+     * Get matching workflow based on amount
      */
-    public function getMatchingWorkflow($amount, $category): ?PumApprovalWorkflow
+    public function getMatchingWorkflow($amount): ?PumApprovalWorkflow
     {
         $workflows = PumApprovalWorkflow::with('conditions')
             ->where('is_active', true)
@@ -29,8 +29,8 @@ class WorkflowSelectionService
             ->get();
 
         // Find workflows that match conditions, ordered by priority
-        $matchingWorkflows = $workflows->filter(function ($workflow) use ($amount, $category) {
-            return $workflow->matchesConditions($amount, $category);
+        $matchingWorkflows = $workflows->filter(function ($workflow) use ($amount) {
+            return $workflow->matchesConditions($amount);
         });
 
         // Get workflow with highest priority condition

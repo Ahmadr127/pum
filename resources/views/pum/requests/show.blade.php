@@ -56,9 +56,6 @@
                             <div class="p-4 bg-gray-50 rounded-lg border border-gray-100">
                                 <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Total Nominal</label>
                                 <p class="text-2xl font-bold text-indigo-600">Rp {{ number_format($pumRequest->amount, 0, ',', '.') }}</p>
-                                <p class="text-xs text-gray-500 mt-1">
-                                    Kategori: <span class="font-medium text-gray-700 capitalize">{{ str_replace('_', ' ', $pumRequest->procurement_category) }}</span>
-                                </p>
                             </div>
                         </div>
 

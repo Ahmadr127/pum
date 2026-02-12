@@ -170,7 +170,7 @@
                         <?php echo $__env->make('pum.requests.columns.keterangan', ['request' => $request], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
                         <?php echo $__env->make('pum.requests.columns.progress', ['request' => $request], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
                         <?php echo $__env->make('pum.requests.columns.status', ['request' => $request], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
-                        <?php echo $__env->make('pum.requests.columns.aksi', ['request' => $request], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+                        <?php echo $__env->make('pum.requests.columns.aksi-admin', ['request' => $request], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
                     </tr>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <tr>

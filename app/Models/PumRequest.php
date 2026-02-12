@@ -16,7 +16,6 @@ class PumRequest extends Model
         'requester_id',
         'request_date',
         'amount',
-        'procurement_category',
         'description',
         'attachments',
         'attachments2',
@@ -42,9 +41,6 @@ class PumRequest extends Model
     const STATUS_APPROVED = 'approved';
     const STATUS_REJECTED = 'rejected';
     const STATUS_FULFILLED = 'fulfilled';
-
-    const CATEGORY_BARANG_BARU = 'barang_baru';
-    const CATEGORY_PEREMAJAAN = 'peremajaan';
 
     /**
      * Status labels in Indonesian
@@ -206,11 +202,11 @@ class PumRequest extends Model
             $workflow = $this->workflow;
         } else {
             $workflowService = app(\App\Services\WorkflowSelectionService::class);
-            $workflow = $workflowService->getMatchingWorkflow($this->amount, $this->procurement_category);
+            $workflow = $workflowService->getMatchingWorkflow($this->amount);
         }
         
         if (!$workflow) {
-            throw new \Exception('Tidak ada workflow approval yang cocok untuk nominal Rp ' . number_format($this->amount, 0, ',', '.') . ' dan kategori ' . $this->procurement_category_label);
+            throw new \Exception('Tidak ada workflow approval yang cocok untuk nominal Rp ' . number_format($this->amount, 0, ',', '.'));
         }
 
         $this->update([
@@ -431,22 +427,5 @@ class PumRequest extends Model
 
 
 
-    /**
-     * Get procurement category labels
-     */
-    public static function getProcurementCategoryLabels()
-    {
-        return [
-            self::CATEGORY_BARANG_BARU => 'Barang Baru',
-            self::CATEGORY_PEREMAJAAN => 'Peremajaan',
-        ];
-    }
 
-    /**
-     * Get procurement category label
-     */
-    public function getProcurementCategoryLabelAttribute()
-    {
-        return self::getProcurementCategoryLabels()[$this->procurement_category] ?? $this->procurement_category;
-    }
 }

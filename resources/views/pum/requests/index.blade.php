@@ -147,7 +147,7 @@
                         @include('pum.requests.columns.keterangan', ['request' => $request])
                         @include('pum.requests.columns.progress', ['request' => $request])
                         @include('pum.requests.columns.status', ['request' => $request])
-                        @include('pum.requests.columns.aksi', ['request' => $request])
+                        @include('pum.requests.columns.aksi-admin', ['request' => $request])
                     </tr>
                     @empty
                     <tr>

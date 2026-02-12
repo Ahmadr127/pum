@@ -41,7 +41,6 @@ class PumApprovalWorkflowController extends Controller
             'description' => 'nullable|string|max:1000',
             'is_active' => 'boolean',
             'is_default' => 'boolean',
-            'procurement_category' => 'nullable|string',
             'amount_min' => 'nullable|numeric|min:0',
             'amount_max' => 'nullable|numeric|gt:amount_min',
             'steps' => 'required|array|min:1',
@@ -67,10 +66,9 @@ class PumApprovalWorkflowController extends Controller
         ]);
 
         // Create condition if provided
-        if ($validated['procurement_category'] || $validated['amount_min'] !== null || $validated['amount_max'] !== null) {
+        if ($validated['amount_min'] !== null || $validated['amount_max'] !== null) {
             \App\Models\PumWorkflowCondition::create([
                 'workflow_id' => $workflow->id,
-                'procurement_category' => $validated['procurement_category'],
                 'amount_min' => $validated['amount_min'],
                 'amount_max' => $validated['amount_max'],
                 'priority' => 1,
@@ -146,7 +144,6 @@ class PumApprovalWorkflowController extends Controller
             'description' => 'nullable|string|max:1000',
             'is_active' => 'boolean',
             'is_default' => 'boolean',
-            'procurement_category' => 'nullable|string',
             'amount_min' => 'nullable|numeric|min:0',
             'amount_max' => 'nullable|numeric|gt:amount_min',
             'steps' => 'required|array|min:1',
@@ -174,10 +171,9 @@ class PumApprovalWorkflowController extends Controller
 
         // Update Condition (Delete all and recreate/update first one)
         $pumWorkflow->conditions()->delete();
-        if ($validated['procurement_category'] || $validated['amount_min'] !== null || $validated['amount_max'] !== null) {
+        if ($validated['amount_min'] !== null || $validated['amount_max'] !== null) {
             \App\Models\PumWorkflowCondition::create([
                 'workflow_id' => $pumWorkflow->id,
-                'procurement_category' => $validated['procurement_category'],
                 'amount_min' => $validated['amount_min'],
                 'amount_max' => $validated['amount_max'],
                 'priority' => 1,

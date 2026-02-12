@@ -74,7 +74,7 @@ class PumApprovalWorkflow extends Model
     /**
      * Check if this workflow matches the given parameters
      */
-    public function matchesConditions($amount, $category): bool
+    public function matchesConditions($amount): bool
     {
         // If no conditions, this is the default workflow
         if ($this->conditions()->count() === 0) {
@@ -82,8 +82,8 @@ class PumApprovalWorkflow extends Model
         }
 
         // Check if any condition matches
-        return $this->conditions()->get()->contains(function ($condition) use ($amount, $category) {
-            return $condition->matches($amount, $category);
+        return $this->conditions()->get()->contains(function ($condition) use ($amount) {
+            return $condition->matches($amount);
         });
     }
 }

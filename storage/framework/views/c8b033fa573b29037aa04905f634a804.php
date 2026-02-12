@@ -57,42 +57,11 @@ unset($__errorArgs, $__bag); ?>
 
                     <div class="border-t border-gray-100"></div>
 
-                    <!-- Section 2: Kategori & Nominal -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Kategori Pengadaan <span class="text-red-500">*</span></label>
-                            <div class="grid grid-cols-2 gap-4">
-                                <label class="relative flex items-center p-4 border rounded-xl cursor-pointer hover:bg-gray-50 transition-colors <?php echo e(old('procurement_category') === 'barang_baru' ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200'); ?>">
-                                    <input type="radio" name="procurement_category" value="barang_baru" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300" <?php echo e(old('procurement_category') === 'barang_baru' ? 'checked' : ''); ?> required>
-                                    <span class="ml-3 flex items-center">
-                                        <i class="fas fa-box text-lg mr-3 <?php echo e(old('procurement_category') === 'barang_baru' ? 'text-indigo-600' : 'text-gray-400'); ?>"></i>
-                                        <span class="text-sm font-medium text-gray-900">Barang Baru</span>
-                                    </span>
-                                </label>
-                                <label class="relative flex items-center p-4 border rounded-xl cursor-pointer hover:bg-gray-50 transition-colors <?php echo e(old('procurement_category') === 'peremajaan' ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200'); ?>">
-                                    <input type="radio" name="procurement_category" value="peremajaan" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300" <?php echo e(old('procurement_category') === 'peremajaan' ? 'checked' : ''); ?> required>
-                                    <span class="ml-3 flex items-center">
-                                        <i class="fas fa-sync-alt text-lg mr-3 <?php echo e(old('procurement_category') === 'peremajaan' ? 'text-indigo-600' : 'text-gray-400'); ?>"></i>
-                                        <span class="text-sm font-medium text-gray-900">Peremajaan</span>
-                                    </span>
-                                </label>
-                            </div>
-                            <?php $__errorArgs = ['procurement_category'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-                                <p class="text-red-500 text-xs mt-1"><?php echo e($message); ?></p>
-                            <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
-                        </div>
-
-                        <div>
-                            <label for="amount" class="block text-sm font-medium text-gray-700 mb-2">Total Nominal (Rp) <span class="text-red-500">*</span></label>
-                            <div class="relative">
-                                <?php if (isset($component)) { $__componentOriginale843086d3d520ece4b5265a9f47dd634 = $component; } ?>
+                    <!-- Section 2: Nominal -->
+                <div>
+                    <label for="amount" class="block text-sm font-medium text-gray-700 mb-2">Total Nominal (Rp) <span class="text-red-500">*</span></label>
+                    <div class="relative">
+                        <?php if (isset($component)) { $__componentOriginale843086d3d520ece4b5265a9f47dd634 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginale843086d3d520ece4b5265a9f47dd634 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.currency-input','data' => ['name' => 'amount','value' => old('amount', ''),'label' => '','placeholder' => '0','required' => true,'class' => 'text-xl font-semibold text-gray-900 border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-lg py-3 px-4 w-full']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('currency-input'); ?>
@@ -112,19 +81,18 @@ unset($__errorArgs, $__bag); ?>
 <?php $component = $__componentOriginale843086d3d520ece4b5265a9f47dd634; ?>
 <?php unset($__componentOriginale843086d3d520ece4b5265a9f47dd634); ?>
 <?php endif; ?>
-                            </div>
-                            <?php $__errorArgs = ['amount'];
+                    </div>
+                    <?php $__errorArgs = ['amount'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
 $message = $__bag->first($__errorArgs[0]); ?>
-                                <p class="text-red-500 text-xs mt-1"><?php echo e($message); ?></p>
-                            <?php unset($message);
+                        <p class="text-red-500 text-xs mt-1"><?php echo e($message); ?></p>
+                    <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>
-                        </div>
-                    </div>
+                </div>
 
                     <!-- Section 3: Keterangan -->
                     <div>

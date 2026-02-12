@@ -51,18 +51,7 @@
                 <!-- Condition Section -->
                 <div class="mb-6 border-t border-gray-200 pt-6">
                     <h3 class="text-lg font-medium text-gray-900 mb-4">Kondisi Workflow</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div>
-                            <label for="procurement_category" class="block text-sm font-medium text-gray-700 mb-1">
-                                Kategori Pengadaan
-                            </label>
-                            <select name="procurement_category" id="procurement_category"
-                                    class="block w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500">
-                                <option value="">Semua Kategori</option>
-                                <option value="barang_baru" {{ ($condition && $condition->procurement_category == 'barang_baru') ? 'selected' : '' }}>Barang Baru</option>
-                                <option value="peremajaan" {{ ($condition && $condition->procurement_category == 'peremajaan') ? 'selected' : '' }}>Peremajaan</option>
-                            </select>
-                        </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label for="amount_min" class="block text-sm font-medium text-gray-700 mb-1">
                                 Minimal Nominal

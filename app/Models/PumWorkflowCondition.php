@@ -11,7 +11,6 @@ class PumWorkflowCondition extends Model
 
     protected $fillable = [
         'workflow_id',
-        'procurement_category',
         'amount_min',
         'amount_max',
         'priority',
@@ -34,13 +33,8 @@ class PumWorkflowCondition extends Model
     /**
      * Check if this condition matches the given request parameters
      */
-    public function matches($amount, $category): bool
+    public function matches($amount): bool
     {
-        // Check category match
-        if ($this->procurement_category && $this->procurement_category !== $category) {
-            return false;
-        }
-
         // Check amount range
         if ($this->amount_min !== null && $amount < $this->amount_min) {
             return false;
