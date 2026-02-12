@@ -20,7 +20,7 @@ return new class extends Migration
             $table->integer('priority')->default(0); // Higher priority = checked first
             $table->timestamps();
             
-            $table->index(['procurement_category', 'amount_min', 'amount_max']);
+            $table->index(['procurement_category', 'amount_min', 'amount_max'], 'pum_wf_cond_cat_amt_idx');
         });
     }
 
