@@ -34,6 +34,12 @@
                                     <span><?php echo e($pumRequest->request_date->format('d M Y')); ?></span>
                                 </div>
                             </div>
+                            
+                            <a href="<?php echo e(route('pum-requests.print', $pumRequest)); ?>" target="_blank"
+                               class="inline-flex items-center gap-2 bg-gray-700 hover:bg-gray-900 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors shadow-sm">
+                                <i class="fas fa-print"></i>
+                                Print
+                            </a>
                         </div>
 
                         <!-- Info Grid -->

@@ -43,6 +43,16 @@
                 </div>
 
                 <div>
+                    <label for="nik" class="block text-sm font-medium text-gray-700">NIK <span class="text-gray-400 text-xs">(Opsional)</span></label>
+                    <input type="text" name="nik" id="nik" value="{{ old('nik') }}"
+                           maxlength="30" placeholder="Nomor Induk Karyawan"
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm">
+                    @error('nik')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div>
                     <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
                     <input type="password" name="password" id="password" required
                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm">

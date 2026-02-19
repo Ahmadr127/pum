@@ -117,6 +117,16 @@ Route::middleware('auth')->group(function () {
             ->name('pum-requests.reject');
     });
 
+    // PUM print route (accessible to all PUM permission holders)
+    Route::middleware('permission:manage_pum,approve_pum,create_pum')->group(function () {
+        Route::get('pum-requests/{pum_request}/print', [PumRequestController::class, 'print'])
+            ->name('pum-requests.print');
+    });
+
+    // User QR Code route (all authenticated users)
+    Route::get('users/{user}/qrcode', [UserController::class, 'qrcode'])
+        ->name('users.qrcode');
+
     // PUM Workflow Management Routes
     Route::middleware('permission:manage_pum_workflows')->group(function () {
         Route::resource('pum-workflows', PumApprovalWorkflowController::class);

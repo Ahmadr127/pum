@@ -331,6 +331,7 @@
         });
     </script>
     <?php echo $__env->yieldPushContent('scripts'); ?>
+    <?php echo $__env->yieldPushContent('modals'); ?>
 </body>
 </html>
 <?php /**PATH D:\Pemrograman\magang\pum\resources\views/layouts/app.blade.php ENDPATH**/ ?>

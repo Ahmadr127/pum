@@ -8,6 +8,11 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Endroid\QrCode\Builder\Builder;
+use Endroid\QrCode\Encoding\Encoding;
+use Endroid\QrCode\ErrorCorrectionLevel\ErrorCorrectionLevelHigh;
+use Endroid\QrCode\RoundBlockSizeMode\RoundBlockSizeModeMargin;
+use Endroid\QrCode\Writer\PngWriter;
 
 class PumRequestController extends Controller
 {
@@ -77,16 +82,18 @@ class PumRequestController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'requester_id' => 'required|exists:users,id',
-            'request_date' => 'required|date',
-            'amount' => 'required|numeric|min:0',
-            'description' => 'nullable|string|max:1000',
-            'workflow_id' => 'nullable|exists:pum_approval_workflows,id',
+            'requester_id'    => 'required|exists:users,id',
+            'request_date'    => 'required|date',
+            'amount'          => 'required|numeric|min:0',
+            'description'     => 'nullable|string|max:1000',
+            'no_surat'        => 'nullable|string|max:255',
+            'workflow_id'     => 'nullable|exists:pum_approval_workflows,id',
             'submit_for_approval' => 'nullable|boolean',
-            'attachments' => 'nullable|array',
-            'attachments.*' => 'file|mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png|max:5120',
-            'attachments2' => 'nullable|array',
-            'attachments2.*' => 'file|mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png|max:5120',
+            'attachments'     => 'nullable|array',
+            'attachments.*'   => 'file|mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png|max:5120',
+            'attachments2'    => 'nullable|array',
+            'attachments2.*'  => 'file|mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png|max:5120',
+            'scanned_pdf'     => 'nullable|file|mimes:pdf|max:10240',
         ]);
 
         // Check authorization to create for others
@@ -94,8 +101,14 @@ class PumRequestController extends Controller
             abort(403, 'Anda hanya dapat membuat permintaan untuk diri sendiri.');
         }
 
-        // Handle file uploads
+        // Handle scanned PDF as first attachment
         $attachments = [];
+        if ($request->hasFile('scanned_pdf')) {
+            $path = $request->file('scanned_pdf')->store('pum-attachments', 'public');
+            $attachments[] = $path;
+        }
+
+        // Handle additional file uploads
         if ($request->hasFile('attachments')) {
             foreach ($request->file('attachments') as $file) {
                 $path = $file->store('pum-attachments', 'public');
@@ -112,16 +125,19 @@ class PumRequestController extends Controller
         }
 
         $pumRequest = PumRequest::create([
-            'code' => PumRequest::generateCode(User::find($validated['requester_id'])),
+            'code'         => !empty($validated['no_surat'])
+                                ? $validated['no_surat']
+                                : PumRequest::generateCode(User::find($validated['requester_id'])),
+            'no_surat'     => $validated['no_surat'] ?? null,
             'requester_id' => $validated['requester_id'],
             'request_date' => $validated['request_date'],
-            'amount' => $validated['amount'],
-            'description' => $validated['description'] ?? null,
-            'attachments' => !empty($attachments) ? $attachments : null,
+            'amount'       => $validated['amount'],
+            'description'  => $validated['description'] ?? null,
+            'attachments'  => !empty($attachments) ? $attachments : null,
             'attachments2' => !empty($attachments2) ? $attachments2 : null,
-            'workflow_id' => $validated['workflow_id'] ?? null,
-            'status' => PumRequest::STATUS_NEW,
-            'created_by' => Auth::id(),
+            'workflow_id'  => $validated['workflow_id'] ?? null,
+            'status'       => PumRequest::STATUS_NEW,
+            'created_by'   => Auth::id(),
         ]);
 
         // Submit for approval if requested
@@ -487,5 +503,55 @@ class PumRequestController extends Controller
         };
 
         return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Print view with QR-based signatures.
+     * Generates QR codes as base64 data URIs server-side to avoid broken
+     * image errors when the print tab makes unauthenticated image requests.
+     */
+    public function print(PumRequest $pumRequest)
+    {
+        $pumRequest->load([
+            'requester',
+            'creator',
+            'workflow.steps',
+            'approvals.step',
+            'approvals.approver',
+        ]);
+
+        // Only approved approvals are shown in signature area
+        $signedApprovals = $pumRequest->approvals
+            ->where('status', 'approved')
+            ->sortBy('step_order')
+            ->values();
+
+        // Pre-generate QR codes as base64 data URIs (keyed by user id)
+        $qrCodes = [];
+        $usersForQr = collect();
+        if ($pumRequest->requester) $usersForQr->push($pumRequest->requester);
+        foreach ($signedApprovals as $approval) {
+            if ($approval->approver) $usersForQr->push($approval->approver);
+        }
+
+        foreach ($usersForQr->unique('id') as $user) {
+            if (!$user->hasNik()) continue;
+            try {
+                $result = Builder::create()
+                    ->writer(new PngWriter())
+                    ->data($user->nik)
+                    ->encoding(new Encoding('UTF-8'))
+                    ->errorCorrectionLevel(new ErrorCorrectionLevelHigh())
+                    ->size(180)
+                    ->margin(6)
+                    ->roundBlockSizeMode(new RoundBlockSizeModeMargin())
+                    ->build();
+                $qrCodes[$user->id] = 'data:' . $result->getMimeType() . ';base64,' . base64_encode($result->getString());
+            } catch (\Exception $e) {
+                // Skip QR if generation fails
+            }
+        }
+
+        return view('pum.requests.show-print', compact('pumRequest', 'signedApprovals', 'qrCodes'));
     }
 }

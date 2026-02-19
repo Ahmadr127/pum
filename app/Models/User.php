@@ -24,6 +24,7 @@ class User extends Authenticatable
         'password',
         'role_id',
         'organization_unit_id',
+        'nik',
     ];
 
     /**
@@ -70,5 +71,13 @@ class User extends Authenticatable
     public function organizationUnit()
     {
         return $this->belongsTo(OrganizationUnit::class);
+    }
+
+    /**
+     * Check if user has a NIK set
+     */
+    public function hasNik(): bool
+    {
+        return !empty($this->nik);
     }
 }

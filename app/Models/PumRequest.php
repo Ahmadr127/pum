@@ -13,6 +13,7 @@ class PumRequest extends Model
 
     protected $fillable = [
         'code',
+        'no_surat',
         'requester_id',
         'request_date',
         'amount',

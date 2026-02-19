@@ -6,7 +6,13 @@
 <div class="w-full">
     <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
         <!-- Header with Add Button -->
-        <div class="px-4 py-3 bg-white border-b border-gray-200 flex justify-end">
+        <div class="px-4 py-3 bg-white border-b border-gray-200 flex justify-end gap-2">
+            <button type="button"
+                    @click="$dispatch('open-scan-pdf')"
+                    class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded inline-flex items-center text-sm transition-colors">
+                <i class="fas fa-file-pdf mr-2"></i>
+                Scan PDF
+            </button>
             <a href="{{ route('pum-requests.create') }}" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded inline-flex items-center text-sm">
                 <i class="fas fa-plus mr-2"></i>
                 Tambah Pengajuan
@@ -129,3 +135,8 @@
     </div>
 </div>
 @endsection
+
+@push('modals')
+    @include('pum.requests.modals.modal-scanpdf')
+    @include('pum.requests.modals.modal-hasilscan', ['users' => [auth()->user()]])
+@endpush

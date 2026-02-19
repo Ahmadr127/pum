@@ -5,6 +5,12 @@
            title="Lihat Detail">
             <i class="fas fa-eye mr-1"></i> Detail
         </a>
+
+        <a href="<?php echo e(route('pum-requests.print', $request)); ?>" target="_blank"
+           class="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs hover:bg-gray-300"
+           title="Print">
+            <i class="fas fa-print mr-1"></i> Print
+        </a>
         
         <?php if($request->status === 'new' && (auth()->user()->hasPermission('manage_pum') || $request->requester_id === auth()->id())): ?>
         <a href="<?php echo e(route('pum-requests.edit', $request)); ?>" 
@@ -28,4 +34,5 @@
         <?php endif; ?>
     </div>
 </td>
+
 <?php /**PATH D:\Pemrograman\magang\pum\resources\views/pum/requests/columns/aksi.blade.php ENDPATH**/ ?>
