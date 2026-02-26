@@ -140,4 +140,10 @@ Route::middleware('auth')->group(function () {
             ->name('pum-approvals.index');
     });
 
+    // PUM Release Routes (for release users)
+    Route::middleware('permission:approve_pum_release')->group(function () {
+        Route::get('pum-releases', [\App\Http\Controllers\PumReleaseController::class, 'index'])
+            ->name('pum-releases.index');
+    });
+
 });

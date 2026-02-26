@@ -280,20 +280,21 @@
                                 <form method="POST" enctype="multipart/form-data" class="space-y-4">
                                     @csrf
                                     
+                                    @php
+                                        $currentStep = $pumRequest->getCurrentStep();
+                                        $isReleaseStep = $currentStep && $currentStep->type === \App\Models\PumApprovalStep::TYPE_RELEASE;
+                                    @endphp
+                                    
                                     <!-- Notes -->
                                     <div>
-                                        <label for="notes" class="block text-xs font-medium text-gray-500 mb-1">Catatan (Opsional saat Menyetujui, Wajib saat Menolak)</label>
-                                        <textarea name="notes" id="notes" rows="3" class="block w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm resize-none placeholder-gray-400" placeholder="Tulis catatan persetujuan/penolakan..."></textarea>
+                                        <label for="notes" class="block text-xs font-medium text-gray-500 mb-1">Catatan (Opsional saat {{ $isReleaseStep ? 'Release' : 'Menyetujui' }}, Wajib saat Menolak)</label>
+                                        <textarea name="notes" id="notes" rows="3" class="block w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm resize-none placeholder-gray-400" placeholder="{{ $isReleaseStep ? 'Tulis catatan release...' : 'Tulis catatan persetujuan/penolakan...' }}"></textarea>
                                         @error('notes')
                                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                                         @enderror
                                     </div>
 
                                     <!-- FS Form Upload (Conditional) -->
-                                    @php
-                                        $currentStep = $pumRequest->getCurrentStep();
-                                    @endphp
-                                    
                                     @if($currentStep && $currentStep->is_upload_fs_required)
                                         <div>
                                             <label class="block text-xs font-medium text-gray-700 mb-1">Upload Dokumen FS <span class="text-red-500">*</span></label>
@@ -313,7 +314,7 @@
                                             <i class="fas fa-times mr-2"></i> Tolak
                                         </button>
                                         <button type="submit" formaction="{{ route('pum-requests.approve', $pumRequest) }}" class="flex items-center justify-center px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-sm shadow-sm">
-                                            <i class="fas fa-check mr-2"></i> Setujui
+                                            <i class="fas {{ $isReleaseStep ? 'fa-wallet' : 'fa-check' }} mr-2"></i> {{ $isReleaseStep ? 'Proses Release' : 'Setujui' }}
                                         </button>
                                     </div>
                                 </form>

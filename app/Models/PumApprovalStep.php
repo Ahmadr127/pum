@@ -22,7 +22,6 @@ class PumApprovalStep extends Model
     ];
 
     const TYPE_APPROVAL = 'approval';
-    const TYPE_PURCHASING = 'purchasing';
     const TYPE_RELEASE = 'release';
 
     protected $casts = [

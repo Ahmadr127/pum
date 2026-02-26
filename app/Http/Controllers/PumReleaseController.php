@@ -6,33 +6,23 @@ use App\Models\PumRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class PumApprovalController extends Controller
+class PumReleaseController extends Controller
 {
     /**
-     * Display pending approvals for current user
+     * Display pending releases for current user
      */
     public function index(Request $request)
     {
         $user = Auth::user();
         
-        // Get ALL requests where user is/was involved in approval process
-        // This includes: pending approvals + already approved by this user
         $query = PumRequest::with(['requester', 'workflow.steps', 'approvals.step', 'approvals.approver'])
             ->where(function ($q) {
-                // Include pending requests
                 $q->where('status', PumRequest::STATUS_PENDING)
-                  // Include approved requests
                   ->orWhere('status', PumRequest::STATUS_APPROVED)
-                  // Include rejected requests
                   ->orWhere('status', PumRequest::STATUS_REJECTED)
-                  // Include fulfilled requests
                   ->orWhere('status', PumRequest::STATUS_FULFILLED);
             })
             ->whereHas('approvals', function ($q) use ($user) {
-                // Show requests where:
-                // 1. User can approve (pending step)
-                // 2. User already approved
-                // 3. User already rejected
                 $q->where(function ($subQ) use ($user) {
                     $subQ->where('status', 'pending')
                          ->orWhere('approver_id', $user->id);
@@ -56,32 +46,27 @@ class PumApprovalController extends Controller
             $query->whereDate('request_date', '<=', $request->date_to);
         }
 
-        // Get all matching requests
         $allRequests = $query->get();
 
-        // Filter to show only requests where user is eligible to approve OR has already approved (for APPROVAL steps only)
         $requests = $allRequests->filter(function ($pumRequest) use ($user) {
-            $isApprovalStepVisible = false;
+            $isReleaseStepVisible = false;
 
-            // Show if user can approve current step AND current step is not a 'release' type
             $currentApproval = $pumRequest->getCurrentApproval();
-            if ($currentApproval && $currentApproval->step->type !== \App\Models\PumApprovalStep::TYPE_RELEASE) {
+            if ($currentApproval && $currentApproval->step->type === \App\Models\PumApprovalStep::TYPE_RELEASE) {
                 if ($pumRequest->canBeApprovedBy($user)) {
-                    $isApprovalStepVisible = true;
+                    $isReleaseStepVisible = true;
                 }
             }
             
-            // Show if user has already actioned on an 'approval' type step
-            $hasActionedApproval = $pumRequest->approvals->contains(function ($approval) use ($user) {
+            $hasActionedRelease = $pumRequest->approvals->contains(function ($approval) use ($user) {
                 return $approval->approver_id === $user->id 
                     && in_array($approval->status, ['approved', 'rejected'])
-                    && $approval->step->type !== \App\Models\PumApprovalStep::TYPE_RELEASE;
+                    && $approval->step->type === \App\Models\PumApprovalStep::TYPE_RELEASE;
             });
             
-            return $isApprovalStepVisible || $hasActionedApproval;
+            return $isReleaseStepVisible || $hasActionedRelease;
         });
 
-        // Calculate summary counts from filtered request
         $summary = [
             'new' => $requests->where('status', 'new')->count(),
             'pending' => $requests->where('status', 'pending')->count(),
@@ -90,7 +75,6 @@ class PumApprovalController extends Controller
             'fulfilled' => $requests->where('status', 'fulfilled')->count(),
         ];
 
-        // Manual pagination for filtered collection
         $page = $request->get('page', 1);
         $perPage = 15;
         $total = $requests->count();
@@ -102,7 +86,7 @@ class PumApprovalController extends Controller
             ['path' => $request->url(), 'query' => $request->query()]
         );
 
-        return view('pum.approvals.index', [
+        return view('pum.releases.index', [
             'requests' => $paginatedRequests,
             'summary' => $summary
         ]);

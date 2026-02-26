@@ -148,7 +148,7 @@
 
                 {{-- PUM (Permintaan Uang Muka) Submenu --}}
                 @if(auth()->user()->hasPermission('manage_pum') || auth()->user()->hasPermission('manage_pum_workflows') || auth()->user()->hasPermission('approve_pum') || auth()->user()->hasPermission('create_pum'))
-                <div class="mb-4" x-data="{ open: {{ request()->routeIs('pum-requests.*') || request()->routeIs('pum-workflows.*') || request()->routeIs('pum-approvals.*') ? 'true' : 'false' }} }">
+                <div class="mb-4" x-data="{ open: {{ request()->routeIs('pum-requests.*') || request()->routeIs('pum-workflows.*') || request()->routeIs('pum-approvals.*') || request()->routeIs('pum-releases.*') ? 'true' : 'false' }} }">
                 <button @click="open = !open" 
                         class="w-full flex items-center justify-between px-4 py-3 text-white rounded-lg hover:bg-green-800 transition-colors">
                     <div class="flex items-center">
@@ -182,6 +182,15 @@
                            title="Approval">
                             <i class="fas fa-clipboard-check w-4 mr-2"></i>
                             <span class="sidebar-text">Approval</span>
+                        </a>
+                        @endif
+                        
+                        @if(auth()->user()->hasPermission('approve_pum_release'))
+                        <a href="{{ route('pum-releases.index') }}" 
+                           class="flex items-center px-3 py-2 text-green-100 rounded-lg hover:bg-green-800 hover:text-white transition-colors text-sm {{ request()->routeIs('pum-releases.*') ? 'bg-green-800 text-white' : '' }}"
+                           title="Release PUM">
+                            <i class="fas fa-hand-holding-usd w-4 mr-2"></i>
+                            <span class="sidebar-text">Release PUM</span>
                         </a>
                         @endif
                         

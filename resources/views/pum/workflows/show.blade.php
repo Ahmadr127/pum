@@ -50,7 +50,14 @@
                             <div class="ml-4 flex-1 bg-gray-50 rounded-lg p-4 border border-gray-200">
                                 <div class="flex justify-between items-start">
                                     <div>
-                                        <h4 class="font-medium text-gray-900">{{ $step->name }}</h4>
+                                        <div class="flex items-center gap-2">
+                                            <h4 class="font-medium text-gray-900">{{ $step->name }}</h4>
+                                            @if($step->type === \App\Models\PumApprovalStep::TYPE_RELEASE)
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-800 uppercase tracking-wider">
+                                                    Release
+                                                </span>
+                                            @endif
+                                        </div>
                                         <p class="text-sm text-gray-500 mt-1">
                                             <i class="fas fa-user-check mr-1"></i>
                                             {{ $step->approver_description }}
