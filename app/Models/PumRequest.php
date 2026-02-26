@@ -226,6 +226,51 @@ class PumRequest extends Model
             ]);
         }
 
+        // AUTO-APPROVE LOGIC
+        // If the requester is the designated approver for the current step(s), auto-approve it.
+        while ($currentApproval = $this->getCurrentApproval()) {
+            $approvers = $currentApproval->step->getApprovers($this->requester);
+            
+            // If the requester is among the eligible approvers for this step
+            if ($approvers->contains('id', $this->requester_id)) {
+                // Auto-approve the step
+                $currentApproval->update([
+                    'approver_id' => $this->requester_id,
+                    'status' => 'approved',
+                    'notes' => 'Auto-approved by system (Pemohon adalah approver)',
+                    'responded_at' => now(),
+                ]);
+                
+                // Move to next step
+                $nextApproval = $this->approvals()
+                    ->where('step_order', '>', $currentApproval->step_order)
+                    ->where('status', 'pending')
+                    ->orderBy('step_order')
+                    ->first();
+
+                if ($nextApproval) {
+                    $this->update(['current_step_order' => $nextApproval->step_order]);
+                } else {
+                    // All steps approved
+                    if ($currentApproval->step->type === PumApprovalStep::TYPE_RELEASE) {
+                        $this->update([
+                            'status' => self::STATUS_FULFILLED,
+                            'current_step_order' => null,
+                        ]);
+                    } else {
+                        $this->update([
+                            'status' => self::STATUS_APPROVED,
+                            'current_step_order' => null,
+                        ]);
+                    }
+                    break;
+                }
+            } else {
+                // The requester is not the approver for this step, stop auto-approving
+                break;
+            }
+        }
+
         return $this;
     }
 
