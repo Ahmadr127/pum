@@ -54,8 +54,12 @@
                         No. Surat / Kode Referensi
                     </label>
                     <input type="text" x-model="form.no_surat" name_preview="no_surat"
+                           @input.debounce.500ms="checkDuplicateNoSurat"
                            placeholder="Contoh: 00440/ADV/PNJ/02/2026"
                            class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm focus:ring-emerald-500 focus:border-emerald-500">
+                    <p x-show="duplicateWarning" class="text-xs text-amber-600 mt-1 font-medium bg-amber-50 p-2 rounded border border-amber-200">
+                        <i class="fas fa-exclamation-triangle mr-1"></i> Perhatian: No Surat ini sudah ada di sistem.
+                    </p>
                 </div>
 
                 {{-- Pengaju --}}
@@ -64,13 +68,9 @@
                         Pengaju <span class="text-red-500">*</span>
                     </label>
                     <div class="flex gap-2 items-center">
-                        <select x-model="form.requester_id"
-                                class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm focus:ring-emerald-500 focus:border-emerald-500">
-                            <option value="">-- Pilih Pengaju --</option>
-                            @foreach($users as $user)
-                                <option value="{{ $user->id }}">{{ $user->name }}</option>
-                            @endforeach
-                        </select>
+                        <input type="hidden" x-model="form.requester_id">
+                        <input type="text" x-model="requesterNameDisplay" readonly
+                               class="block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md shadow-sm text-sm text-gray-700 cursor-not-allowed">
                     </div>
                     <p class="text-xs text-gray-400 mt-1">Terbaca dari PDF: <span class="italic font-medium" x-text="scannedRequesterName || '(tidak ditemukan)'"></span></p>
                 </div>
@@ -158,6 +158,10 @@ function hasilScanModal() {
         scannedRequesterName: '',
         scannedFile: null,
 
+        users: @json($users->map->only(['id', 'name'])),
+        requesterNameDisplay: '',
+        duplicateWarning: false,
+
         form: {
             no_surat: '',
             requester_id: '',
@@ -182,24 +186,49 @@ function hasilScanModal() {
 
             // Auto-match requester by name (case-insensitive partial)
             this.autoMatchRequester(this.scannedRequesterName);
+            this.checkDuplicateNoSurat();
 
             this.open = true;
         },
 
         autoMatchRequester(name) {
-            if (!name) { this.form.requester_id = ''; return; }
+            if (!name) { 
+                this.form.requester_id = '{{ auth()->id() }}'; 
+                this.requesterNameDisplay = '{{ auth()->user()->name }}';
+                return; 
+            }
             const nameLower = name.toLowerCase();
-            const select = document.querySelector('[x-model="form.requester_id"]');
-            if (!select) return;
-
-            let bestOption = null;
-            for (const opt of select.options) {
-                if (opt.value && opt.text.toLowerCase().includes(nameLower.slice(0, 10))) {
-                    bestOption = opt;
+            let bestName = '';
+            let bestId = '';
+            for (const u of this.users) {
+                if (u.name.toLowerCase().includes(nameLower.slice(0, 10))) {
+                    bestId = u.id;
+                    bestName = u.name;
                     break;
                 }
             }
-            this.form.requester_id = bestOption ? bestOption.value : '';
+            if (bestId) {
+                this.form.requester_id = bestId;
+                this.requesterNameDisplay = bestName;
+            } else {
+                this.form.requester_id = '{{ auth()->id() }}';
+                this.requesterNameDisplay = '{{ auth()->user()->name }} (Fallback)';
+            }
+        },
+
+        async checkDuplicateNoSurat() {
+            if (!this.form.no_surat) {
+                this.duplicateWarning = false;
+                return;
+            }
+            try {
+                const url = '{{ route("pum-requests.check-duplicate") }}?no_surat=' + encodeURIComponent(this.form.no_surat);
+                const response = await fetch(url, { headers: { 'Accept': 'application/json' } });
+                const data = await response.json();
+                this.duplicateWarning = data.exists;
+            } catch (err) {
+                console.error('Gagal mengecek duplikasi No Surat:', err);
+            }
         },
 
         async submitForm() {

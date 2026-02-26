@@ -77,6 +77,20 @@ class PumRequestController extends Controller
     }
 
     /**
+     * Check if a request with given no_surat already exists.
+     */
+    public function checkDuplicate(Request $request)
+    {
+        $noSurat = $request->query('no_surat');
+        if (!$noSurat) {
+            return response()->json(['exists' => false]);
+        }
+        
+        $exists = PumRequest::where('no_surat', $noSurat)->exists();
+        return response()->json(['exists' => $exists]);
+    }
+
+    /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
