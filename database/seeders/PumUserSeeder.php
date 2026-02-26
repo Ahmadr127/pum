@@ -54,9 +54,9 @@ class PumUserSeeder extends Seeder
 
             if ($role) {
                 $user = User::updateOrCreate(
-                    ['email' => $data['email']],
+                    ['username' => $data['username']],
                     [
-                        'username' => $data['username'],
+                        'email' => $data['email'],
                         'name' => $data['name'],
                         'role_id' => $role->id,
                         'organization_unit_id' => $unit?->id,
