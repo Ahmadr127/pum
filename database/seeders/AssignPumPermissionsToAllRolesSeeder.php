@@ -36,10 +36,10 @@ class AssignPumPermissionsToAllRolesSeeder extends Seeder
         $rolePermissions = [
             'admin' => ['manage_pum', 'manage_pum_workflows', 'approve_pum', 'create_pum', 'approve_pum_release'],
             'hospital_director' => ['approve_pum'], // Director only approves, doesn't create
-            'manager_pt' => ['approve_pum', 'create_pum'], // Manager PT can approve and create
-            'direktur_pt' => ['approve_pum'], // Direktur PT only approves, doesn't create
+            'manager_pt' => ['approve_pum', 'create_pum', 'approve_pum_release'], // Manager PT can approve, create and release
+            'direktur_pt' => ['approve_pum', 'approve_pum_release'], // Direktur PT can approve and release, doesn't create
             'manajer_keuangan' => ['approve_pum', 'create_pum', 'approve_pum_release'], // Can approve, create, and release
-            'manajer_pembelian' => ['approve_pum', 'create_pum'], // Can approve and create
+            'manajer_pembelian' => ['approve_pum', 'create_pum', 'approve_pum_release'], // Can approve, create and release
             'manager' => ['approve_pum', 'create_pum'], // Generic manager can approve and create
             'staff' => ['create_pum'], // Staff can only create PUM requests
             'keuangan' => ['approve_pum', 'create_pum', 'approve_pum_release'], // Keuangan can approve, create, and release

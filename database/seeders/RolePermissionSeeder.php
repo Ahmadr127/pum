@@ -21,6 +21,7 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'manage_pum', 'display_name' => 'Kelola Permintaan Uang Muka', 'description' => 'Membuat dan mengelola permintaan uang muka'],
             ['name' => 'manage_pum_workflows', 'display_name' => 'Kelola Workflow PUM', 'description' => 'Mengelola workflow approval permintaan uang muka'],
             ['name' => 'approve_pum', 'display_name' => 'Approval Uang Muka', 'description' => 'Menyetujui atau menolak permintaan uang muka'],
+            ['name' => 'approve_pum_release', 'display_name' => 'Release Uang Muka', 'description' => 'Melakukan release uang muka'],
         ];
 
         foreach ($permissions as $permission) {
@@ -77,10 +78,10 @@ class RolePermissionSeeder extends Seeder
         );
 
         // Assign permissions to roles
-        $adminRole->permissions()->attach(Permission::all()); // Admin gets all permissions
+        $adminRole->permissions()->syncWithoutDetaching(Permission::all()); // Admin gets all permissions
         
         // Manager gets specific permissions
-        $managerRole->permissions()->attach(
+        $managerRole->permissions()->syncWithoutDetaching(
             Permission::whereIn('name', [
                 'view_dashboard',
                 'manage_pum',
@@ -99,19 +100,21 @@ class RolePermissionSeeder extends Seeder
         $managerPtRole->permissions()->sync(
             Permission::whereIn('name', [
                 'view_dashboard',
-                'approve_pum'
+                'approve_pum',
+                'approve_pum_release'
             ])->get()
         );
 
         $direkturPtRole->permissions()->sync(
              Permission::whereIn('name', [
                  'view_dashboard',
-                 'approve_pum'
+                 'approve_pum',
+                 'approve_pum_release'
              ])->get()
          );
 
         // Keuangan gets specific permissions
-        $keuanganRole->permissions()->attach(
+        $keuanganRole->permissions()->syncWithoutDetaching(
             Permission::whereIn('name', [
                 'view_dashboard',
                 'approve_pum'

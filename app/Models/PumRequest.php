@@ -163,8 +163,8 @@ class PumRequest extends Model
      */
     public function canBeApprovedBy(User $user)
     {
-        // Cannot approve if status is not pending or new
-        if (!in_array($this->status, [self::STATUS_NEW, self::STATUS_PENDING])) {
+        // Cannot approve if status is not pending, new, or approved (for release)
+        if (!in_array($this->status, [self::STATUS_NEW, self::STATUS_PENDING, self::STATUS_APPROVED])) {
             return false;
         }
 
@@ -249,7 +249,11 @@ class PumRequest extends Model
                     ->first();
 
                 if ($nextApproval) {
-                    $this->update(['current_step_order' => $nextApproval->step_order]);
+                    $updateData = ['current_step_order' => $nextApproval->step_order];
+                    if ($currentApproval->step->type === \App\Models\PumApprovalStep::TYPE_APPROVAL && $nextApproval->step->type === \App\Models\PumApprovalStep::TYPE_RELEASE) {
+                        $updateData['status'] = self::STATUS_APPROVED;
+                    }
+                    $this->update($updateData);
                 } else {
                     // All steps approved
                     if ($currentApproval->step->type === PumApprovalStep::TYPE_RELEASE) {
@@ -306,7 +310,11 @@ class PumRequest extends Model
 
         if ($nextApproval) {
             // Move to next step
-            $this->update(['current_step_order' => $nextApproval->step_order]);
+            $updateData = ['current_step_order' => $nextApproval->step_order];
+            if ($currentApproval->step->type === \App\Models\PumApprovalStep::TYPE_APPROVAL && $nextApproval->step->type === \App\Models\PumApprovalStep::TYPE_RELEASE) {
+                $updateData['status'] = self::STATUS_APPROVED;
+            }
+            $this->update($updateData);
         } else {
             // All steps approved
             // Check if the last step was a 'release' step
@@ -445,7 +453,7 @@ class PumRequest extends Model
      */
     public function scopeNeedsApprovalFrom($query, User $user)
     {
-        return $query->whereIn('status', [self::STATUS_NEW, self::STATUS_PENDING])
+        return $query->whereIn('status', [self::STATUS_NEW, self::STATUS_PENDING, self::STATUS_APPROVED])
             ->whereHas('approvals', function ($q) use ($user) {
                 $q->where('status', 'pending')
                   ->where(function ($approvalQuery) use ($user) {

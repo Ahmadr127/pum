@@ -33,6 +33,7 @@ class PumWorkflowSeeder extends Seeder
                 ['name' => 'Manager Unit', 'type' => 'approval', 'approver_type' => 'organization_head'],
                 ['name' => 'Hospital Director', 'type' => 'approval', 'role' => 'hospital_director'],
                 ['name' => 'Manager Pembelian', 'type' => 'approval', 'role' => 'manajer_pembelian'],
+                ['name' => 'Manager Pembelian', 'type' => 'release', 'role' => 'manajer_pembelian'],
             ]
         );
 
@@ -46,6 +47,8 @@ class PumWorkflowSeeder extends Seeder
                 ['name' => 'Hospital Director', 'type' => 'approval', 'role' => 'hospital_director'],
                 ['name' => 'Manager PT', 'type' => 'approval', 'role' => 'manager_pt'],
                 ['name' => 'Manager Pembelian', 'type' => 'approval', 'role' => 'manajer_pembelian'],
+                ['name' => 'Manager Pembelian', 'type' => 'release', 'role' => 'manajer_pembelian'],
+                ['name' => 'Manager PT', 'type' => 'release', 'role' => 'manager_pt'],
             ]
         );
 
@@ -60,6 +63,9 @@ class PumWorkflowSeeder extends Seeder
                 ['name' => 'Hospital Director', 'type' => 'approval', 'role' => 'hospital_director'],
                 ['name' => 'Manager PT', 'type' => 'approval', 'role' => 'manager_pt'],
                 ['name' => 'Manager Pembelian', 'type' => 'approval', 'role' => 'manajer_pembelian'],
+                ['name' => 'Manager Pembelian', 'type' => 'release', 'role' => 'manajer_pembelian'],
+                ['name' => 'Manager PT', 'type' => 'release', 'role' => 'manager_pt'],
+                ['name' => 'Direktur PT', 'type' => 'release', 'role' => 'direktur_pt'],
             ]
         );
 
