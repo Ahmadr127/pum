@@ -195,11 +195,15 @@
 
         {{-- 2. Approvals --}}
         @foreach($signedApprovals as $approval)
-            @php $approver = $approval->approver; @endphp
+            @php 
+                $approver = $approval->approver;
+                $isReleaseStep = $approval->step && $approval->step->type === \App\Models\PumApprovalStep::TYPE_RELEASE;
+                $roleLabel = $isReleaseStep ? 'Dirilis Oleh,' : 'Disetujui Oleh,';
+            @endphp
             <div class="sig-box">
-                <div class="sig-role">Disetujui Oleh,<br>{{ $approval->step->name ?? 'Approver' }}</div>
+                <div class="sig-role">{{ $roleLabel }}<br>{{ $approval->step->name ?? 'Approver' }}</div>
 
-                @if($approver && isset($qrCodes[$approver->id]))
+                @if(!$isReleaseStep && $approver && isset($qrCodes[$approver->id]))
                     <img class="qr-img" src="{{ $qrCodes[$approver->id] }}" alt="QR">
                 @else
                     <div class="qr-empty"></div>
