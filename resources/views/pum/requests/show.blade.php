@@ -280,15 +280,19 @@
 
                         @if($canApprove)
                             <div class="border-t border-gray-100 pt-4 mt-4">
-                                <h4 class="text-sm font-semibold text-gray-900 mb-3">Form Persetujuan</h4>
+                                @php
+                                    $currentStep = $pumRequest->getCurrentStep();
+                                    $isReleaseStep = $currentStep && $currentStep->type === \App\Models\PumApprovalStep::TYPE_RELEASE;
+                                @endphp
+                                <h4 class="text-sm font-semibold text-gray-900 mb-3">
+                                    {{ $isReleaseStep ? 'Form Persetujuan Release' : 'Form Persetujuan' }}
+                                </h4>
                                 
                                 <form method="POST" enctype="multipart/form-data" class="space-y-4">
                                     @csrf
                                     
-                                    @php
-                                        $currentStep = $pumRequest->getCurrentStep();
-                                        $isReleaseStep = $currentStep && $currentStep->type === \App\Models\PumApprovalStep::TYPE_RELEASE;
-                                    @endphp
+                                    {{-- isReleaseStep already defined above --}}
+
                                     
                                     <!-- Notes -->
                                     <div>
