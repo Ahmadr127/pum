@@ -20,7 +20,7 @@ class DashboardController extends Controller
         
         // PUM Release Stats (if user has approve_pum_release permission)
         if ($user->hasPermission('approve_pum_release')) {
-            // Pending releases = requests currently waiting for release action by THIS user
+            // Pending releases = requests where CURRENT ACTIVE step is a release step AND this user can action it
             $allPendingRelease = PumRequest::with(['requester', 'approvals.step', 'approvals.approver'])
                 ->whereIn('status', [PumRequest::STATUS_PENDING, PumRequest::STATUS_APPROVED])
                 ->whereHas('approvals', function($q) {
@@ -30,7 +30,13 @@ class DashboardController extends Controller
                       });
                 })
                 ->get()
-                ->filter(fn($req) => $req->canBeApprovedBy($user));
+                ->filter(function($req) use ($user) {
+                    // CRITICAL: only include if the CURRENT active step (not just any future step) is a release step
+                    $currentApproval = $req->getCurrentApproval();
+                    if (!$currentApproval || !$currentApproval->step) return false;
+                    if ($currentApproval->step->type !== \App\Models\PumApprovalStep::TYPE_RELEASE) return false;
+                    return $req->canBeApprovedBy($user);
+                });
             
             $data['pendingReleases'] = $allPendingRelease->take(5);
             $data['pendingReleasesCount'] = $allPendingRelease->count();
