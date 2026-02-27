@@ -179,13 +179,19 @@ class PumRequest extends Model
         }
 
         // Check if user already approved this request in any previous step
-        $hasApprovedBefore = $this->approvals()
-            ->where('approver_id', $user->id)
-            ->where('status', 'approved')
-            ->exists();
+        // Exception: release steps can be actioned by someone who already approved a regular step
+        $isCurrentStepRelease = $currentApproval->step 
+            && $currentApproval->step->type === \App\Models\PumApprovalStep::TYPE_RELEASE;
 
-        if ($hasApprovedBefore) {
-            return false; // User cannot approve the same request twice
+        if (!$isCurrentStepRelease) {
+            $hasApprovedBefore = $this->approvals()
+                ->where('approver_id', $user->id)
+                ->where('status', 'approved')
+                ->exists();
+
+            if ($hasApprovedBefore) {
+                return false; // User cannot approve the same request twice (only for non-release steps)
+            }
         }
 
         // Check if user is eligible for current step

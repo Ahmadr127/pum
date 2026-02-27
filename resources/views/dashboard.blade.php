@@ -44,6 +44,38 @@
     </div>
     @endif
 
+    {{-- Release Stats Section - For Releasers (approve_pum_release) --}}
+    @if(isset($releaseStats))
+    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-5">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <i class="fas fa-wallet text-teal-600 mr-2"></i> Tugas Release Saya
+        </h3>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <x-stat-card 
+                :value="$releaseStats['total']" 
+                label="Total Tugas Release" 
+                icon="fas fa-money-check-alt" 
+                color="teal" 
+                :href="route('pum-releases.index')" 
+            />
+            <x-stat-card 
+                :value="$releaseStats['pending']" 
+                label="Menunggu Release Saya" 
+                icon="fas fa-clock" 
+                color="yellow" 
+                :href="route('pum-releases.index')" 
+            />
+            <x-stat-card 
+                :value="$releaseStats['released']" 
+                label="Sudah Saya Release" 
+                icon="fas fa-check-double" 
+                color="green" 
+                :href="route('pum-releases.index')" 
+            />
+        </div>
+    </div>
+    @endif
+
     {{-- My Request Stats Section - For Request Creators (create_pum) --}}
     @if(isset($myRequestStats))
     <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-5">
@@ -79,13 +111,18 @@
 
     @php
         $hasApprovals = isset($pendingApprovals) || $user->hasPermission('approve_pum');
+        $hasReleases = isset($pendingReleases) || $user->hasPermission('approve_pum_release');
         $hasRequests = isset($recentRequests) || $user->hasPermission('manage_pum') || $user->hasPermission('create_pum');
-        $showTwoColumns = $hasApprovals && $hasRequests;
+        
+        // Count active columns
+        $activeColumns = ($hasApprovals || $hasReleases ? 1 : 0) + ($hasRequests ? 1 : 0);
+        $showTwoColumns = $activeColumns > 1;
     @endphp
 
     <div class="grid grid-cols-1 {{ $showTwoColumns ? 'lg:grid-cols-2' : '' }} gap-6">
-        <!-- Pending Approvals Widget -->
-        @if(isset($pendingApprovals) && $pendingApprovals->count() > 0)
+        <div class="space-y-6">
+            <!-- Pending Approvals Widget -->
+            @if(isset($pendingApprovals) && $pendingApprovals->count() > 0)
         <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
             <div class="p-4 bg-orange-50 border-b border-orange-100 flex items-center justify-between">
                 <div class="flex items-center">
@@ -139,6 +176,60 @@
             </div>
         </div>
         @endif
+
+        <!-- Pending Releases Widget -->
+        @if(isset($pendingReleases) && $pendingReleases->count() > 0)
+        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="p-4 bg-teal-50 border-b border-teal-100 flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="w-8 h-8 bg-teal-500 rounded-full flex items-center justify-center mr-3">
+                        <i class="fas fa-wallet text-white text-sm"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-teal-900">Menunggu Release Anda</h3>
+                        <p class="text-xs text-teal-600">{{ $pendingReleasesCount }} permintaan</p>
+                    </div>
+                </div>
+                <a href="{{ route('pum-releases.index') }}" class="text-sm text-teal-600 hover:text-teal-800">
+                    Lihat Semua <i class="fas fa-arrow-right ml-1"></i>
+                </a>
+            </div>
+            <div class="divide-y divide-gray-100">
+                @foreach($pendingReleases as $release)
+                <div class="p-4 hover:bg-gray-50 transition-colors">
+                    <div class="flex items-center justify-between">
+                        <div class="flex-1 min-w-0">
+                            <a href="{{ route('pum-requests.show', $release) }}" class="font-medium text-teal-600 hover:text-teal-800">
+                                {{ $release->code }}
+                            </a>
+                            <p class="text-sm text-gray-500 truncate">{{ $release->requester->name ?? '-' }}</p>
+                        </div>
+                        <div class="text-right mx-4">
+                            <p class="font-bold text-green-600">Rp {{ number_format($release->amount, 0, ',', '.') }}</p>
+                            <p class="text-xs text-gray-400">{{ $release->request_date->format('d/m/Y') }}</p>
+                        </div>
+                        <div class="flex gap-1">
+                            <a href="{{ route('pum-requests.show', $release) }}" class="p-2 bg-teal-100 text-teal-700 rounded hover:bg-teal-200" title="Proses Release">
+                                <i class="fas fa-wallet"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        </div>
+        @elseif($user->hasPermission('approve_pum_release'))
+        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="p-6 text-center">
+                <div class="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-check-double text-teal-500 text-2xl"></i>
+                </div>
+                <h3 class="font-semibold text-gray-900 mb-1">Tidak Ada Release Pending</h3>
+                <p class="text-sm text-gray-500">Semua dana sudah direlease</p>
+            </div>
+        </div>
+        @endif
+        </div>
 
         <!-- My Recent Requests Widget -->
         @if(isset($recentRequests) && $recentRequests->count() > 0)
@@ -203,9 +294,10 @@
         $quickActions = collect([
             ['permission' => 'manage_pum|create_pum', 'href' => route('pum-requests.create'), 'icon' => 'fas fa-plus', 'title' => 'Buat Permintaan', 'subtitle' => 'Ajukan uang muka', 'color' => 'green'],
             ['permission' => 'approve_pum', 'href' => route('pum-approvals.index'), 'icon' => 'fas fa-clipboard-check', 'title' => 'Approval', 'subtitle' => ($pendingApprovalsCount ?? 0) . ' menunggu', 'color' => 'orange'],
+            ['permission' => 'approve_pum_release', 'href' => route('pum-releases.index'), 'icon' => 'fas fa-wallet', 'title' => 'Release Dana', 'subtitle' => ($pendingReleasesCount ?? 0) . ' menunggu', 'color' => 'teal'],
             ['permission' => 'manage_users', 'href' => route('users.index'), 'icon' => 'fas fa-users', 'title' => 'Kelola Pengguna', 'subtitle' => ($userCount ?? 0) . ' pengguna', 'color' => 'blue'],
             ['permission' => 'manage_roles', 'href' => route('roles.index'), 'icon' => 'fas fa-user-tag', 'title' => 'Kelola Role', 'subtitle' => ($roleCount ?? 0) . ' role', 'color' => 'purple'],
-            ['permission' => 'manage_organization_units', 'href' => route('organization-units.index'), 'icon' => 'fas fa-building', 'title' => 'Unit Organisasi', 'subtitle' => ($orgUnitCount ?? 0) . ' unit', 'color' => 'teal'],
+            ['permission' => 'manage_organization_units', 'href' => route('organization-units.index'), 'icon' => 'fas fa-building', 'title' => 'Unit Organisasi', 'subtitle' => ($orgUnitCount ?? 0) . ' unit', 'color' => 'indigo'],
             ['permission' => 'manage_pum_workflows', 'href' => route('pum-workflows.index'), 'icon' => 'fas fa-project-diagram', 'title' => 'Workflow PUM', 'subtitle' => 'Kelola approval', 'color' => 'indigo'],
         ])->filter(function($action) use ($user) {
             // Handle multiple permissions separated by |

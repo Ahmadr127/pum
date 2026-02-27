@@ -6,6 +6,8 @@
                 $approval = $request->approvals->where('step_id', $step->id)->first();
                 $status = $approval ? $approval->status : 'pending';
                 
+                $stepIndicator = $step->type === \App\Models\PumApprovalStep::TYPE_RELEASE ? 'R' : 'A';
+                
                 // Default State (Future/Waiting)
                 $bgColor = 'bg-gray-100';
                 $textColor = 'text-gray-500';
@@ -73,6 +75,7 @@
                 return [
                     'id' => $step->id,
                     'name' => $step->name,
+                    'stepIndicator' => $stepIndicator,
                     'status' => $status,
                     'statusLabel' => $statusLabel,
                     'bgColor' => $bgColor,
@@ -105,7 +108,7 @@
                      @click="showStep(steps[{{ $index }}])"
                      title="{{ $step['name'] }}: {{ $step['statusLabel'] }}">
                     
-                    {{ $step['name'] }}
+                    {{ $step['name'] }} <span class="opacity-75">({{ $step['stepIndicator'] }})</span>
                 </div>
             @endforeach
 

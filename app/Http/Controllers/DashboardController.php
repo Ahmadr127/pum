@@ -18,6 +18,61 @@ class DashboardController extends Controller
         $user = Auth::user();
         $data = ['user' => $user];
         
+        // PUM Release Stats (if user has approve_pum_release permission)
+        if ($user->hasPermission('approve_pum_release')) {
+            // Pending releases = requests currently waiting for release action by THIS user
+            $allPendingRelease = PumRequest::with(['requester', 'approvals.step', 'approvals.approver'])
+                ->whereIn('status', [PumRequest::STATUS_PENDING, PumRequest::STATUS_APPROVED])
+                ->whereHas('approvals', function($q) {
+                    $q->where('status', 'pending')
+                      ->whereHas('step', function($sq) {
+                          $sq->where('type', \App\Models\PumApprovalStep::TYPE_RELEASE);
+                      });
+                })
+                ->get()
+                ->filter(fn($req) => $req->canBeApprovedBy($user));
+            
+            $data['pendingReleases'] = $allPendingRelease->take(5);
+            $data['pendingReleasesCount'] = $allPendingRelease->count();
+            
+            // Stats: All requests where this user HAS a release-step approval record (pending or actioned)
+            $allReleaseRequests = PumRequest::with(['approvals.step'])
+                ->whereIn('status', [
+                    PumRequest::STATUS_PENDING,
+                    PumRequest::STATUS_APPROVED, 
+                    PumRequest::STATUS_FULFILLED,
+                    PumRequest::STATUS_REJECTED
+                ])
+                ->whereHas('approvals', function($q) use ($user) {
+                    $q->where('approver_id', $user->id)
+                      ->whereHas('step', function($sq) {
+                          $sq->where('type', \App\Models\PumApprovalStep::TYPE_RELEASE);
+                      });
+                })
+                ->get();
+            
+            // Also include requests currently pending release by this user (not yet actioned but user is the releaser)
+            $pendingReleaseRequests = $allPendingRelease->reject(function($req) use ($allReleaseRequests) {
+                return $allReleaseRequests->contains('id', $req->id);
+            });
+            
+            $myReleaseRequests = $allReleaseRequests->merge($pendingReleaseRequests);
+            
+            $data['releaseStats'] = [
+                'total' => $myReleaseRequests->count(),
+                'pending' => $allPendingRelease->count(), // requests waiting for THIS user to release
+                'released' => $allReleaseRequests->filter(function($req) use ($user) {
+                    // Has an approved release step by this user specifically
+                    return $req->approvals
+                        ->where('approver_id', $user->id)
+                        ->where('status', 'approved')
+                        ->filter(fn($appr) => $appr->step && $appr->step->type === \App\Models\PumApprovalStep::TYPE_RELEASE)
+                        ->count() > 0;
+                })->count(),
+            ];
+        }
+
+        
         // PUM Approval Stats (if user has approve_pum permission)
         if ($user->hasPermission('approve_pum')) {
             $pendingApprovals = PumRequest::with(['requester', 'approvals.step'])
@@ -36,7 +91,8 @@ class DashboardController extends Controller
                 ->whereIn('status', [
                     PumRequest::STATUS_PENDING, 
                     PumRequest::STATUS_APPROVED, 
-                    PumRequest::STATUS_REJECTED
+                    PumRequest::STATUS_REJECTED,
+                    PumRequest::STATUS_FULFILLED,
                 ])
                 ->get();
             
@@ -50,7 +106,14 @@ class DashboardController extends Controller
             $data['approvalStats'] = [
                 'total' => $myApprovalRequests->count(),
                 'pending' => $myApprovalRequests->where('status', 'pending')->count(),
-                'approved' => $myApprovalRequests->where('status', 'approved')->count(),
+                // Count requests where THIS user has actually approved an approval-type step
+                'approved' => $myApprovalRequests->filter(function($req) use ($user) {
+                    return $req->approvals
+                        ->where('approver_id', $user->id)
+                        ->where('status', 'approved')
+                        ->filter(fn($appr) => !$appr->step || $appr->step->type !== \App\Models\PumApprovalStep::TYPE_RELEASE)
+                        ->count() > 0;
+                })->count(),
             ];
         }
         

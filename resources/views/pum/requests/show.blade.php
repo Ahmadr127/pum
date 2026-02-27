@@ -191,7 +191,12 @@
                                     <td class="px-6 py-4 text-sm text-gray-900">
                                         <div class="space-y-2">
                                             <div class="flex items-center gap-2">
-                                                <span class="font-medium">{{ $approval->step->name ?? '-' }}</span>
+                                                <span class="font-medium">
+                                                    {{ $approval->step->name ?? '-' }}
+                                                    @if($approval->step)
+                                                        <span class="inline-flex items-center justify-center px-1.5 py-0.5 ml-1 text-[10px] font-bold rounded bg-gray-100 text-gray-600" title="{{ $approval->step->type === \App\Models\PumApprovalStep::TYPE_RELEASE ? 'Release Step' : 'Approval Step' }}">{{ $approval->step->type === \App\Models\PumApprovalStep::TYPE_RELEASE ? 'R' : 'A' }}</span>
+                                                    @endif
+                                                </span>
                                                 @if($approval->fs_form_path)
                                                     <a href="{{ Storage::url($approval->fs_form_path) }}" target="_blank" 
                                                        class="inline-flex items-center gap-1.5 px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-xs hover:bg-blue-100 transition-colors" 

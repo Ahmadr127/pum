@@ -23,7 +23,9 @@ class PumReleaseController extends Controller
                   ->orWhere('status', PumRequest::STATUS_FULFILLED);
             })
             ->whereHas('approvals', function ($q) use ($user) {
-                $q->where(function ($subQ) use ($user) {
+                $q->whereHas('step', function ($sq) {
+                    $sq->where('type', \App\Models\PumApprovalStep::TYPE_RELEASE);
+                })->where(function ($subQ) use ($user) {
                     $subQ->where('status', 'pending')
                          ->orWhere('approver_id', $user->id);
                 });
@@ -49,22 +51,23 @@ class PumReleaseController extends Controller
         $allRequests = $query->get();
 
         $requests = $allRequests->filter(function ($pumRequest) use ($user) {
-            $isReleaseStepVisible = false;
-
             $currentApproval = $pumRequest->getCurrentApproval();
-            if ($currentApproval && $currentApproval->step->type === \App\Models\PumApprovalStep::TYPE_RELEASE) {
-                if ($pumRequest->canBeApprovedBy($user)) {
-                    $isReleaseStepVisible = true;
-                }
-            }
             
+            // Include if current step is a release step and user can action it
+            $isCurrentReleaseStep = $currentApproval 
+                && $currentApproval->step
+                && $currentApproval->step->type === \App\Models\PumApprovalStep::TYPE_RELEASE
+                && $pumRequest->canBeApprovedBy($user);
+            
+            // Include if user has already actioned a release step on this request
             $hasActionedRelease = $pumRequest->approvals->contains(function ($approval) use ($user) {
                 return $approval->approver_id === $user->id 
                     && in_array($approval->status, ['approved', 'rejected'])
+                    && $approval->step
                     && $approval->step->type === \App\Models\PumApprovalStep::TYPE_RELEASE;
             });
             
-            return $isReleaseStepVisible || $hasActionedRelease;
+            return $isCurrentReleaseStep || $hasActionedRelease;
         });
 
         $summary = [

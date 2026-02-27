@@ -284,7 +284,7 @@ function hasilScanModal() {
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(text, 'text/html');
                     const errEl = doc.querySelector('.text-red-600, [class*="text-red"]');
-                    this.errorMsg = errEl ? errEl.textContent.trim() : 'Terjadi kesalahan saat menyimpan data.';
+                    this.errorMsg = errEl ? errEl.textContent.trim() : 'Tidak bisa menyimpan file/nomor surat yang sudah ada';
                 }
             } catch (err) {
                 console.error(err);
