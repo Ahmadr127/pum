@@ -198,12 +198,12 @@
             @php 
                 $approver = $approval->approver;
                 $isReleaseStep = $approval->step && $approval->step->type === \App\Models\PumApprovalStep::TYPE_RELEASE;
-                $roleLabel = $isReleaseStep ? 'Dirilis Oleh,' : 'Disetujui Oleh,';
             @endphp
+            @if(!$isReleaseStep)
             <div class="sig-box">
-                <div class="sig-role">{{ $roleLabel }}<br>{{ $approval->step->name ?? 'Approver' }}</div>
+                <div class="sig-role">Disetujui Oleh,<br>{{ $approval->step->name ?? 'Approver' }}</div>
 
-                @if(!$isReleaseStep && $approver && isset($qrCodes[$approver->id]))
+                @if($approver && isset($qrCodes[$approver->id]))
                     <img class="qr-img" src="{{ $qrCodes[$approver->id] }}" alt="QR">
                 @else
                     <div class="qr-empty"></div>
@@ -214,6 +214,7 @@
                     <div class="sig-nip">NIP. {{ $approver->nik }}</div>
                 @endif
             </div>
+            @endif
         @endforeach
 
         {{-- Spacer to ensure left alignment if flex-grow used, or use justify-content: start/space-between --}}
