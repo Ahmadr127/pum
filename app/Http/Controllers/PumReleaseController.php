@@ -63,8 +63,9 @@ class PumReleaseController extends Controller
                 && $pumRequest->canBeApprovedBy($user);
             
             // Include if user has already actioned a release step on this request
+            // Use (int) cast to avoid === strict type mismatch (DB string vs PHP int)
             $hasActionedRelease = $pumRequest->approvals->contains(function ($approval) use ($user) {
-                return $approval->approver_id === $user->id 
+                return (int) $approval->approver_id === (int) $user->id
                     && in_array($approval->status, ['approved', 'rejected'])
                     && $approval->step
                     && $approval->step->type === \App\Models\PumApprovalStep::TYPE_RELEASE;

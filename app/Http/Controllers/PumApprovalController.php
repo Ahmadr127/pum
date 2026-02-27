@@ -69,12 +69,18 @@ class PumApprovalController extends Controller
                 && $pumRequest->canBeApprovedBy($user);
             
             // Show if user has already actioned on an 'approval' type step (with null check)
+            // Use (int) cast to avoid === strict type mismatch between string DB value and int $user->id
             $hasActionedApproval = $pumRequest->approvals->contains(function ($approval) use ($user) {
-                return $approval->approver_id === $user->id 
+                return (int) $approval->approver_id === (int) $user->id
                     && in_array($approval->status, ['approved', 'rejected'])
                     && $approval->step
                     && $approval->step->type !== \App\Models\PumApprovalStep::TYPE_RELEASE;
             });
+            
+            Log::debug('[PumApproval] req#' . $pumRequest->id . ' status=' . $pumRequest->status
+                . ' isVisible=' . ($isApprovalStepVisible ? 'yes' : 'no')
+                . ' hasActioned=' . ($hasActionedApproval ? 'yes' : 'no')
+                . ' approvals=' . $pumRequest->approvals->pluck('approver_id', 'step_order')->toJson());
             
             return $isApprovalStepVisible || $hasActionedApproval;
         });
