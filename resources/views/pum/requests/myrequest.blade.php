@@ -138,5 +138,5 @@
 
 @push('modals')
     @include('pum.requests.modals.modal-scanpdf')
-    @include('pum.requests.modals.modal-hasilscan', ['users' => [auth()->user()]])
+    @include('pum.requests.modals.modal-hasilscan', ['users' => collect([auth()->user()])])
 @endpush

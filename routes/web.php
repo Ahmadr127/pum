@@ -80,6 +80,8 @@ Route::middleware('auth')->group(function () {
             ->name('pum-requests.my-requests');
         Route::get('pum-requests/create', [PumRequestController::class, 'create'])
             ->name('pum-requests.create');
+        Route::get('pum-requests/check-duplicate', [PumRequestController::class, 'checkDuplicate'])
+            ->name('pum-requests.check-duplicate');
         Route::post('pum-requests', [PumRequestController::class, 'store'])
             ->name('pum-requests.store');
         Route::get('pum-requests/{pum_request}/edit', [PumRequestController::class, 'edit'])
