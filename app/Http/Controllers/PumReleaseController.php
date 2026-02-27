@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\PumRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class PumReleaseController extends Controller
 {
@@ -49,6 +50,8 @@ class PumReleaseController extends Controller
         }
 
         $allRequests = $query->get();
+        
+        Log::debug('[PumRelease] user=' . $user->id . ' allRequests=' . $allRequests->count());
 
         $requests = $allRequests->filter(function ($pumRequest) use ($user) {
             $currentApproval = $pumRequest->getCurrentApproval();
@@ -68,6 +71,14 @@ class PumReleaseController extends Controller
             });
             
             return $isCurrentReleaseStep || $hasActionedRelease;
+        });
+        
+        Log::debug('[PumRelease] filtered=' . $requests->count() . ' ids=' . $requests->pluck('id')->join(','));
+        $requests->each(function($r) use ($user) {
+            $currentApproval = $r->getCurrentApproval();
+            $currentStepType = $currentApproval?->step?->type ?? 'null';
+            $hasActioned = $r->approvals->contains(fn($a) => $a->approver_id === $user->id && $a->step?->type === \App\Models\PumApprovalStep::TYPE_RELEASE);
+            Log::debug('[PumRelease] req#' . $r->id . ' status=' . $r->status . ' currentStep=' . $currentStepType . ' hasActioned=' . ($hasActioned ? 'yes' : 'no'));
         });
 
         $summary = [

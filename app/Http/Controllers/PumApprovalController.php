@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\PumRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class PumApprovalController extends Controller
 {
@@ -55,6 +56,8 @@ class PumApprovalController extends Controller
 
         // Get all matching requests
         $allRequests = $query->get();
+        
+        Log::debug('[PumApproval] user=' . $user->id . ' allRequests=' . $allRequests->count());
 
         // Filter to show only requests where user is eligible to approve OR has already approved (for APPROVAL steps only)
         $requests = $allRequests->filter(function ($pumRequest) use ($user) {
@@ -75,6 +78,8 @@ class PumApprovalController extends Controller
             
             return $isApprovalStepVisible || $hasActionedApproval;
         });
+        
+        Log::debug('[PumApproval] filtered=' . $requests->count() . ' ids=' . $requests->pluck('id')->join(','));
 
         // Calculate summary counts from filtered request
         $summary = [
