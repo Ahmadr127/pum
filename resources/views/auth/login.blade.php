@@ -95,6 +95,12 @@
                     </div>
                     @endif
 
+                    @error('sso')
+                        <div class="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
+                            <i class="fas fa-exclamation-circle mr-1"></i> {{ $message }}
+                        </div>
+                    @enderror
+
                     <!-- Submit Button -->
                     <button 
                         type="submit" 
@@ -104,6 +110,28 @@
                         Masuk
                     </button>
                 </form>
+
+                <!-- Divider -->
+                <div class="relative my-4">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-gray-200"></div>
+                    </div>
+                    <div class="relative flex justify-center text-xs text-gray-400">
+                        <span class="px-2 bg-white">atau masuk dengan</span>
+                    </div>
+                </div>
+
+                <!-- Tombol SSO -->
+                <a href="{{ route('auth.sso.redirect') }}"
+                   class="flex items-center justify-center gap-2 w-full px-4 py-2.5
+                          border border-green-600 text-green-700 rounded-lg
+                          hover:bg-green-50 transition-colors font-medium text-sm">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                    </svg>
+                    Login via SSO
+                </a>
 
                 <!-- Footer -->
                 <div class="mt-6 text-center text-sm text-gray-500">

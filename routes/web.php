@@ -1,6 +1,10 @@
 <?php
 
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Str;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\UserController;
@@ -11,6 +15,7 @@ use App\Http\Controllers\OrganizationUnitController;
 use App\Http\Controllers\PumRequestController;
 use App\Http\Controllers\PumApprovalWorkflowController;
 use App\Http\Controllers\PumApprovalController;
+use App\Models\User;
 
 /*
 |--------------------------------------------------------------------------
@@ -34,6 +39,96 @@ Route::middleware('guest')->group(function () {
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
     Route::post('/register', [AuthController::class, 'register']);
 });
+
+// SSO Routes
+Route::get('/auth/sso/redirect', function (Request $request) {
+    $state = Str::random(40);
+    $request->session()->put('sso_state', $state);
+
+    $query = http_build_query([
+        'client_id'     => env('SSO_CLIENT_ID'),
+        'redirect_uri'  => env('SSO_REDIRECT_URI'),
+        'response_type' => 'code',
+        'scope'         => '',
+        'state'         => $state,
+    ]);
+
+    return redirect(env('SSO_BASE_URL') . '/oauth/authorize?' . $query);
+})->middleware('web')->name('auth.sso.redirect');
+
+Route::get('/auth/sso/callback', function (Request $request) {
+    // Validasi state (CSRF protection) — hanya jika state ada di callback
+    if ($request->state && session('sso_state')) {
+        abort_if($request->state !== session('sso_state'), 419, 'Invalid SSO state.');
+    }
+
+    // Tukar auth code dengan access token
+    $tokenResponse = Http::asForm()
+        ->withoutVerifying()
+        ->post(env('SSO_BASE_URL') . '/oauth/token', [
+            'grant_type'    => 'authorization_code',
+            'client_id'     => env('SSO_CLIENT_ID'),
+            'client_secret' => env('SSO_CLIENT_SECRET'),
+            'redirect_uri'  => env('SSO_REDIRECT_URI'),
+            'code'          => $request->code,
+        ]);
+
+    if (! $tokenResponse->successful()) {
+        $body = $tokenResponse->json();
+        $errDetail = $body['error_description']
+            ?? $body['error']
+            ?? $body['message']
+            ?? ('HTTP ' . $tokenResponse->status() . ' — ' . json_encode($body));
+
+        \Illuminate\Support\Facades\Log::error('SSO token exchange failed', [
+            'status' => $tokenResponse->status(),
+            'body'   => $body,
+        ]);
+
+        return redirect('/login')->withErrors([
+            'sso' => 'Gagal mendapatkan token dari SSO: ' . $errDetail,
+        ]);
+    }
+
+    $accessToken = $tokenResponse->json('access_token');
+
+    // Ambil data user dari SSO menggunakan access token
+    $ssoUser = Http::withToken($accessToken)
+        ->get(env('SSO_BASE_URL') . '/api/user')
+        ->json();
+
+    if (empty($ssoUser['email'])) {
+        return redirect('/login')->withErrors(['sso' => 'Gagal mengambil data user dari SSO.']);
+    }
+
+    // Cari user lokal — cari berdasarkan email dulu, lalu username
+    $localUser = User::where('email', $ssoUser['email'])->first()
+        ?? User::where('username', $ssoUser['username'] ?? '')->first();
+
+    if ($localUser) {
+        // Update data user yang sudah ada
+        $localUser->update([
+            'name'  => $ssoUser['name'],
+            'email' => $ssoUser['email'],
+            'nik'   => $ssoUser['nik'] ?? $localUser->nik,
+        ]);
+    } else {
+        // Buat user baru jika benar-benar belum ada
+        $localUser = User::create([
+            'name'     => $ssoUser['name'],
+            'email'    => $ssoUser['email'],
+            'nik'      => $ssoUser['nik']      ?? null,
+            'username' => $ssoUser['username'] ?? null,
+            'password' => bcrypt(Str::random(32)),
+        ]);
+    }
+
+    // Login lokal & regenerate session
+    Auth::login($localUser, remember: true);
+    $request->session()->regenerate();
+
+    return redirect()->intended('/dashboard');
+})->middleware('web')->name('auth.sso.callback');
 
 // Protected routes
 Route::middleware('auth')->group(function () {
