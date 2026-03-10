@@ -50,6 +50,11 @@ class SsoController extends Controller
             // Generate a local Sanctum token for the mobile app to use with pum API
             $token = $user->createToken('PUM API Token')->plainTextToken;
 
+            // Gather permissions for the user
+            $permissions = $user->role
+                ? $user->role->permissions->pluck('name')->toArray()
+                : [];
+
             return response()->json([
                 'status'  => 'success',
                 'message' => 'SSO Login successful',
@@ -60,7 +65,9 @@ class SsoController extends Controller
                         'email'    => $user->email,
                         'username' => $user->username,
                         'nik'      => $user->nik,
+                        'role'     => $user->role?->name,
                     ],
+                    'permissions'  => $permissions,
                     'access_token' => $token,
                     'token_type'   => 'Bearer',
                 ]
