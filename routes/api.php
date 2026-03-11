@@ -18,6 +18,9 @@ use App\Http\Controllers\Api\PumWorkflowApiController;
 Route::post('/sso-login', [SsoController::class, 'loginViaToken']);
 Route::get('/ping', fn() => response()->json(['status' => 'ok']));
 
+// Public route for downloading attachments (because local symlinks fail on Windows)
+Route::get('/pum/requests/download-attachment/{filename}', [PumRequestApiController::class, 'downloadAttachment']);
+
 Route::middleware('auth:sanctum')->group(function () {
 
     // Current user info

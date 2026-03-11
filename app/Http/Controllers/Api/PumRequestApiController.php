@@ -141,4 +141,17 @@ class PumRequestApiController extends Controller
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], 422);
         }
     }
+
+    public function downloadAttachment($filename)
+    {
+        // Prevent directory traversal
+        $filename = basename($filename);
+        $path = storage_path('app/public/pum-attachments/' . $filename);
+        
+        if (!file_exists($path)) {
+            return response()->json(['status' => 'error', 'message' => 'File tidak ditemukan.'], 404);
+        }
+
+        return response()->file($path);
+    }
 }
