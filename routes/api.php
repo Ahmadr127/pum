@@ -35,21 +35,18 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // ----------------------------------------------------------------
-    // PUM Requests  (PumRequestApiController)
+    // PUM Requests + Approvals  (merged prefix to avoid route conflicts)
+    // Specific slug routes MUST be declared before /{pumRequest} wildcard
     // ----------------------------------------------------------------
     Route::prefix('pum/requests')->group(function () {
-        Route::get('/mine',    [PumRequestApiController::class, 'myRequests']);
-        Route::get('/',        [PumRequestApiController::class, 'index']);
-        Route::get('/{pumRequest}',          [PumRequestApiController::class, 'show']);
-        Route::post('/{pumRequest}/submit',  [PumRequestApiController::class, 'submit']);
-    });
+        Route::get('/mine',               [PumRequestApiController::class,  'myRequests']);
+        Route::get('/pending-approvals',  [PumApprovalApiController::class, 'pendingApprovals']);
+        Route::get('/pending-releases',   [PumApprovalApiController::class, 'pendingReleases']);
+        Route::get('/',                   [PumRequestApiController::class,  'index']);
 
-    // ----------------------------------------------------------------
-    // PUM Approvals  (PumApprovalApiController)
-    // ----------------------------------------------------------------
-    Route::prefix('pum/requests')->group(function () {
-        Route::get('/pending-approvals',     [PumApprovalApiController::class, 'pendingApprovals']);
-        Route::get('/pending-releases',      [PumApprovalApiController::class, 'pendingReleases']);
+        // Wildcard must come LAST
+        Route::get('/{pumRequest}',          [PumRequestApiController::class,  'show']);
+        Route::post('/{pumRequest}/submit',  [PumRequestApiController::class,  'submit']);
         Route::post('/{pumRequest}/approve', [PumApprovalApiController::class, 'approve']);
         Route::post('/{pumRequest}/reject',  [PumApprovalApiController::class, 'reject']);
     });

@@ -34,14 +34,16 @@ class SsoController extends Controller
             }
 
             $ssoUser = $response->json();
+            // main-sso wraps data in {status, data: {...}}
+            $ssoUserData = $ssoUser['data'] ?? $ssoUser;
 
             // Find or update the user locally
             $user = User::updateOrCreate(
-                ['email' => $ssoUser['email']],
+                ['email' => $ssoUserData['email']],
                 [
-                    'name'     => $ssoUser['name'],
-                    'username' => $ssoUser['username'] ?? $ssoUser['email'],
-                    'nik'      => $ssoUser['nik'] ?? null,
+                    'name'     => $ssoUserData['name'],
+                    'username' => $ssoUserData['username'] ?? $ssoUserData['email'],
+                    'nik'      => $ssoUserData['nik'] ?? null,
                     // If you need to handle role mapping, it can be done here.
                     // 'role_id' => ...
                 ]
