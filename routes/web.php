@@ -93,12 +93,19 @@ Route::get('/auth/sso/callback', function (Request $request) {
     $accessToken = $tokenResponse->json('access_token');
 
     // Ambil data user dari SSO menggunakan access token
-    $ssoUser = Http::withToken($accessToken)
-        ->get(env('SSO_BASE_URL') . '/api/user')
-        ->json();
+    try {
+        $ssoUserResponse = Http::withToken($accessToken)
+            ->get(env('SSO_BASE_URL') . '/api/user');
+        $ssoUser = $ssoUserResponse->json();
 
-    if (empty($ssoUser['email'])) {
-        return redirect('/login')->withErrors(['sso' => 'Gagal mengambil data user dari SSO.']);
+        if (empty($ssoUser['email'])) {
+            $errorBody = $ssoUserResponse->body();
+            \Illuminate\Support\Facades\Log::error('SSO User Fetch failed', ['status' => $ssoUserResponse->status(), 'body' => $errorBody]);
+            return redirect('/login')->withErrors(['sso' => 'Gagal mengambil data user dari SSO. Detail: ' . $errorBody]);
+        }
+    } catch (\Exception $e) {
+        \Illuminate\Support\Facades\Log::error('SSO User Fetch Exception', ['message' => $e->getMessage()]);
+        return redirect('/login')->withErrors(['sso' => 'Koneksi ke SSO gagal: ' . $e->getMessage()]);
     }
 
     // Cari user lokal — cari berdasarkan email dulu, lalu username
