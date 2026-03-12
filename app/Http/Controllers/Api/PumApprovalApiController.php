@@ -36,22 +36,39 @@ class PumApprovalApiController extends Controller
             ->byDateRange($request->date_from, $request->date_to)
             ->get();
 
-        $filtered = $allRequests->filter(function ($pumRequest) use ($user) {
+        $filtered = $allRequests->map(function ($pumRequest) use ($user) {
             $currentApproval = $pumRequest->getCurrentApproval();
             $isApprovalStep  = $currentApproval
                 && $currentApproval->step
                 && $currentApproval->step->type !== PumApprovalStep::TYPE_RELEASE
                 && $pumRequest->canBeApprovedBy($user);
 
-            $hasActioned = $pumRequest->approvals->contains(function ($a) use ($user) {
+            $myAction = $pumRequest->approvals->filter(function ($a) use ($user) {
                 return (int) $a->approver_id === (int) $user->id
                     && in_array($a->status, ['approved', 'rejected'])
                     && $a->step
                     && $a->step->type !== PumApprovalStep::TYPE_RELEASE;
-            });
+            })->last();
 
-            return $isApprovalStep || $hasActioned;
-        })->values();
+            $hasActioned = $myAction !== null;
+
+            if (!$isApprovalStep && !$hasActioned) {
+                return null;
+            }
+
+            $myStatus = $isApprovalStep ? 'pending' : $myAction->status;
+            
+            $pumRequest->status = $myStatus;
+            $pumRequest->status_label = \App\Models\PumRequest::getStatusLabels()[$myStatus] ?? $myStatus;
+
+            return $pumRequest;
+        })->filter();
+
+        if ($request->filled('status') && $request->status !== 'all') {
+            $filtered = $filtered->where('status', $request->status);
+        }
+
+        $filtered = $filtered->values();
 
         $summary = [
             'pending'  => $filtered->where('status', 'pending')->count(),
@@ -84,22 +101,39 @@ class PumApprovalApiController extends Controller
             ->byDateRange($request->date_from, $request->date_to)
             ->get();
 
-        $filtered = $allRequests->filter(function ($pumRequest) use ($user) {
+        $filtered = $allRequests->map(function ($pumRequest) use ($user) {
             $currentApproval  = $pumRequest->getCurrentApproval();
             $isCurrentRelease = $currentApproval
                 && $currentApproval->step
                 && $currentApproval->step->type === PumApprovalStep::TYPE_RELEASE
                 && $pumRequest->canBeApprovedBy($user);
 
-            $hasActionedRelease = $pumRequest->approvals->contains(function ($a) use ($user) {
+            $myAction = $pumRequest->approvals->filter(function ($a) use ($user) {
                 return (int) $a->approver_id === (int) $user->id
                     && in_array($a->status, ['approved', 'rejected'])
                     && $a->step
                     && $a->step->type === PumApprovalStep::TYPE_RELEASE;
-            });
+            })->last();
 
-            return $isCurrentRelease || $hasActionedRelease;
-        })->values();
+            $hasActionedRelease = $myAction !== null;
+
+            if (!$isCurrentRelease && !$hasActionedRelease) {
+                return null;
+            }
+
+            $myStatus = $isCurrentRelease ? 'pending' : $myAction->status;
+            
+            $pumRequest->status = $myStatus;
+            $pumRequest->status_label = \App\Models\PumRequest::getStatusLabels()[$myStatus] ?? $myStatus;
+
+            return $pumRequest;
+        })->filter();
+
+        if ($request->filled('status') && $request->status !== 'all') {
+            $filtered = $filtered->where('status', $request->status);
+        }
+
+        $filtered = $filtered->values();
 
         return response()->json([
             'status' => 'success',
