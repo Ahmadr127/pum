@@ -144,13 +144,35 @@ class PumApprovalApiController extends Controller
     /**
      * POST /api/pum/requests/{id}/approve
      * Approve the current pending step on a PUM request.
-     * Body: { "notes": "optional string" }
+     * Body: { "notes": "optional string", "fs_document": "optional file" }
      */
     public function approve(Request $request, PumRequest $pumRequest)
     {
-        $request->validate(['notes' => 'nullable|string|max:500']);
+        $currentApproval = $pumRequest->getCurrentApproval();
+        if (!$currentApproval) {
+            return response()->json(['status' => 'error', 'message' => 'Tidak ada step yang perlu di-approve.'], 422);
+        }
+
+        $needsFsUpload = $currentApproval->step->is_upload_fs_required ?? false;
+
+        $rules = ['notes' => 'nullable|string|max:500'];
+        if ($needsFsUpload) {
+            $rules['fs_document'] = 'required|file|mimes:pdf,doc,docx|max:5120';
+        }
+
+        $request->validate($rules);
 
         try {
+            if ($needsFsUpload && $request->hasFile('fs_document')) {
+                $file = $request->file('fs_document');
+                $filename = time() . '_FS_' . $file->getClientOriginalName();
+                $path = $file->storeAs('public/pum-attachments', $filename);
+                // Also save it inside attachments2 which is intended for added items
+                $attachments2 = $pumRequest->attachments2 ?? [];
+                $attachments2[] = $filename;
+                $pumRequest->update(['attachments2' => $attachments2]);
+            }
+
             $pumRequest->approve(Auth::user(), $request->notes);
             $pumRequest->load(['requester', 'workflow', 'approvals.step', 'approvals.approver']);
             return response()->json([

@@ -76,6 +76,7 @@ class PumRequestApiController extends Controller
                 'step_type'     => $currentApproval->step->type,
                 'approver_type' => $currentApproval->step->approver_type,
                 'status'        => $currentApproval->status,
+                'needs_fs_upload' => $currentApproval->step->is_upload_fs_required ?? false,
             ];
         }
 
