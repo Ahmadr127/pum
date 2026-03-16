@@ -30,7 +30,6 @@ class PumUserSeeder extends Seeder
             
             // Keuangan Team
             ['name' => 'Ria Fajarrohmi', 'username' => 'ria.fajarrohmi', 'email' => 'ria@azra.com', 'role_name' => 'manajer_keuangan', 'unit' => 'KEUANGAN', 'nik' => '3201010101010005'],
-            ['name' => 'Indah Triyani', 'username' => 'indah.triyani', 'email' => 'indah@azra.com', 'role_name' => 'manajer_pembelian', 'unit' => 'KEUANGAN', 'nik' => '3201010101010006'],
             
             // General Manager / Other
             ['name' => 'Seni Maulida', 'username' => 'seni.maulida', 'email' => 'seni@azra.com', 'role_name' => 'manager', 'unit' => 'SEKR', 'nik' => '3201010101010007'],

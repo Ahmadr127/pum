@@ -36,6 +36,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             OrganizationTypeSeeder::class,
             OrganizationUnitSeeder::class,
+            OrganizationUsersSeeder::class,
         ]);
         $this->command->line('');
 

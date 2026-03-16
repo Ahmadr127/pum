@@ -104,7 +104,6 @@ class OrganizationUsersSeeder extends Seeder
             ['nik' => '20253008', 'name' => 'TUMPAS BANGKIT PRAYUDA, SE', 'username' => 'tumpas.bangkit', 'email' => 'tumpas.bangkit@azra.com', 'org_code' => 'MARK', 'role' => $managerRole],
             ['nik' => '20242988', 'name' => 'VERONIKA RINI HANDAYANI, A. MD', 'username' => 'veronika.rini', 'email' => 'veronika.rini@azra.com', 'org_code' => 'SEKR', 'role' => $staffRole],
             // Additional users
-            ['nik' => '99999001', 'name' => 'Indah Triyani', 'username' => 'indah.triyani', 'email' => 'indah.triyani@azra.com', 'org_code' => 'KEU', 'role' => $managerPembelianRole],
             ['nik' => '99999002', 'name' => 'Admin System', 'username' => 'admin', 'email' => 'admin@azra.com', 'org_code' => 'IT', 'role' => $adminRole],
         ];
 
