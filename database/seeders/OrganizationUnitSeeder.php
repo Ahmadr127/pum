@@ -68,12 +68,7 @@ class OrganizationUnitSeeder extends Seeder
             'is_active' => true,
         ]);
 
-        // Manager IT
-        // $managerIT = $this->createUser('Budi Manager IT', 'budi.it', 'manager.it@hospital.com', $managerRole->id, $it->id);
-        // $it->update(['head_id' => $managerIT->id]);
-
-        // Staff IT (1 user)
-        // $this->createUser('Citra Staff IT', 'citra.it', 'citra.it@hospital.com', $staffRole->id, $it->id);
+        // NOTE: User creation is now handled by OrganizationUsersSeeder
 
         // ========================================
         // 3. DEPARTEMEN KEUANGAN (langsung dibawah Direktur Utama)
@@ -87,18 +82,7 @@ class OrganizationUnitSeeder extends Seeder
             'is_active' => true,
         ]);
 
-        // Get keuangan role
-        $keuanganRole = Role::firstOrCreate(
-            ['name' => 'manajer_keuangan'],
-            ['display_name' => 'Manajer Keuangan', 'description' => 'Bagian Keuangan']
-        );
-
-        // Manager Keuangan
-        $managerKeuangan = $this->createUser('Ria Fajarrohmi', 'ria.fajarrohmi', 'ria.fajarrohmi@hospital.com', $keuanganRole->id, $keuangan->id);
-        $keuangan->update(['head_id' => $managerKeuangan->id]);
-
-        // Staff Keuangan (1 user)
-        $this->createUser('Rina Staff Keuangan', 'rina.keuangan', 'rina.keuangan@hospital.com', $staffRole->id, $keuangan->id);
+        // NOTE: User creation is now handled by OrganizationUsersSeeder
 
         // ========================================
         // 4. DEPARTEMEN SEKRETARIS (langsung dibawah Direktur Utama)
@@ -112,12 +96,7 @@ class OrganizationUnitSeeder extends Seeder
             'is_active' => true,
         ]);
 
-        // Manager Sekretaris
-        // $managerSekretaris = $this->createUser('Erna Manager Sekretaris', 'erna.sekretaris', 'manager.sekretaris@hospital.com', $managerRole->id, $sekretaris->id);
-        // $sekretaris->update(['head_id' => $managerSekretaris->id]);
-
-        // Staff Sekretaris (1 user)
-        // $this->createUser('Fitri Staff Sekretaris', 'fitri.sekretaris', 'fitri.sekretaris@hospital.com', $staffRole->id, $sekretaris->id);
+        // NOTE: User creation is now handled by OrganizationUsersSeeder
 
         // ========================================
         // 5. DEPARTEMEN KEPERAWATAN (langsung dibawah Direktur Utama)
@@ -131,12 +110,7 @@ class OrganizationUnitSeeder extends Seeder
             'is_active' => true,
         ]);
 
-        // Manager Keperawatan
-        // $managerKeperawatan = $this->createUser('Hana Manager Keperawatan', 'hana.keperawatan', 'manager.keperawatan@hospital.com', $managerRole->id, $keperawatan->id);
-        // $keperawatan->update(['head_id' => $managerKeperawatan->id]);
-
-        // Staff Keperawatan (1 user)
-        // $this->createUser('Indah Staff Keperawatan', 'indah.keperawatan', 'indah.keperawatan@hospital.com', $staffRole->id, $keperawatan->id);
+        // NOTE: User creation is now handled by OrganizationUsersSeeder
 
         // ========================================
         // 6. DEPARTEMEN RAWAT INAP (langsung dibawah Direktur Utama - setingkat departemen)
@@ -150,12 +124,7 @@ class OrganizationUnitSeeder extends Seeder
             'is_active' => true,
         ]);
 
-        // Manager Rawat Inap
-        // $managerRanap = $this->createUser('Kiki Manager Rawat Inap', 'kiki.ranap', 'manager.ranap@hospital.com', $managerRole->id, $rawatInap->id);
-        // $rawatInap->update(['head_id' => $managerRanap->id]);
-
-        // Staff Rawat Inap (1 user)
-        // $this->createUser('Lina Perawat Ranap', 'lina.ranap', 'lina.ranap@hospital.com', $staffRole->id, $rawatInap->id);
+        // NOTE: User creation is now handled by OrganizationUsersSeeder
 
         // ========================================
         // 7. DEPARTEMEN IGD (langsung dibawah Direktur Utama - setingkat departemen)
@@ -169,12 +138,7 @@ class OrganizationUnitSeeder extends Seeder
             'is_active' => true,
         ]);
 
-        // Manager IGD
-        // $managerIgd = $this->createUser('Nana Manager IGD', 'nana.igd', 'manager.igd@hospital.com', $managerRole->id, $igd->id);
-        // $igd->update(['head_id' => $managerIgd->id]);
-
-        // Staff IGD (1 user)
-        // $this->createUser('Oscar Perawat IGD', 'oscar.igd', 'oscar.igd@hospital.com', $staffRole->id, $igd->id);
+        // NOTE: User creation is now handled by OrganizationUsersSeeder
     }
 
     /**
