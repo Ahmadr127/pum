@@ -99,7 +99,8 @@ Route::get('/auth/sso/callback', function (Request $request) {
             ->get(env('SSO_BASE_URL') . '/api/user');
         $ssoUser = $ssoUserResponse->json('data') ?? $ssoUserResponse->json();
 
-        if (empty($ssoUser['email'])) {
+    // Validasi: NIK harus ada di response SSO
+        if (empty($ssoUser['nik'])) {
             $errorBody = $ssoUserResponse->body();
             \Illuminate\Support\Facades\Log::error('SSO User Fetch failed', ['status' => $ssoUserResponse->status(), 'body' => $errorBody]);
             return redirect('/login')->withErrors(['sso' => 'Gagal mengambil data user dari SSO. Detail: ' . $errorBody]);
@@ -109,23 +110,22 @@ Route::get('/auth/sso/callback', function (Request $request) {
         return redirect('/login')->withErrors(['sso' => 'Koneksi ke SSO gagal: ' . $e->getMessage()]);
     }
 
-    // Cari user lokal — cari berdasarkan email dulu, lalu username
-    $localUser = User::where('email', $ssoUser['email'])->first()
-        ?? User::where('username', $ssoUser['username'] ?? '')->first();
+    // Cari user lokal berdasarkan NIK saja
+    $localUser = User::where('nik', $ssoUser['nik'])->first();
 
     if ($localUser) {
         // Update data user yang sudah ada
         $localUser->update([
-            'name'  => $ssoUser['name'],
-            'email' => $ssoUser['email'],
-            'nik'   => $ssoUser['nik'] ?? $localUser->nik,
+            'name'     => $ssoUser['name'],
+            'email'    => $ssoUser['email'] ?? $localUser->email,
+            'username' => $ssoUser['username'] ?? $localUser->username,
         ]);
     } else {
         // Buat user baru jika benar-benar belum ada
         $localUser = User::create([
+            'nik'      => $ssoUser['nik'],
             'name'     => $ssoUser['name'],
-            'email'    => $ssoUser['email'],
-            'nik'      => $ssoUser['nik']      ?? null,
+            'email'    => $ssoUser['email']    ?? null,
             'username' => $ssoUser['username'] ?? null,
             'password' => bcrypt(Str::random(32)),
         ]);

@@ -150,7 +150,7 @@ class OrganizationUsersSeeder extends Seeder
                     'name' => $userData['name'],
                     'username' => $userData['username'],
                     'email' => $userData['email'],
-                    'password' => Hash::make('password'),
+                    'password' => Hash::make('rsazra'),
                     'role_id' => $role->id,
                     'organization_unit_id' => $orgUnits[$orgCode]->id ?? null,
                 ]);
@@ -161,7 +161,7 @@ class OrganizationUsersSeeder extends Seeder
                     'name' => $userData['name'],
                     'username' => $userData['username'],
                     'email' => $userData['email'],
-                    'password' => Hash::make('password'),
+                    'password' => Hash::make('rsazra'),
                     'role_id' => $role->id,
                     'organization_unit_id' => $orgUnits[$orgCode]->id ?? null,
                 ]);

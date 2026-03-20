@@ -64,7 +64,7 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Administrator',
                 'email' => 'admin@azra.com',
-                'password' => \Hash::make('password'),
+                'password' => \Hash::make('rsazra'),
                 'role_id' => $adminRole?->id,
             ]
         );
@@ -79,12 +79,12 @@ class DatabaseSeeder extends Seeder
         
         $this->command->info('Admin Login:');
         $this->command->line('  Email: admin@azra.com');
-        $this->command->line('  Password: password');
+        $this->command->line('  Password: rsazra');
         $this->command->line('');
         
         $this->command->info('PUM Test Users:');
         $this->command->line('  • direktur.utama (Direktur) - Dr. Ahmad Direktur');
-        $this->command->line('  Password: password');
+        $this->command->line('  Password: rsazra');
         $this->command->line('');
         $this->command->info('Note:');
         $this->command->line('  • User Manager PUM dan Staff PUM dihapus (tidak digunakan)');

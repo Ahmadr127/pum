@@ -14,7 +14,7 @@ class PumUserSeeder extends Seeder
      */
     public function run(): void
     {
-        $password = Hash::make('password');
+        $password = Hash::make('rsazra');
         
         // 1. Specific Users
         $specificUsers = [
