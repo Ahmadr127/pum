@@ -133,6 +133,19 @@ class PumRequestApiController extends Controller
         try {
             $pumRequest->submitForApproval();
             $pumRequest->load(['requester', 'workflow', 'approvals.step', 'approvals.approver']);
+
+            // Notification Hook
+            $notificationService = app(\App\Services\NotificationService::class);
+            if ($pumRequest->status === \App\Models\PumRequest::STATUS_FULFILLED || $pumRequest->status === \App\Models\PumRequest::STATUS_APPROVED) {
+                if ($pumRequest->getCurrentApproval()) {
+                    $notificationService->notifyApprovers($pumRequest);
+                } else {
+                    $notificationService->notifyRequesterApproved($pumRequest);
+                }
+            } else {
+                $notificationService->notifyApprovers($pumRequest);
+            }
+
             return response()->json([
                 'status'  => 'success',
                 'message' => 'Permintaan berhasil diajukan untuk persetujuan.',

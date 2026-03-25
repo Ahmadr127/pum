@@ -27,12 +27,12 @@ class NotificationService
         }
 
         $title = "Persetujuan PUM Baru";
-        $body = "Permintaan PUM {$pumRequest->code} dari {$pumRequest->requester->name} sebesar Rp " . number_format($pumRequest->amount, 0, ',', '.') . " menunggu persetujuan Anda.";
+        $body = "Anda perlu approve pengajuan uang muka {$pumRequest->code}";
         
         // If it's a release step, change the wording
         if ($currentApproval->step->type === \App\Models\PumApprovalStep::TYPE_RELEASE) {
             $title = "Pencairan PUM Baru";
-            $body = "Permintaan PUM {$pumRequest->code} menunggu pencairan (release) dari Anda.";
+            $body = "Anda perlu release pengajuan uang muka {$pumRequest->code}";
         }
 
         $this->notifyUsers($approvers, $title, $body, [
