@@ -6,6 +6,9 @@ use App\Http\Controllers\Api\SsoController;
 use App\Http\Controllers\Api\PumRequestApiController;
 use App\Http\Controllers\Api\PumApprovalApiController;
 use App\Http\Controllers\Api\PumWorkflowApiController;
+use App\Http\Controllers\Api\FcmTokenController;
+use App\Http\Controllers\Api\NotificationApiController;
+use App\Http\Controllers\Api\NotificationTestController;
 
 /*
 |--------------------------------------------------------------------------
@@ -58,4 +61,18 @@ Route::middleware('auth:sanctum')->group(function () {
     // PUM Workflows  (PumWorkflowApiController)
     // ----------------------------------------------------------------
     Route::get('/pum/workflows', [PumWorkflowApiController::class, 'index']);
+
+    // ----------------------------------------------------------------
+    // FCM Tokens
+    // ----------------------------------------------------------------
+    Route::post('/fcm-token',   [FcmTokenController::class, 'store']);
+    Route::delete('/fcm-token', [FcmTokenController::class, 'destroy']);
+    Route::post('/test-notification', [NotificationTestController::class, 'sendTest']);
+
+    // ----------------------------------------------------------------
+    // Notifications (Inbox)
+    // ----------------------------------------------------------------
+    Route::get('/notifications', [NotificationApiController::class, 'index']);
+    Route::patch('/notifications/{id}/read', [NotificationApiController::class, 'markAsRead']);
+    Route::post('/notifications/read-all', [NotificationApiController::class, 'markAllAsRead']);
 });

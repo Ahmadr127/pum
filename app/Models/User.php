@@ -56,6 +56,22 @@ class User extends Authenticatable
         return $this->belongsTo(Role::class);
     }
 
+    /**
+     * Get the device tokens for FCM
+     */
+    public function deviceTokens()
+    {
+        return $this->hasMany(UserDeviceToken::class);
+    }
+
+    /**
+     * Get the notifications for this user (Inbox)
+     */
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class);
+    }
+
     public function hasRole($role)
     {
         if (is_string($role)) {

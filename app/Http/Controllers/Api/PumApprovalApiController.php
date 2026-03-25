@@ -175,6 +175,22 @@ class PumApprovalApiController extends Controller
 
             $pumRequest->approve(Auth::user(), $request->notes);
             $pumRequest->load(['requester', 'workflow', 'approvals.step', 'approvals.approver']);
+
+            // Notification Hook
+            $notificationService = app(\App\Services\NotificationService::class);
+            if ($pumRequest->status === \App\Models\PumRequest::STATUS_FULFILLED || $pumRequest->status === \App\Models\PumRequest::STATUS_APPROVED) {
+                // If the next step is release, but it moved to approved status, we notify next releasers.
+                // Or if it's completely fulfilled, notify requester.
+                if ($pumRequest->getCurrentApproval()) {
+                    $notificationService->notifyApprovers($pumRequest);
+                } else {
+                    $notificationService->notifyRequesterApproved($pumRequest);
+                }
+            } else {
+                // Still in pending, notify next approver
+                $notificationService->notifyApprovers($pumRequest);
+            }
+
             return response()->json([
                 'status'  => 'success',
                 'message' => 'Permintaan berhasil disetujui.',
@@ -197,6 +213,10 @@ class PumApprovalApiController extends Controller
         try {
             $pumRequest->reject(Auth::user(), $request->notes);
             $pumRequest->load(['requester', 'workflow', 'approvals.step', 'approvals.approver']);
+
+            // Notification Hook: Notify Requester about rejection
+            app(\App\Services\NotificationService::class)->notifyRequesterRejected($pumRequest, $request->notes);
+
             return response()->json([
                 'status'  => 'success',
                 'message' => 'Permintaan berhasil ditolak.',

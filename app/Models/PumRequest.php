@@ -232,6 +232,9 @@ class PumRequest extends Model
             ]);
         }
 
+        // Notify the first approver(s)
+        app(\App\Services\NotificationService::class)->notifyApprovers($this);
+
         // AUTO-APPROVE LOGIC
         // If the requester is the designated approver for the current step(s), auto-approve it.
         while ($currentApproval = $this->getCurrentApproval()) {
