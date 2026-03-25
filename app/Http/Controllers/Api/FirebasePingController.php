@@ -15,7 +15,7 @@ class FirebasePingController extends Controller
     public function ping()
     {
         $credentialsJson = env('FIREBASE_CREDENTIALS_JSON');
-        $credentialsPath = env('FIREBASE_CREDENTIALS', storage_path('app/firebase-auth.json'));
+        $credentialsPath = storage_path('app/firebase-auth.json'); // selalu absolute path
 
         // Determine which mode is being used
         $mode       = $credentialsJson ? 'json_string' : 'file_path';
