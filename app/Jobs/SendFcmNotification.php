@@ -57,8 +57,10 @@ class SendFcmNotification implements ShouldQueue
                 ->withNotification($notification)
                 ->withData($this->data)
                 ->withAndroidConfig([
+                    'priority' => 'high',
                     'notification' => [
                         'sound' => 'default',
+                        'channel_id' => 'pum_notifications',
                     ],
                 ])
                 ->withApnsConfig([
