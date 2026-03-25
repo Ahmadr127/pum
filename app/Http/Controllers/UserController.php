@@ -17,7 +17,7 @@ class UserController extends Controller
 {
     public function index(Request $request)
     {
-        $query = User::with('role');
+        $query = User::with('role', 'organizationUnit');
 
         // Search filter
         if ($request->filled('search')) {
@@ -27,6 +27,11 @@ class UserController extends Controller
                   ->orWhereRaw('LOWER(username) LIKE ?', ["%".strtolower($search)."%"])
                   ->orWhereRaw('LOWER(email) LIKE ?', ["%".strtolower($search)."%"]);
             });
+        }
+
+        // Role filter
+        if ($request->filled('role_id')) {
+            $query->where('role_id', $request->role_id);
         }
 
         // Date range filter
@@ -39,8 +44,9 @@ class UserController extends Controller
         }
 
         $users = $query->latest()->paginate(10)->withQueryString();
+        $roles = Role::all();
         
-        return view('users.index', compact('users'));
+        return view('users.index', compact('users', 'roles'));
     }
 
     public function create()
