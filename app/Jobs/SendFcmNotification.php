@@ -55,7 +55,19 @@ class SendFcmNotification implements ShouldQueue
         foreach ($chunks as $chunk) {
             $message = CloudMessage::new()
                 ->withNotification($notification)
-                ->withData($this->data);
+                ->withData($this->data)
+                ->withAndroidConfig([
+                    'notification' => [
+                        'sound' => 'default',
+                    ],
+                ])
+                ->withApnsConfig([
+                    'payload' => [
+                        'aps' => [
+                            'sound' => 'default',
+                        ],
+                    ],
+                ]);
 
             try {
                 Log::info("Sending FCM Notification to " . count($chunk) . " devices. Title: {$this->title}");
