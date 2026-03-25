@@ -35,7 +35,7 @@ class NotificationService
             $body = "Permintaan PUM {$pumRequest->code} menunggu pencairan (release) dari Anda.";
         }
 
-        $this->sendToUsers($approvers, $title, $body, [
+        $this->notifyUsers($approvers, $title, $body, [
             'type' => 'pum_approval_required',
             'pum_id' => (string) $pumRequest->id,
             'code' => $pumRequest->code,
@@ -53,7 +53,7 @@ class NotificationService
         $title = "PUM {$pumRequest->status_label}";
         $body = "Permintaan PUM {$pumRequest->code} Anda sebesar Rp " . number_format($pumRequest->amount, 0, ',', '.') . " {$statusLabel}.";
 
-        $this->sendToUsers(collect([$requester]), $title, $body, [
+        $this->notifyUsers(collect([$requester]), $title, $body, [
             'type' => 'pum_approved',
             'pum_id' => (string) $pumRequest->id,
             'code' => $pumRequest->code,
@@ -70,7 +70,7 @@ class NotificationService
         $title = "PUM Ditolak";
         $body = "Maaf, permintaan PUM {$pumRequest->code} Anda ditolak." . ($notes ? " Alasan: {$notes}" : "");
 
-        $this->sendToUsers(collect([$requester]), $title, $body, [
+        $this->notifyUsers(collect([$requester]), $title, $body, [
             'type' => 'pum_rejected',
             'pum_id' => (string) $pumRequest->id,
             'code' => $pumRequest->code,
@@ -78,9 +78,9 @@ class NotificationService
     }
 
     /**
-     * Internal helper to resolve tokens and dispatch job.
+     * Notify specific users with a custom message.
      */
-    protected function sendToUsers($users, $title, $body, $data = [])
+    public function notifyUsers($users, $title, $body, $data = [])
     {
         $allTokens = [];
 
