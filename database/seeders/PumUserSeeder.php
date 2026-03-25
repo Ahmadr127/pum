@@ -14,33 +14,45 @@ class PumUserSeeder extends Seeder
      */
     public function run(): void
     {
-        $password = Hash::make('rsazra');
-        
-        // 1. Specific Users
-        $specificUsers = [
-            // PT Board / High Level
-            ['name' => 'Budi Manager PT', 'username' => 'manager.pt', 'email' => 'manager.pt@example.com', 'role_name' => 'manager_pt', 'unit' => 'DIRUT', 'nik' => '3201010101010001'],
-            // ['name' => 'Siti Direktur PT', 'username' => 'direktur.pt', 'email' => 'direktur.pt@example.com', 'role_name' => 'direktur_pt', 'unit' => 'DIRUT', 'nik' => '3201010101010002'],
-            
-            // // RS Executives
-            // ['name' => 'dr. Irma Rismayanti, MM', 'username' => 'irma.rismayanti', 'email' => 'irma@azra.com', 'role_name' => 'hospital_director', 'unit' => 'DIRUT', 'nik' => '3201010101010003'],
-            
-            // // Admin
-            // ['name' => 'Muhamad Miftahudin', 'username' => 'admin', 'email' => 'admin@azra.com', 'role_name' => 'admin', 'unit' => 'IT', 'nik' => '3201010101010004'],
-            
-            // // Keuangan Team
-            // ['name' => 'Ria Fajarrohmi', 'username' => 'ria.fajarrohmi', 'email' => 'ria@azra.com', 'role_name' => 'manajer_keuangan', 'unit' => 'KEUANGAN', 'nik' => '3201010101010005'],
-            
-            // // General Manager / Other
-            // ['name' => 'Seni Maulida', 'username' => 'seni.maulida', 'email' => 'seni@azra.com', 'role_name' => 'manager', 'unit' => 'SEKR', 'nik' => '3201010101010007'],
-            
-            // // Staff / Pengguna
-            // ['name' => 'Eka Setia', 'username' => 'eka.setia', 'email' => 'eka@azra.com', 'role_name' => 'staff', 'unit' => 'SEKR', 'nik' => '3201010101010008'],
-            // ['name' => 'Umar', 'username' => 'umar', 'email' => 'umar@azra.com', 'role_name' => 'staff', 'unit' => 'IT', 'nik' => '3201010101010009'],
-        ];
+        $this->command->info('🟢 Starting PUM User Seeder...');
+        $this->command->newLine();
 
-        // NOTE: User creation is now handled by OrganizationUsersSeeder
-        $this->command->info('User creation is now handled by OrganizationUsersSeeder');
-        $this->command->info('PUM users setup completed.');
+        // Create dummy Manager PT user for PUM
+        $this->createDummyManagerPtUser();
+
+        $this->command->newLine();
+        $this->command->info('✅ PUM users setup completed.');
+    }
+
+    private function createDummyManagerPtUser(): void
+    {
+        $this->command->info('📝 Creating Dummy Manager PT User...');
+
+        // Get or create manager_pt role
+        $managerPtRole = Role::firstOrCreate(
+            ['name' => 'manager_pt'],
+            [
+                'display_name' => 'Manager PT',
+                'description' => 'Manager PT - Approver dan Releaser'
+            ]
+        );
+
+        // Create dummy Manager PT user
+        $user = User::firstOrCreate(
+            ['username' => 'manager.pt'],
+            [
+                'nik' => '32010199990001',
+                'name' => 'Budi Manager PT',
+                'email' => 'manager.pt@azra.com',
+                'password' => Hash::make('rsazra'),
+                'role_id' => $managerPtRole->id,
+            ]
+        );
+
+        $this->command->info("  ✓ Dummy User: {$user->name} (manager_pt)");
+        $this->command->info('');
+        $this->command->info('💡 Dummy User Credentials:');
+        $this->command->info('   Username: manager.pt');
+        $this->command->info('   Password: rsazra');
     }
 }
