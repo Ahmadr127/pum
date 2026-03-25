@@ -14,27 +14,48 @@ class FirebasePingController extends Controller
      */
     public function ping()
     {
-        $credentialsPath = storage_path('app/firebase-auth.json');
+        $credentialsJson = env('FIREBASE_CREDENTIALS_JSON');
+        $credentialsPath = env('FIREBASE_CREDENTIALS', storage_path('app/firebase-auth.json'));
 
-        // 1. Check if the credentials file exists
-        if (!file_exists($credentialsPath)) {
-            return response()->json([
-                'status'  => 'error',
-                'message' => 'Firebase credentials file not found at: ' . $credentialsPath,
-            ], 500);
+        // Determine which mode is being used
+        $mode       = $credentialsJson ? 'json_string' : 'file_path';
+        $projectId  = 'unknown';
+        $clientEmail = 'unknown';
+
+        if ($mode === 'json_string') {
+            // Parse the JSON string from env
+            $decoded = json_decode($credentialsJson, true);
+            if (!$decoded) {
+                return response()->json([
+                    'status'  => 'error',
+                    'mode'    => $mode,
+                    'message' => 'FIREBASE_CREDENTIALS_JSON is set but contains invalid JSON.',
+                ], 500);
+            }
+            $projectId   = $decoded['project_id']   ?? 'unknown';
+            $clientEmail = $decoded['client_email']  ?? 'unknown';
+        } else {
+            // File path mode
+            if (!file_exists($credentialsPath)) {
+                return response()->json([
+                    'status'  => 'error',
+                    'mode'    => $mode,
+                    'path'    => $credentialsPath,
+                    'message' => 'Credentials file not found. Upload firebase-auth.json to storage/app/ OR set FIREBASE_CREDENTIALS_JSON in .env instead.',
+                ], 500);
+            }
+            $decoded     = json_decode(file_get_contents($credentialsPath), true);
+            $projectId   = $decoded['project_id']   ?? 'unknown';
+            $clientEmail = $decoded['client_email']  ?? 'unknown';
         }
 
-        // 2. Parse the credentials file to get project info
-        $credentials = json_decode(file_get_contents($credentialsPath), true);
-        $projectId   = $credentials['project_id'] ?? 'unknown';
-        $clientEmail = $credentials['client_email'] ?? 'unknown';
-
-        // 3. Try to instantiate the Firebase messaging service
+        // Try to init messaging service
         try {
-            $messaging = Firebase::messaging();
+            Firebase::messaging();
 
             return response()->json([
                 'status'       => 'ok',
+                'mode'         => $mode,
                 'project_id'   => $projectId,
                 'client_email' => $clientEmail,
                 'message'      => 'Firebase connection successful. Messaging service is ready.',
@@ -44,6 +65,7 @@ class FirebasePingController extends Controller
 
             return response()->json([
                 'status'       => 'error',
+                'mode'         => $mode,
                 'project_id'   => $projectId,
                 'client_email' => $clientEmail,
                 'message'      => 'Firebase messaging init failed: ' . $e->getMessage(),
