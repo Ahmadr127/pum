@@ -65,9 +65,10 @@ class User extends Authenticatable
     }
 
     /**
-     * Get the notifications for this user (Inbox)
+     * Get notification inbox for this user (our custom App\Models\Notification)
+     * Named 'appNotifications' to avoid conflict with Notifiable trait's notifications().
      */
-    public function notifications()
+    public function appNotifications()
     {
         return $this->hasMany(Notification::class);
     }

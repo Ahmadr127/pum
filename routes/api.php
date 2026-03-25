@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\PumWorkflowApiController;
 use App\Http\Controllers\Api\FcmTokenController;
 use App\Http\Controllers\Api\NotificationApiController;
 use App\Http\Controllers\Api\NotificationTestController;
+use App\Http\Controllers\Api\FirebasePingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,6 +21,9 @@ use App\Http\Controllers\Api\NotificationTestController;
 
 Route::post('/sso-login', [SsoController::class, 'loginViaToken']);
 Route::get('/ping', fn() => response()->json(['status' => 'ok']));
+
+// Firebase connection diagnostics (public — no auth required)
+Route::get('/firebase/ping', [FirebasePingController::class, 'ping']);
 
 // Public route for downloading attachments (because local symlinks fail on Windows)
 Route::get('/pum/requests/download-attachment/{filename}', [PumRequestApiController::class, 'downloadAttachment']);
