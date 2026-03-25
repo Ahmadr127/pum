@@ -6,10 +6,12 @@ return [
     'projects' => [
         'app' => [
             // Gunakan FIREBASE_CREDENTIALS_JSON (isi JSON string) jika ada,
-            // atau fallback ke file path di storage/app/firebase-auth.json
+            // atau baca file dan parse sendiri (lebih reliable daripada pass path ke kreait)
             'credentials' => env('FIREBASE_CREDENTIALS_JSON')
                 ? json_decode(env('FIREBASE_CREDENTIALS_JSON'), true)
-                : storage_path('app/firebase-auth.json'),
+                : (file_exists(storage_path('app/firebase-auth.json'))
+                    ? json_decode(file_get_contents(storage_path('app/firebase-auth.json')), true)
+                    : storage_path('app/firebase-auth.json')), // fallback agar error lebih jelas
         ],
     ],
 ];

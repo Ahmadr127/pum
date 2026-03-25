@@ -44,7 +44,22 @@ class FirebasePingController extends Controller
                     'message' => 'Credentials file not found. Upload firebase-auth.json to storage/app/ OR set FIREBASE_CREDENTIALS_JSON in .env instead.',
                 ], 500);
             }
-            $decoded     = json_decode(file_get_contents($credentialsPath), true);
+
+            $raw     = file_get_contents($credentialsPath);
+            $decoded = json_decode($raw, true);
+
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                return response()->json([
+                    'status'     => 'error',
+                    'mode'       => $mode,
+                    'path'       => $credentialsPath,
+                    'json_error' => json_last_error_msg(),
+                    'file_size'  => strlen($raw),
+                    'file_start' => mb_substr($raw, 0, 100), // 100 chars untuk debug
+                    'message'    => 'firebase-auth.json berisi JSON tidak valid: ' . json_last_error_msg(),
+                ], 500);
+            }
+
             $projectId   = $decoded['project_id']   ?? 'unknown';
             $clientEmail = $decoded['client_email']  ?? 'unknown';
         }
