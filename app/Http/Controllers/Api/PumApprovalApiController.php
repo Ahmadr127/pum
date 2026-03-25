@@ -21,14 +21,15 @@ class PumApprovalApiController extends Controller
 {
     /**
      * GET /api/pum/requests/pending-approvals
-     * Requests with approval-type steps waiting for the current user.
+     * Requests with approval-type steps that the user is involved in (pending, approved, or already actioned).
+     * Shows all statuses EXCEPT 'new' and 'rejected'.
      */
     public function pendingApprovals(Request $request)
     {
         $user = Auth::user();
 
         $allRequests = PumRequest::with(['requester', 'workflow.steps', 'approvals.step', 'approvals.approver'])
-            ->whereIn('status', [PumRequest::STATUS_PENDING, PumRequest::STATUS_APPROVED])
+            ->whereIn('status', [PumRequest::STATUS_PENDING, PumRequest::STATUS_APPROVED, PumRequest::STATUS_FULFILLED])
             ->whereHas('approvals', function ($q) use ($user) {
                 $q->where(fn($s) => $s->where('status', 'pending')->orWhere('approver_id', $user->id));
             })
@@ -85,14 +86,15 @@ class PumApprovalApiController extends Controller
 
     /**
      * GET /api/pum/requests/pending-releases
-     * Requests with release-type steps waiting for the current user.
+     * Requests with release-type steps that the user is involved in (pending, approved, or already actioned).
+     * Shows all statuses EXCEPT 'new' and 'rejected'.
      */
     public function pendingReleases(Request $request)
     {
         $user = Auth::user();
 
         $allRequests = PumRequest::with(['requester', 'workflow.steps', 'approvals.step', 'approvals.approver'])
-            ->whereIn('status', [PumRequest::STATUS_PENDING, PumRequest::STATUS_APPROVED])
+            ->whereIn('status', [PumRequest::STATUS_PENDING, PumRequest::STATUS_APPROVED, PumRequest::STATUS_FULFILLED])
             ->whereHas('approvals', function ($q) use ($user) {
                 $q->whereHas('step', fn($s) => $s->where('type', PumApprovalStep::TYPE_RELEASE))
                   ->where(fn($s) => $s->where('status', 'pending')->orWhere('approver_id', $user->id));
