@@ -61,7 +61,7 @@ class UserController extends Controller
             'name'      => 'required|string|max:255',
             'username'  => 'required|string|max:255|unique:users',
             'email'     => 'required|string|email|max:255|unique:users',
-            'password'  => 'required|string|min:8|confirmed',
+            'password'  => 'required|string|confirmed',
             'role_id'   => 'required|exists:roles,id',
             'nik'       => 'nullable|string|max:30|unique:users,nik',
         ]);
@@ -94,7 +94,7 @@ class UserController extends Controller
             'name'     => 'required|string|max:255',
             'username' => 'required|string|max:255|unique:users,username,' . $user->id,
             'email'    => 'required|string|email|max:255|unique:users,email,' . $user->id,
-            'password' => 'nullable|string|min:8|confirmed',
+            'password' => 'nullable|string|confirmed',
             'role_id'  => 'required|exists:roles,id',
             'nik'      => 'nullable|string|max:30|unique:users,nik,' . $user->id,
         ]);
