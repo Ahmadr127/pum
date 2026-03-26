@@ -84,8 +84,12 @@ class NotificationService
     {
         $allTokens = [];
         $allDeviceTypeCounts = [];
+        $targetUserIds = [];
+        $perUserTokenDebug = [];
 
         foreach ($users as $user) {
+            $targetUserIds[] = $user->id;
+
             // Save to database inbox for each user (Phase 8 integration)
             \App\Models\Notification::create([
                 'user_id' => $user->id,
@@ -97,6 +101,24 @@ class NotificationService
             $tokenRecords = $user->deviceTokens()->get(['device_token', 'device_type']);
             $tokens = $tokenRecords->pluck('device_token')->toArray();
             $allTokens = array_merge($allTokens, $tokens);
+
+            $lengths = [];
+            $hashes = [];
+            foreach ($tokens as $t) {
+                if (!is_string($t)) {
+                    continue;
+                }
+                $lengths[] = strlen($t);
+                if (count($hashes) < 3 && $t !== '') {
+                    $hashes[] = substr(hash('sha256', $t), 0, 12);
+                }
+            }
+            $perUserTokenDebug[] = [
+                'user_id' => $user->id,
+                'token_count' => count($tokens),
+                'token_lengths' => $lengths,
+                'token_hash_samples_sha256_prefix' => $hashes,
+            ];
 
             foreach ($tokenRecords->groupBy('device_type') as $deviceType => $group) {
                 $key = $deviceType ?? 'unknown';
@@ -124,6 +146,8 @@ class NotificationService
                 'runId' => 'iter2',
                 'hypothesisId' => 'H1_placeholder_or_invalid_tokens_in_db',
                 'user_count' => (is_object($users) ? $users->count() : count($users)),
+                'target_user_ids' => $targetUserIds,
+                'per_user_token_debug' => $perUserTokenDebug,
                 'token_count_total' => count($allTokens),
                 'device_type_counts' => $allDeviceTypeCounts,
                 'placeholder_exact_count' => $placeholderExactCount,

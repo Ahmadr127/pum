@@ -69,11 +69,15 @@ class FcmTokenController extends Controller
             'device_token' => 'required|string',
         ]);
 
-        UserDeviceToken::where('device_token', $request->device_token)->delete();
+        $token = trim((string) $request->device_token);
+        $deleted = UserDeviceToken::where('user_id', Auth::id())
+            ->where('device_token', $token)
+            ->delete();
 
         return response()->json([
             'status'  => 'success',
             'message' => 'FCM Token berhasil dihapus.',
+            'deleted' => $deleted,
         ]);
     }
 }
