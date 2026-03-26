@@ -76,8 +76,41 @@ class SendFcmNotification implements ShouldQueue
 
         $notification = Notification::create($this->title, $this->body);
         
-        // Filter out empty tokens
-        $tokens = array_filter($this->tokens);
+        // Filter out empty/placeholder/obviously-invalid tokens (avoid spamming FCM with garbage).
+        $dropped = [
+            'empty' => 0,
+            'non_string' => 0,
+            'placeholder_exact' => 0,
+            'too_short' => 0,
+        ];
+        $tokens = [];
+        foreach ($this->tokens as $t) {
+            if (!is_string($t)) {
+                $dropped['non_string']++;
+                continue;
+            }
+            $t = trim($t);
+            if ($t === '') {
+                $dropped['empty']++;
+                continue;
+            }
+            if ($t === 'YOUR_FCM_TOKEN_HERE') {
+                $dropped['placeholder_exact']++;
+                continue;
+            }
+            // Typical FCM registration tokens are long; short tokens are always invalid.
+            if (strlen($t) < 50) {
+                $dropped['too_short']++;
+                continue;
+            }
+            $tokens[] = $t;
+        }
+        $tokens = array_values(array_unique($tokens));
+        Log::info('[FCM DEBUG] Token filtering summary (pum)', [
+            'runId' => 'iter3',
+            'kept' => count($tokens),
+            'dropped' => $dropped,
+        ]);
         
         if (empty($tokens)) {
             return;
@@ -143,8 +176,10 @@ class SendFcmNotification implements ShouldQueue
                             str_contains($reasonLower, 'not a valid fcm registration token') ||
                             str_contains($reasonLower, 'registration token is not a valid fcm registration token')) {
                             $deleted = UserDeviceToken::where('device_token', $targetToken)->delete();
+                            $remaining = UserDeviceToken::where('device_token', $targetToken)->count();
                             Log::warning("Removing invalid FCM Token (pum). Reason: {$reason}", [
                                 'deleted_rows' => $deleted,
+                                'remaining_rows_for_token' => $remaining,
                                 'token_sha256_prefix' => substr(hash('sha256', $targetToken), 0, 12),
                             ]);
                         } else {
