@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use App\Models\User;
+use Illuminate\Support\Str;
 
 class SsoController extends Controller
 {
@@ -45,26 +47,59 @@ class SsoController extends Controller
                 ], 422);
             }
 
-            // Cari user lokal berdasarkan NIK saja (konsisten dengan web SSO)
-            $user = User::where('nik', $ssoUserData['nik'])->first();
+            $nik = trim((string) $ssoUserData['nik']);
+            $name = trim((string) ($ssoUserData['name'] ?? 'User SSO'));
+            $email = isset($ssoUserData['email']) ? trim((string) $ssoUserData['email']) : null;
+            $username = isset($ssoUserData['username']) ? trim((string) $ssoUserData['username']) : null;
+
+            // Permanent resolution strategy to avoid duplicate local users:
+            // 1) by nik (canonical), 2) fallback claim by email, 3) fallback claim by username.
+            $user = User::where('nik', $nik)->first();
+            $resolvedBy = 'nik';
+
+            if (!$user && $email) {
+                $user = User::where('email', $email)->first();
+                if ($user) {
+                    $resolvedBy = 'email';
+                }
+            }
+
+            if (!$user && $username) {
+                $user = User::where('username', $username)->first();
+                if ($user) {
+                    $resolvedBy = 'username';
+                }
+            }
 
             if ($user) {
-                // Update data supplementary jika ada
+                // Bind legacy local account to current NIK so future logins are stable.
                 $user->update([
-                    'name'     => $ssoUserData['name'],
-                    'email'    => $ssoUserData['email']    ?? $user->email,
-                    'username' => $ssoUserData['username'] ?? $user->username,
+                    'nik'      => $nik,
+                    'name'     => $name,
+                    'email'    => $email ?: $user->email,
+                    'username' => $username ?: $user->username,
                 ]);
             } else {
+                $resolvedBy = 'create';
+
                 // Buat user baru
                 $user = User::create([
-                    'nik'      => $ssoUserData['nik'],
-                    'name'     => $ssoUserData['name'],
-                    'email'    => $ssoUserData['email']    ?? null,
-                    'username' => $ssoUserData['username'] ?? null,
-                    'password' => bcrypt(\Illuminate\Support\Str::random(32)),
+                    'nik'      => $nik,
+                    'name'     => $name,
+                    // users.email is required+unique; provide deterministic fallback if missing.
+                    'email'    => $email ?: ('sso+' . $nik . '@local.invalid'),
+                    'username' => $username ?: ('user_' . $nik),
+                    'password' => bcrypt(Str::random(32)),
                 ]);
             }
+
+            Log::info('SSO user resolution (pum)', [
+                'nik' => $nik,
+                'resolved_by' => $resolvedBy,
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'username' => $user->username,
+            ]);
 
             // Generate a local Sanctum token for the mobile app to use with pum API
             $token = $user->createToken('PUM API Token')->plainTextToken;
