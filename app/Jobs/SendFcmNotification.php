@@ -39,7 +39,41 @@ class SendFcmNotification implements ShouldQueue
     public function handle(): void
     {
         $messaging = Firebase::messaging();
-        
+
+        // Runtime evidence: token statistics (avoid logging raw tokens).
+        $tokensSnapshot = $this->tokens;
+        $tokenCount = is_array($tokensSnapshot) ? count($tokensSnapshot) : 0;
+        $placeholderExactCount = 0;
+        $minLen = null;
+        $maxLen = null;
+        $tokenHashSamples = [];
+        foreach ($tokensSnapshot as $t) {
+            if (!is_string($t)) {
+                continue;
+            }
+            if ($t === 'YOUR_FCM_TOKEN_HERE') {
+                $placeholderExactCount++;
+            }
+            $len = strlen($t);
+            $minLen = $minLen === null ? $len : min($minLen, $len);
+            $maxLen = $maxLen === null ? $len : max($maxLen, $len);
+            if (count($tokenHashSamples) < 3 && $t !== '') {
+                $tokenHashSamples[] = substr(hash('sha256', $t), 0, 12);
+            }
+        }
+
+        $projectId = config('firebase.projects.' . config('firebase.default') . '.credentials.project_id') ?? 'unknown';
+        Log::info('[FCM DEBUG] Job about to send multicast (pum)', [
+            'runId' => 'iter2',
+            'hypothesisId' => 'H1_placeholder_or_invalid_tokens_in_db',
+            'token_count' => $tokenCount,
+            'placeholder_exact_count' => $placeholderExactCount,
+            'token_length' => ['min' => $minLen, 'max' => $maxLen],
+            'firebase_project_id' => $projectId,
+            'title' => $this->title,
+            'token_hash_samples_sha256_prefix' => $tokenHashSamples,
+        ]);
+
         $notification = Notification::create($this->title, $this->body);
         
         // Filter out empty tokens
@@ -51,6 +85,7 @@ class SendFcmNotification implements ShouldQueue
 
         // Send in chunks of 500 (FCM limit for multicast)
         $chunks = array_chunk($tokens, 500);
+        $firstFailureLogged = false;
 
         foreach ($chunks as $chunk) {
             $message = CloudMessage::new()
@@ -83,14 +118,31 @@ class SendFcmNotification implements ShouldQueue
                     foreach ($report->failures()->getItems() as $failure) {
                         $reason = $failure->error()->getMessage();
                         $targetToken = $failure->target()->value();
+
+                        // Log only the first failure to keep output small.
+                        if ($firstFailureLogged === false) {
+                            $matchesCleanup =
+                                (str_contains($reason, 'invalid-registration-token') ||
+                                    str_contains($reason, 'registration-token-not-registered'));
+                            $isPlaceholderTarget = $targetToken === 'YOUR_FCM_TOKEN_HERE';
+                            Log::info('[FCM DEBUG] First failure reason + cleanup match (pum)', [
+                                'runId' => 'iter2',
+                                'hypothesisId' => 'H3_cleanup_patterns_mismatch_with_fcm_reason',
+                                'fcm_reason' => $reason,
+                                'cleanup_condition_matches_current_patterns' => $matchesCleanup,
+                                'target_is_placeholder_exact' => $isPlaceholderTarget,
+                                'target_sha256_prefix' => substr(hash('sha256', $targetToken), 0, 12),
+                            ]);
+                            $firstFailureLogged = true;
+                        }
                         
                         // If token is invalid or not registered, delete it
                         if (str_contains($reason, 'invalid-registration-token') || 
                             str_contains($reason, 'registration-token-not-registered')) {
-                            Log::warning("Removing invalid FCM Token: {$targetToken}. Reason: {$reason}");
+                            Log::warning("Removing invalid FCM Token (pum). Reason: {$reason}");
                             UserDeviceToken::where('device_token', $targetToken)->delete();
                         } else {
-                            Log::error("FCM Delivery Failed for token {$targetToken}. Reason: {$reason}");
+                            Log::error("FCM Delivery Failed for token (masked, pum). Reason: {$reason}");
                         }
                     }
                 }

@@ -83,6 +83,7 @@ class NotificationService
     public function notifyUsers($users, $title, $body, $data = [])
     {
         $allTokens = [];
+        $allDeviceTypeCounts = [];
 
         foreach ($users as $user) {
             // Save to database inbox for each user (Phase 8 integration)
@@ -93,13 +94,41 @@ class NotificationService
                 'data'    => $data,
             ]);
 
-            $tokens = $user->deviceTokens()->pluck('device_token')->toArray();
+            $tokenRecords = $user->deviceTokens()->get(['device_token', 'device_type']);
+            $tokens = $tokenRecords->pluck('device_token')->toArray();
             $allTokens = array_merge($allTokens, $tokens);
+
+            foreach ($tokenRecords->groupBy('device_type') as $deviceType => $group) {
+                $key = $deviceType ?? 'unknown';
+                $allDeviceTypeCounts[$key] = ($allDeviceTypeCounts[$key] ?? 0) + $group->count();
+            }
         }
 
         $allTokens = array_unique($allTokens);
 
         if (!empty($allTokens)) {
+            // Runtime evidence: token distribution & whether placeholder exists.
+            $placeholderExactCount = 0;
+            $tokenHashSamples = [];
+            foreach ($allTokens as $t) {
+                if ($t === 'YOUR_FCM_TOKEN_HERE') {
+                    $placeholderExactCount++;
+                }
+                // Avoid logging raw FCM tokens; log only short hashes.
+                if (count($tokenHashSamples) < 3 && is_string($t) && $t !== '') {
+                    $tokenHashSamples[] = substr(hash('sha256', $t), 0, 12);
+                }
+            }
+
+            Log::info('[FCM DEBUG] Dispatching FCM notification (pum)', [
+                'runId' => 'iter2',
+                'hypothesisId' => 'H1_placeholder_or_invalid_tokens_in_db',
+                'user_count' => (is_object($users) ? $users->count() : count($users)),
+                'token_count_total' => count($allTokens),
+                'device_type_counts' => $allDeviceTypeCounts,
+                'placeholder_exact_count' => $placeholderExactCount,
+                'token_hash_samples_sha256_prefix' => $tokenHashSamples,
+            ]);
             SendFcmNotification::dispatch($allTokens, $title, $body, $data);
         }
     }
