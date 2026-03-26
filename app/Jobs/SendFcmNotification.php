@@ -142,8 +142,11 @@ class SendFcmNotification implements ShouldQueue
                             str_contains($reasonLower, 'registration-token-not-registered') ||
                             str_contains($reasonLower, 'not a valid fcm registration token') ||
                             str_contains($reasonLower, 'registration token is not a valid fcm registration token')) {
-                            Log::warning("Removing invalid FCM Token (pum). Reason: {$reason}");
-                            UserDeviceToken::where('device_token', $targetToken)->delete();
+                            $deleted = UserDeviceToken::where('device_token', $targetToken)->delete();
+                            Log::warning("Removing invalid FCM Token (pum). Reason: {$reason}", [
+                                'deleted_rows' => $deleted,
+                                'token_sha256_prefix' => substr(hash('sha256', $targetToken), 0, 12),
+                            ]);
                         } else {
                             Log::error("FCM Delivery Failed for token (masked, pum). Reason: {$reason}");
                         }
