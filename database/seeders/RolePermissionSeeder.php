@@ -45,7 +45,7 @@ class RolePermissionSeeder extends Seeder
             ]
         );
 
-        $direkturRole = Role::firstOrCreate(
+        $hospitalDirectorRole = Role::firstOrCreate(
             ['name' => 'hospital_director'],
             [
                 'display_name' => 'Hospital Director',
@@ -90,10 +90,12 @@ class RolePermissionSeeder extends Seeder
         );
 
         // Direktur gets specific permissions
-        $direkturRole->permissions()->sync(
+        $hospitalDirectorRole->permissions()->sync(
             Permission::whereIn('name', [
                 'view_dashboard',
-                'approve_pum'
+                'approve_pum',
+                'manage_pum',
+                'create_pum'
             ])->get()
         );
 
