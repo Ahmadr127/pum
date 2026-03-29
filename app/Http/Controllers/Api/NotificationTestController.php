@@ -25,14 +25,15 @@ class NotificationTestController extends Controller
         $title = $request->title ?? 'Test Notifikasi PUM';
         $body = $request->body ?? 'Ini adalah pesan percobaan dari sistem PUM Azra.';
 
-        $notificationService->notifyUsers(collect([$user]), $title, $body, [
+        $debugData = $notificationService->notifyUsers(collect([$user]), $title, $body, [
             'type' => 'test_notification',
             'sent_at' => now()->toDateTimeString(),
         ]);
-
+        
         return response()->json([
             'status'  => 'success',
             'message' => 'Test notifikasi telah dikirim ke perangkat Anda.',
+            'data'    => $debugData,
         ]);
     }
 }

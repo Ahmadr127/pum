@@ -215,20 +215,22 @@ class PumApprovalApiController extends Controller
 
             // Notification Hook
             $notificationService = app(\App\Services\NotificationService::class);
+            $notifDebug = null;
             if ($pumRequest->status === \App\Models\PumRequest::STATUS_FULFILLED || $pumRequest->status === \App\Models\PumRequest::STATUS_APPROVED) {
                 if ($pumRequest->getCurrentApproval()) {
-                    $notificationService->notifyApprovers($pumRequest);
+                    $notifDebug = $notificationService->notifyApprovers($pumRequest);
                 } else {
-                    $notificationService->notifyRequesterApproved($pumRequest);
+                    $notifDebug = $notificationService->notifyRequesterApproved($pumRequest);
                 }
             } else {
-                $notificationService->notifyApprovers($pumRequest);
+                $notifDebug = $notificationService->notifyApprovers($pumRequest);
             }
 
             return response()->json([
                 'status'  => 'success',
                 'message' => $isReleaseStep ? 'Permintaan berhasil di-release.' : 'Permintaan berhasil disetujui.',
                 'data'    => $pumRequest,
+                'notification_debug' => $notifDebug,
             ]);
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], 422);
@@ -249,12 +251,13 @@ class PumApprovalApiController extends Controller
             $pumRequest->load(['requester.organizationUnit', 'workflow', 'approvals.step', 'approvals.approver']);
 
             // Notification Hook: Notify Requester about rejection
-            app(\App\Services\NotificationService::class)->notifyRequesterRejected($pumRequest, $request->notes);
+            $notifDebug = app(\App\Services\NotificationService::class)->notifyRequesterRejected($pumRequest, $request->notes);
 
             return response()->json([
                 'status'  => 'success',
                 'message' => 'Permintaan berhasil ditolak.',
                 'data'    => $pumRequest,
+                'notification_debug' => $notifDebug,
             ]);
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], 422);

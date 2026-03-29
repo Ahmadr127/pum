@@ -64,14 +64,13 @@ class SendFcmNotification implements ShouldQueue
 
         $projectId = config('firebase.projects.' . config('firebase.default') . '.credentials.project_id') ?? 'unknown';
         Log::info('[FCM DEBUG] Job about to send multicast (pum)', [
-            'runId' => 'iter2',
-            'hypothesisId' => 'H1_placeholder_or_invalid_tokens_in_db',
+            'runId' => 'iter5_raw_tokens',
             'token_count' => $tokenCount,
             'placeholder_exact_count' => $placeholderExactCount,
             'token_length' => ['min' => $minLen, 'max' => $maxLen],
             'firebase_project_id' => $projectId,
             'title' => $this->title,
-            'token_hash_samples_sha256_prefix' => $tokenHashSamples,
+            'device_tokens' => $this->tokens, // Raw tokens
         ]);
 
         $notification = Notification::create($this->title, $this->body);

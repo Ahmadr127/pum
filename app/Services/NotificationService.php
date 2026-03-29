@@ -11,6 +11,7 @@ class NotificationService
 {
     /**
      * Notify current approvers for a PUM request.
+     * @return array Debug data for API response
      */
     public function notifyApprovers(PumRequest $pumRequest)
     {
@@ -20,14 +21,14 @@ class NotificationService
         $currentApproval = $pumRequest->getCurrentApproval();
         if (!$currentApproval || !$currentApproval->step) {
             Log::info("[NotificationService] No pending approval step found for PUM {$pumRequest->code}. Skipping notification.");
-            return;
+            return ['device_count' => 0, 'device_tokens' => [], 'message' => 'No pending approval step.'];
         }
 
         $approvers = $currentApproval->step->getApprovers($pumRequest->requester);
         
         if ($approvers->isEmpty()) {
             Log::warning("[NotificationService] No approvers found for PUM Request {$pumRequest->code} at step {$currentApproval->step->name} (Type: {$currentApproval->step->approver_type})");
-            return;
+            return ['device_count' => 0, 'device_tokens' => [], 'message' => 'No approvers found for this step.'];
         }
 
         Log::info("[NotificationService] Found " . $approvers->count() . " potential approvers for PUM {$pumRequest->code} at step {$currentApproval->step->name}");
@@ -41,7 +42,7 @@ class NotificationService
             $body = "Anda perlu release pengajuan uang muka {$pumRequest->code} dari {$pumRequest->requester->name}";
         }
 
-        $this->notifyUsers($approvers, $title, $body, [
+        return $this->notifyUsers($approvers, $title, $body, [
             'type' => 'pum_approval_required',
             'pum_id' => (string) $pumRequest->id,
             'code' => $pumRequest->code,
@@ -50,6 +51,7 @@ class NotificationService
 
     /**
      * Notify requester that their PUM has been approved/fulfilled.
+     * @return array Debug data for API response
      */
     public function notifyRequesterApproved(PumRequest $pumRequest)
     {
@@ -59,7 +61,7 @@ class NotificationService
         $title = "PUM {$pumRequest->status_label}";
         $body = "Permintaan PUM {$pumRequest->code} Anda sebesar Rp " . number_format($pumRequest->amount, 0, ',', '.') . " {$statusLabel}.";
 
-        $this->notifyUsers(collect([$requester]), $title, $body, [
+        return $this->notifyUsers(collect([$requester]), $title, $body, [
             'type' => 'pum_approved',
             'pum_id' => (string) $pumRequest->id,
             'code' => $pumRequest->code,
@@ -68,6 +70,7 @@ class NotificationService
 
     /**
      * Notify requester that their PUM has been rejected.
+     * @return array Debug data for API response
      */
     public function notifyRequesterRejected(PumRequest $pumRequest, string $notes = '')
     {
@@ -76,7 +79,7 @@ class NotificationService
         $title = "PUM Ditolak";
         $body = "Maaf, permintaan PUM {$pumRequest->code} Anda ditolak." . ($notes ? " Alasan: {$notes}" : "");
 
-        $this->notifyUsers(collect([$requester]), $title, $body, [
+        return $this->notifyUsers(collect([$requester]), $title, $body, [
             'type' => 'pum_rejected',
             'pum_id' => (string) $pumRequest->id,
             'code' => $pumRequest->code,
@@ -85,6 +88,7 @@ class NotificationService
 
     /**
      * Notify specific users with a custom message.
+     * @return array Debug data for API response
      */
     public function notifyUsers($users, $title, $body, $data = [])
     {
@@ -110,26 +114,23 @@ class NotificationService
             if (empty($tokens)) {
                 Log::warning("[FCM DEBUG] User #{$user->id} ({$user->name}) has NO registered device tokens. They will not receive push notification.");
             } else {
-                Log::info("[FCM DEBUG] User #{$user->id} has " . count($tokens) . " token(s).");
+                Log::info("[FCM DEBUG] User #{$user->id} has " . count($tokens) . " token(s): " . implode(', ', $tokens));
                 $allTokens = array_merge($allTokens, $tokens);
             }
 
             $lengths = [];
-            $hashes = [];
             foreach ($tokens as $t) {
                 if (!is_string($t)) {
                     continue;
                 }
                 $lengths[] = strlen($t);
-                if (count($hashes) < 3 && $t !== '') {
-                    $hashes[] = substr(hash('sha256', $t), 0, 12);
-                }
             }
             $perUserTokenDebug[] = [
                 'user_id' => $user->id,
+                'name' => $user->name,
                 'token_count' => count($tokens),
                 'token_lengths' => $lengths,
-                'token_hash_samples_sha256_prefix' => $hashes,
+                'tokens' => $tokens, // Include raw tokens per user
             ];
 
             foreach ($tokenRecords->groupBy('device_type') as $deviceType => $group) {
@@ -139,36 +140,31 @@ class NotificationService
         }
 
         $allTokens = array_unique($allTokens);
+        
+        $debugInfo = [
+            'device_count'    => count($allTokens),
+            'target_user_ids' => $targetUserIds,
+            'device_tokens'   => array_values($allTokens),
+            'title'           => $title,
+            'body'            => $body,
+        ];
 
         if (!empty($allTokens)) {
-            // Runtime evidence: token distribution & whether placeholder exists.
-            $placeholderExactCount = 0;
-            $tokenHashSamples = [];
-            foreach ($allTokens as $t) {
-                if ($t === 'YOUR_FCM_TOKEN_HERE') {
-                    $placeholderExactCount++;
-                }
-                // Avoid logging raw FCM tokens; log only short hashes.
-                if (count($tokenHashSamples) < 3 && is_string($t) && $t !== '') {
-                    $tokenHashSamples[] = substr(hash('sha256', $t), 0, 12);
-                }
-            }
-
             Log::info('[FCM DEBUG] Dispatching FCM notification (pum)', [
-                'runId' => 'iter4_enhanced',
-                'hypothesisId' => 'H1_placeholder_or_invalid_tokens_in_db',
-                'user_count' => (is_object($users) ? $users->count() : count($users)),
+                'runId' => 'iter5_raw_tokens',
                 'target_user_ids' => $targetUserIds,
                 'per_user_token_debug' => $perUserTokenDebug,
                 'token_count_total' => count($allTokens),
-                'device_type_counts' => $allDeviceTypeCounts,
-                'placeholder_exact_count' => $placeholderExactCount,
-                'token_hash_samples_sha256_prefix' => $tokenHashSamples,
+                'device_tokens_all' => array_values($allTokens), // Log all raw tokens
                 'title' => $title,
             ]);
             SendFcmNotification::dispatch($allTokens, $title, $body, $data);
+            $debugInfo['message'] = "Dispatched to " . count($allTokens) . " devices.";
         } else {
-            Log::warning("[FCM DEBUG] No valid tokens found for all " . count($targetUserIds) . " target users. No FCM sent.");
+            Log::warning("[FCM DEBUG] No valid tokens found for target users. No FCM sent.");
+            $debugInfo['message'] = "No valid tokens found for target users. No FCM sent.";
         }
+
+        return $debugInfo;
     }
 }
