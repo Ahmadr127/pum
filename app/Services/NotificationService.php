@@ -14,25 +14,31 @@ class NotificationService
      */
     public function notifyApprovers(PumRequest $pumRequest)
     {
+        // Ensure requester and their organization unit are loaded for Org Head resolution
+        $pumRequest->loadMissing('requester.organizationUnit');
+        
         $currentApproval = $pumRequest->getCurrentApproval();
         if (!$currentApproval || !$currentApproval->step) {
+            Log::info("[NotificationService] No pending approval step found for PUM {$pumRequest->code}. Skipping notification.");
             return;
         }
 
         $approvers = $currentApproval->step->getApprovers($pumRequest->requester);
         
         if ($approvers->isEmpty()) {
-            Log::warning("No approvers found for PUM Request {$pumRequest->code} at step {$currentApproval->step->name}");
+            Log::warning("[NotificationService] No approvers found for PUM Request {$pumRequest->code} at step {$currentApproval->step->name} (Type: {$currentApproval->step->approver_type})");
             return;
         }
 
+        Log::info("[NotificationService] Found " . $approvers->count() . " potential approvers for PUM {$pumRequest->code} at step {$currentApproval->step->name}");
+
         $title = "Persetujuan PUM Baru";
-        $body = "Anda perlu approve pengajuan uang muka {$pumRequest->code}";
+        $body = "Anda perlu approve pengajuan uang muka {$pumRequest->code} dari {$pumRequest->requester->name}";
         
         // If it's a release step, change the wording
         if ($currentApproval->step->type === \App\Models\PumApprovalStep::TYPE_RELEASE) {
             $title = "Pencairan PUM Baru";
-            $body = "Anda perlu release pengajuan uang muka {$pumRequest->code}";
+            $body = "Anda perlu release pengajuan uang muka {$pumRequest->code} dari {$pumRequest->requester->name}";
         }
 
         $this->notifyUsers($approvers, $title, $body, [
@@ -100,7 +106,13 @@ class NotificationService
 
             $tokenRecords = $user->deviceTokens()->get(['device_token', 'device_type']);
             $tokens = $tokenRecords->pluck('device_token')->toArray();
-            $allTokens = array_merge($allTokens, $tokens);
+            
+            if (empty($tokens)) {
+                Log::warning("[FCM DEBUG] User #{$user->id} ({$user->name}) has NO registered device tokens. They will not receive push notification.");
+            } else {
+                Log::info("[FCM DEBUG] User #{$user->id} has " . count($tokens) . " token(s).");
+                $allTokens = array_merge($allTokens, $tokens);
+            }
 
             $lengths = [];
             $hashes = [];
@@ -143,7 +155,7 @@ class NotificationService
             }
 
             Log::info('[FCM DEBUG] Dispatching FCM notification (pum)', [
-                'runId' => 'iter2',
+                'runId' => 'iter4_enhanced',
                 'hypothesisId' => 'H1_placeholder_or_invalid_tokens_in_db',
                 'user_count' => (is_object($users) ? $users->count() : count($users)),
                 'target_user_ids' => $targetUserIds,
@@ -152,8 +164,11 @@ class NotificationService
                 'device_type_counts' => $allDeviceTypeCounts,
                 'placeholder_exact_count' => $placeholderExactCount,
                 'token_hash_samples_sha256_prefix' => $tokenHashSamples,
+                'title' => $title,
             ]);
             SendFcmNotification::dispatch($allTokens, $title, $body, $data);
+        } else {
+            Log::warning("[FCM DEBUG] No valid tokens found for all " . count($targetUserIds) . " target users. No FCM sent.");
         }
     }
 }

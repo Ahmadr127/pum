@@ -134,7 +134,7 @@ class PumRequestApiController extends Controller
 
         try {
             $pumRequest->submitForApproval();
-            $pumRequest->load(['requester', 'workflow', 'approvals.step', 'approvals.approver']);
+            $pumRequest->load(['requester.organizationUnit', 'workflow', 'approvals.step', 'approvals.approver']);
 
             // Notification Hook
             $notificationService = app(\App\Services\NotificationService::class);

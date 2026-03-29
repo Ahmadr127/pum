@@ -199,7 +199,7 @@ class PumApprovalApiController extends Controller
             }
 
             $pumRequest->approve(Auth::user(), $notes);
-            $pumRequest->load(['requester', 'workflow', 'approvals.step', 'approvals.approver']);
+            $pumRequest->load(['requester.organizationUnit', 'workflow', 'approvals.step', 'approvals.approver']);
 
             // Store released_amount on the approval record
             if ($releasedAmount !== null) {
@@ -246,7 +246,7 @@ class PumApprovalApiController extends Controller
 
         try {
             $pumRequest->reject(Auth::user(), $request->notes);
-            $pumRequest->load(['requester', 'workflow', 'approvals.step', 'approvals.approver']);
+            $pumRequest->load(['requester.organizationUnit', 'workflow', 'approvals.step', 'approvals.approver']);
 
             // Notification Hook: Notify Requester about rejection
             app(\App\Services\NotificationService::class)->notifyRequesterRejected($pumRequest, $request->notes);
