@@ -158,6 +158,10 @@ class PumRequestController extends Controller
         if ($request->boolean('submit_for_approval')) {
             try {
                 $pumRequest->submitForApproval();
+                
+                // Notification Hook
+                app(\App\Services\NotificationService::class)->notifyApprovers($pumRequest);
+
                 return redirect()
                     ->route('pum-requests.show', $pumRequest)
                     ->with('success', 'Permintaan uang muka berhasil dibuat dan diajukan untuk persetujuan.');
@@ -314,6 +318,10 @@ class PumRequestController extends Controller
         if ($request->boolean('submit_for_approval')) {
             try {
                 $pumRequest->submitForApproval();
+                
+                // Notification Hook
+                app(\App\Services\NotificationService::class)->notifyApprovers($pumRequest);
+
                 return redirect()
                     ->route('pum-requests.show', $pumRequest)
                     ->with('success', 'Permintaan berhasil diupdate dan diajukan untuk persetujuan.');
@@ -371,6 +379,10 @@ class PumRequestController extends Controller
 
         try {
             $pumRequest->submitForApproval();
+            
+            // Notification Hook
+            app(\App\Services\NotificationService::class)->notifyApprovers($pumRequest);
+
             return redirect()
                 ->route('pum-requests.show', $pumRequest)
                 ->with('success', 'Permintaan berhasil diajukan untuk persetujuan.');
@@ -445,6 +457,20 @@ class PumRequestController extends Controller
                 }
             }
 
+            $pumRequest->load(['requester.organizationUnit', 'workflow', 'approvals.step', 'approvals.approver']);
+
+            // Notification Hook
+            $notificationService = app(\App\Services\NotificationService::class);
+            if ($pumRequest->status === \App\Models\PumRequest::STATUS_FULFILLED || $pumRequest->status === \App\Models\PumRequest::STATUS_APPROVED) {
+                if ($pumRequest->getCurrentApproval()) {
+                    $notificationService->notifyApprovers($pumRequest);
+                } else {
+                    $notificationService->notifyRequesterApproved($pumRequest);
+                }
+            } else {
+                $notificationService->notifyApprovers($pumRequest);
+            }
+
             return redirect()
                 ->route('pum-requests.show', $pumRequest)
                 ->with('success', $isReleaseStep ? 'Permintaan berhasil di-release.' : 'Permintaan berhasil disetujui.');
@@ -466,6 +492,11 @@ class PumRequestController extends Controller
 
         try {
             $pumRequest->reject(Auth::user(), $request->notes);
+            $pumRequest->load(['requester.organizationUnit', 'workflow', 'approvals.step', 'approvals.approver']);
+
+            // Notification Hook
+            app(\App\Services\NotificationService::class)->notifyRequesterRejected($pumRequest, $request->notes);
+
             return redirect()
                 ->route('pum-requests.show', $pumRequest)
                 ->with('success', 'Permintaan berhasil ditolak.');
@@ -483,6 +514,10 @@ class PumRequestController extends Controller
     {
         try {
             $pumRequest->markAsFulfilled();
+            
+            // Notification Hook: Notify requester about fulfillment
+            app(\App\Services\NotificationService::class)->notifyRequesterApproved($pumRequest);
+
             return redirect()
                 ->route('pum-requests.show', $pumRequest)
                 ->with('success', 'Permintaan berhasil ditandai sebagai terpenuhi.');
