@@ -71,12 +71,13 @@ class PumRequestApiController extends Controller
 
         if ($currentApproval?->step) {
             $currentStep = [
-                'id'            => $currentApproval->id,
-                'step_name'     => $currentApproval->step->name ?? '-',
-                'step_type'     => $currentApproval->step->type,
-                'approver_type' => $currentApproval->step->approver_type,
-                'status'        => $currentApproval->status,
-                'needs_fs_upload' => $currentApproval->step->is_upload_fs_required ?? false,
+                'id'                  => $currentApproval->id,
+                'step_name'           => $currentApproval->step->name ?? '-',
+                'step_type'           => $currentApproval->step->type,
+                'approver_type'       => $currentApproval->step->approver_type,
+                'status'              => $currentApproval->status,
+                'needs_fs_upload'     => $currentApproval->step->is_upload_fs_required ?? false,
+                'allow_amount_change' => $currentApproval->step->allow_amount_change ?? false,
             ];
         }
 
@@ -109,6 +110,7 @@ class PumRequestApiController extends Controller
                                     && ($user->hasPermission('manage_pum') || $pumRequest->requester_id === $user->id),
                 'attachments'    => $pumRequest->attachments,
                 'attachments2'   => $pumRequest->attachments2,
+                'print_url'      => route('pum-requests.print', $pumRequest),
                 'created_at'     => $pumRequest->created_at,
             ],
         ]);

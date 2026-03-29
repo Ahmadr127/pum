@@ -146,7 +146,7 @@ class PumApprovalApiController extends Controller
     /**
      * POST /api/pum/requests/{id}/approve
      * Approve the current pending step on a PUM request.
-     * Body: { "notes": "optional string", "fs_document": "optional file" }
+     * Body: { "notes": "optional string", "fs_document": "optional file", "change_amount": true, "new_amount": 5000000 }
      */
     public function approve(Request $request, PumRequest $pumRequest)
     {
@@ -157,7 +157,11 @@ class PumApprovalApiController extends Controller
 
         $needsFsUpload = $currentApproval->step->is_upload_fs_required ?? false;
 
-        $rules = ['notes' => 'nullable|string|max:500'];
+        $rules = [
+            'notes'         => 'nullable|string|max:1000',
+            'change_amount' => 'nullable|boolean',
+            'new_amount'    => 'nullable|numeric|min:1',
+        ];
         if ($needsFsUpload) {
             $rules['fs_document'] = 'required|file|mimes:pdf,doc,docx|max:5120';
         }
@@ -165,37 +169,65 @@ class PumApprovalApiController extends Controller
         $request->validate($rules);
 
         try {
+            // --- Handle nominal change during release step ---
+            $releasedAmount = null;
+            $currentStep    = $pumRequest->getCurrentStep();
+            $isReleaseStep  = $currentStep && $currentStep->type === PumApprovalStep::TYPE_RELEASE;
+            $allowChange    = $currentStep && $currentStep->allow_amount_change;
+
+            $notes = $request->notes;
+
+            if ($isReleaseStep && $allowChange && $request->boolean('change_amount') && $request->filled('new_amount')) {
+                $oldAmount      = (float) $pumRequest->amount;
+                $newAmount      = (float) $request->new_amount;
+                $releasedAmount = $newAmount;
+
+                $changeNote = 'Nominal diubah dari Rp ' . number_format($oldAmount, 0, ',', '.')
+                            . ' menjadi Rp ' . number_format($newAmount, 0, ',', '.');
+                $notes = $notes ? $notes . ' | ' . $changeNote : $changeNote;
+
+                $pumRequest->update(['amount' => $newAmount]);
+            }
+
             if ($needsFsUpload && $request->hasFile('fs_document')) {
                 $file = $request->file('fs_document');
                 $filename = time() . '_FS_' . $file->getClientOriginalName();
                 $path = $file->storeAs('public/pum-attachments', $filename);
-                // Also save it inside attachments2 which is intended for added items
                 $attachments2 = $pumRequest->attachments2 ?? [];
                 $attachments2[] = $filename;
                 $pumRequest->update(['attachments2' => $attachments2]);
             }
 
-            $pumRequest->approve(Auth::user(), $request->notes);
+            $pumRequest->approve(Auth::user(), $notes);
             $pumRequest->load(['requester', 'workflow', 'approvals.step', 'approvals.approver']);
+
+            // Store released_amount on the approval record
+            if ($releasedAmount !== null) {
+                $latestApproval = $pumRequest->approvals()
+                    ->where('approver_id', Auth::id())
+                    ->where('status', 'approved')
+                    ->latest()
+                    ->first();
+                if ($latestApproval) {
+                    $latestApproval->update(['released_amount' => $releasedAmount]);
+                }
+            }
 
             // Notification Hook
             $notificationService = app(\App\Services\NotificationService::class);
             if ($pumRequest->status === \App\Models\PumRequest::STATUS_FULFILLED || $pumRequest->status === \App\Models\PumRequest::STATUS_APPROVED) {
-                // If the next step is release, but it moved to approved status, we notify next releasers.
-                // Or if it's completely fulfilled, notify requester.
                 if ($pumRequest->getCurrentApproval()) {
                     $notificationService->notifyApprovers($pumRequest);
                 } else {
                     $notificationService->notifyRequesterApproved($pumRequest);
                 }
             } else {
-                // Still in pending, notify next approver
                 $notificationService->notifyApprovers($pumRequest);
             }
 
             return response()->json([
                 'status'  => 'success',
-                'message' => 'Permintaan berhasil disetujui.',
+                'message' => $isReleaseStep ? 'Permintaan berhasil di-release.' : 'Permintaan berhasil disetujui.',
                 'data'    => $pumRequest,
             ]);
         } catch (\Exception $e) {

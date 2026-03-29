@@ -42,15 +42,16 @@ class PumApprovalWorkflowController extends Controller
             'is_active' => 'boolean',
             'is_default' => 'boolean',
             'amount_min' => 'nullable|numeric|min:0',
-            'amount_max' => 'nullable|numeric|gt:amount_min',
+            'amount_max' => 'nullable|numeric' . ($request->filled('amount_max') ? '|gt:amount_min' : ''),
             'steps' => 'required|array|min:1',
             'steps.*.name' => 'required|string|max:255',
             'steps.*.type' => 'required|in:approval,release',
             'steps.*.approver_type' => 'required|in:role,user,organization_head',
             'steps.*.role_id' => 'nullable|required_if:steps.*.approver_type,role|exists:roles,id',
             'steps.*.user_id' => 'nullable|required_if:steps.*.approver_type,user|exists:users,id',
-            'steps.*.is_required' => 'boolean',
+            'steps.*.is_required'          => 'boolean',
             'steps.*.is_upload_fs_required' => 'boolean',
+            'steps.*.allow_amount_change'   => 'boolean',
         ]);
 
         // If setting as default, unset other defaults
@@ -85,8 +86,9 @@ class PumApprovalWorkflowController extends Controller
                 'approver_type' => $stepData['approver_type'],
                 'role_id' => $stepData['approver_type'] === 'role' ? $stepData['role_id'] : null,
                 'user_id' => $stepData['approver_type'] === 'user' ? $stepData['user_id'] : null,
-                'is_required' => $stepData['is_required'] ?? true,
+                'is_required'          => $stepData['is_required'] ?? true,
                 'is_upload_fs_required' => $stepData['is_upload_fs_required'] ?? false,
+                'allow_amount_change'   => $stepData['allow_amount_change'] ?? false,
             ]);
         }
 
@@ -120,14 +122,15 @@ class PumApprovalWorkflowController extends Controller
         // Prepare steps data for JavaScript
         $stepsData = $pumWorkflow->steps->map(function($step) {
             return [
-                'id' => $step->id,
-                'name' => $step->name,
-                'type' => $step->type,
-                'approver_type' => $step->approver_type,
-                'role_id' => $step->role_id ? (string)$step->role_id : '',
-                'user_id' => $step->user_id ? (string)$step->user_id : '',
-                'is_required' => $step->is_required,
+                'id'                  => $step->id,
+                'name'                => $step->name,
+                'type'                => $step->type,
+                'approver_type'       => $step->approver_type,
+                'role_id'             => $step->role_id ? (string)$step->role_id : '',
+                'user_id'             => $step->user_id ? (string)$step->user_id : '',
+                'is_required'         => $step->is_required,
                 'is_upload_fs_required' => $step->is_upload_fs_required,
+                'allow_amount_change' => (bool)$step->allow_amount_change,
             ];
         })->values()->toArray();
         
@@ -145,7 +148,7 @@ class PumApprovalWorkflowController extends Controller
             'is_active' => 'boolean',
             'is_default' => 'boolean',
             'amount_min' => 'nullable|numeric|min:0',
-            'amount_max' => 'nullable|numeric|gt:amount_min',
+            'amount_max' => 'nullable|numeric' . ($request->filled('amount_max') ? '|gt:amount_min' : ''),
             'steps' => 'required|array|min:1',
             'steps.*.id' => 'nullable|exists:pum_approval_steps,id',
             'steps.*.name' => 'required|string|max:255',
@@ -153,8 +156,9 @@ class PumApprovalWorkflowController extends Controller
             'steps.*.approver_type' => 'required|in:role,user,organization_head',
             'steps.*.role_id' => 'nullable|required_if:steps.*.approver_type,role|exists:roles,id',
             'steps.*.user_id' => 'nullable|required_if:steps.*.approver_type,user|exists:users,id',
-            'steps.*.is_required' => 'boolean',
+            'steps.*.is_required'          => 'boolean',
             'steps.*.is_upload_fs_required' => 'boolean',
+            'steps.*.allow_amount_change'   => 'boolean',
         ]);
 
         // If setting as default, unset other defaults
@@ -201,8 +205,9 @@ class PumApprovalWorkflowController extends Controller
                 'approver_type' => $stepData['approver_type'],
                 'role_id' => $stepData['approver_type'] === 'role' ? $stepData['role_id'] : null,
                 'user_id' => $stepData['approver_type'] === 'user' ? $stepData['user_id'] : null,
-                'is_required' => $stepData['is_required'] ?? true,
+                'is_required'          => $stepData['is_required'] ?? true,
                 'is_upload_fs_required' => $stepData['is_upload_fs_required'] ?? false,
+                'allow_amount_change'   => $stepData['allow_amount_change'] ?? false,
             ];
 
             if (!empty($stepData['id'])) {

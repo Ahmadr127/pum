@@ -17,11 +17,13 @@ class PumRequestApproval extends Model
         'status',
         'notes',
         'fs_form_path',
+        'released_amount',
         'responded_at',
     ];
 
     protected $casts = [
         'responded_at' => 'datetime',
+        'released_amount' => 'decimal:2',
     ];
 
     const STATUS_PENDING = 'pending';

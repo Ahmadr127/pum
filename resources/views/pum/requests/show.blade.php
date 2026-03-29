@@ -283,32 +283,82 @@
                                 @php
                                     $currentStep = $pumRequest->getCurrentStep();
                                     $isReleaseStep = $currentStep && $currentStep->type === \App\Models\PumApprovalStep::TYPE_RELEASE;
+                                    $allowAmountChange = $currentStep && $currentStep->allow_amount_change;
                                 @endphp
                                 <h4 class="text-sm font-semibold text-gray-900 mb-3">
                                     {{ $isReleaseStep ? 'Form Persetujuan Release' : 'Form Persetujuan' }}
                                 </h4>
                                 
-                                <form method="POST" enctype="multipart/form-data" class="space-y-4">
+                                <form method="POST" enctype="multipart/form-data" class="space-y-4" id="release-approve-form">
                                     @csrf
-                                    
-                                    {{-- isReleaseStep already defined above --}}
 
-                                    
-                                    <!-- Notes -->
+                                    {{-- === UBAH NOMINAL (hanya pada step release yang allow_amount_change) === --}}
+                                    @if($isReleaseStep && $allowAmountChange)
+                                    <div class="rounded-lg border border-amber-200 bg-amber-50 p-3">
+                                        <label class="flex items-center gap-2.5 cursor-pointer select-none">
+                                            <input type="checkbox" id="change_amount_checkbox" name="change_amount" value="1"
+                                                   class="w-4 h-4 rounded border-amber-400 text-amber-600 focus:ring-amber-500 cursor-pointer"
+                                                   onchange="toggleAmountEdit(this)">
+                                            <span class="text-sm font-medium text-amber-800">
+                                                <i class="fas fa-edit mr-1 text-amber-600"></i>
+                                                Ubah Nominal Pencairan
+                                            </span>
+                                        </label>
+                                        <p class="text-[11px] text-amber-600 mt-1 ml-6">
+                                            Centang untuk mengubah nominal yang disetujui sebelum release.
+                                        </p>
+
+                                        {{-- Hidden raw amount input --}}
+                                        <input type="hidden" name="new_amount" id="new_amount_raw" value="">
+
+                                        <div id="amount_edit_panel" class="mt-3 overflow-hidden transition-all duration-300 ease-in-out max-h-0 opacity-0">
+                                            <div class="space-y-2">
+                                                <label class="block text-xs font-semibold text-amber-800 uppercase tracking-wide">
+                                                    Nominal Baru (Rp)
+                                                </label>
+                                                {{-- Nominal asli sebagai referensi --}}
+                                                <p class="text-xs text-amber-600">
+                                                    Nominal diajukan: <span class="font-semibold">Rp {{ number_format($pumRequest->amount, 0, ',', '.') }}</span>
+                                                </p>
+                                                <div class="relative">
+                                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-medium text-gray-500">Rp</span>
+                                                    <input type="text" id="new_amount_display"
+                                                           class="block w-full pl-10 pr-3 py-2 border border-amber-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-amber-400 focus:border-amber-400 shadow-sm font-mono"
+                                                           placeholder="0"
+                                                           oninput="formatAmountInput(this)"
+                                                           autocomplete="off">
+                                                </div>
+                                                <p class="text-[10px] text-gray-400">Masukkan nominal tanpa titik/koma. Contoh: 5000000</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    @endif
+
+                                    {{-- Notes --}}
                                     <div>
-                                        <label for="notes" class="block text-xs font-medium text-gray-500 mb-1">Catatan (Opsional saat {{ $isReleaseStep ? 'Release' : 'Menyetujui' }}, Wajib saat Menolak)</label>
-                                        <textarea name="notes" id="notes" rows="3" class="block w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm resize-none placeholder-gray-400" placeholder="{{ $isReleaseStep ? 'Tulis catatan release...' : 'Tulis catatan persetujuan/penolakan...' }}"></textarea>
+                                        <label for="notes" class="block text-xs font-medium text-gray-500 mb-1">
+                                            Catatan
+                                            @if($isReleaseStep)
+                                                <span class="text-gray-400">(Opsional saat Release, Wajib saat Menolak)</span>
+                                            @else
+                                                <span class="text-gray-400">(Opsional saat Menyetujui, Wajib saat Menolak)</span>
+                                            @endif
+                                        </label>
+                                        <textarea name="notes" id="notes" rows="3"
+                                                  class="block w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm resize-none placeholder-gray-400"
+                                                  placeholder="{{ $isReleaseStep ? 'Tulis catatan release...' : 'Tulis catatan persetujuan/penolakan...' }}"></textarea>
                                         @error('notes')
                                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                                         @enderror
                                     </div>
 
-                                    <!-- FS Form Upload (Conditional) -->
+                                    {{-- FS Form Upload (Conditional) --}}
                                     @if($currentStep && $currentStep->is_upload_fs_required)
                                         <div>
                                             <label class="block text-xs font-medium text-gray-700 mb-1">Upload Dokumen FS <span class="text-red-500">*</span></label>
                                             <div class="relative">
-                                                <input type="file" name="fs_form" id="fs_form" required class="block w-full text-xs text-gray-500 file:mr-2 file:py-2 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none">
+                                                <input type="file" name="fs_form" id="fs_form" required
+                                                       class="block w-full text-xs text-gray-500 file:mr-2 file:py-2 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none">
                                             </div>
                                             <p class="text-[10px] text-gray-400 mt-1">Wajib upload form FS untuk tahap ini.</p>
                                             @error('fs_form')
@@ -317,16 +367,65 @@
                                         </div>
                                     @endif
 
-                                    <!-- Action Buttons -->
+                                    {{-- Action Buttons --}}
                                     <div class="grid grid-cols-2 gap-3 pt-2">
-                                        <button type="submit" formaction="{{ route('pum-requests.reject', $pumRequest) }}" class="flex items-center justify-center px-3 py-2 bg-white border border-red-300 text-red-700 rounded-lg hover:bg-red-50 transition-colors font-medium text-sm shadow-sm">
+                                        <button type="submit" formaction="{{ route('pum-requests.reject', $pumRequest) }}"
+                                                id="btn-reject"
+                                                class="flex items-center justify-center px-3 py-2 bg-white border border-red-300 text-red-700 rounded-lg hover:bg-red-50 transition-colors font-medium text-sm shadow-sm">
                                             <i class="fas fa-times mr-2"></i> Tolak
                                         </button>
-                                        <button type="submit" formaction="{{ route('pum-requests.approve', $pumRequest) }}" class="flex items-center justify-center px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-sm shadow-sm">
-                                            <i class="fas {{ $isReleaseStep ? 'fa-wallet' : 'fa-check' }} mr-2"></i> {{ $isReleaseStep ? 'Proses Release' : 'Setujui' }}
+                                        <button type="submit" formaction="{{ route('pum-requests.approve', $pumRequest) }}"
+                                                id="btn-approve"
+                                                onclick="return validateAmountChange()"
+                                                class="flex items-center justify-center px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-sm shadow-sm">
+                                            <i class="fas {{ $isReleaseStep ? 'fa-wallet' : 'fa-check' }} mr-2"></i>
+                                            {{ $isReleaseStep ? 'Proses Release' : 'Setujui' }}
                                         </button>
                                     </div>
                                 </form>
+
+                                {{-- JS: toggle ubah nominal --}}
+                                @if($isReleaseStep && $allowAmountChange)
+                                <script>
+                                function toggleAmountEdit(checkbox) {
+                                    const panel = document.getElementById('amount_edit_panel');
+                                    if (checkbox.checked) {
+                                        panel.style.maxHeight = '200px';
+                                        panel.style.opacity = '1';
+                                        document.getElementById('new_amount_display').focus();
+                                    } else {
+                                        panel.style.maxHeight = '0';
+                                        panel.style.opacity = '0';
+                                        document.getElementById('new_amount_display').value = '';
+                                        document.getElementById('new_amount_raw').value = '';
+                                    }
+                                }
+
+                                function formatAmountInput(input) {
+                                    // Strip non-numeric
+                                    const raw = input.value.replace(/\D/g, '');
+                                    // Store raw value
+                                    document.getElementById('new_amount_raw').value = raw;
+                                    // Format with thousand separator
+                                    if (raw) {
+                                        input.value = parseInt(raw, 10).toLocaleString('id-ID');
+                                    }
+                                }
+
+                                function validateAmountChange() {
+                                    const checkbox = document.getElementById('change_amount_checkbox');
+                                    if (checkbox && checkbox.checked) {
+                                        const raw = document.getElementById('new_amount_raw').value;
+                                        if (!raw || parseInt(raw, 10) < 1) {
+                                            alert('Masukkan nominal baru yang valid sebelum melakukan release.');
+                                            document.getElementById('new_amount_display').focus();
+                                            return false;
+                                        }
+                                    }
+                                    return true;
+                                }
+                                </script>
+                                @endif
                             </div>
                         @endif
                         

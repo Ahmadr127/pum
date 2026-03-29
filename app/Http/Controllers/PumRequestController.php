@@ -387,13 +387,37 @@ class PumRequestController extends Controller
     public function approve(Request $request, PumRequest $pumRequest)
     {
         $request->validate([
-            'notes' => 'nullable|string|max:500',
-            'fs_form' => 'nullable|file|mimes:pdf,doc,docx|max:5120',
+            'notes'         => 'nullable|string|max:1000',
+            'fs_form'       => 'nullable|file|mimes:pdf,doc,docx|max:5120',
+            'change_amount' => 'nullable|boolean',
+            'new_amount'    => 'nullable|numeric|min:1',
         ]);
 
         try {
+            // --- Handle nominal change during release step ---
+            $releasedAmount = null;
+            $currentStep    = $pumRequest->getCurrentStep();
+            $isReleaseStep  = $currentStep && $currentStep->type === \App\Models\PumApprovalStep::TYPE_RELEASE;
+            $allowChange    = $currentStep && $currentStep->allow_amount_change;
+
+            $notes = $request->notes;
+
+            if ($isReleaseStep && $allowChange && $request->boolean('change_amount') && $request->filled('new_amount')) {
+                $oldAmount      = (float) $pumRequest->amount;
+                $newAmount      = (float) $request->new_amount;
+                $releasedAmount = $newAmount;
+
+                // Append change note so it appears in print and history
+                $changeNote = 'Nominal diubah dari Rp ' . number_format($oldAmount, 0, ',', '.')
+                            . ' menjadi Rp ' . number_format($newAmount, 0, ',', '.');
+                $notes = $notes ? $notes . ' | ' . $changeNote : $changeNote;
+
+                // Update the amount on the request itself
+                $pumRequest->update(['amount' => $newAmount]);
+            }
+
             // Process approval
-            $pumRequest->approve(Auth::user(), $request->notes);
+            $pumRequest->approve(Auth::user(), $notes);
 
             // Handle FS form upload if provided
             if ($request->hasFile('fs_form')) {
@@ -409,11 +433,21 @@ class PumRequestController extends Controller
                 }
             }
 
-
+            // Store released_amount on the approval record
+            if ($releasedAmount !== null) {
+                $latestApproval = $pumRequest->approvals()
+                    ->where('approver_id', Auth::id())
+                    ->where('status', 'approved')
+                    ->latest()
+                    ->first();
+                if ($latestApproval) {
+                    $latestApproval->update(['released_amount' => $releasedAmount]);
+                }
+            }
 
             return redirect()
                 ->route('pum-requests.show', $pumRequest)
-                ->with('success', 'Permintaan berhasil disetujui.');
+                ->with('success', $isReleaseStep ? 'Permintaan berhasil di-release.' : 'Permintaan berhasil disetujui.');
         } catch (\Exception $e) {
             return redirect()
                 ->route('pum-requests.show', $pumRequest)

@@ -18,7 +18,8 @@ class PumApprovalStep extends Model
         'user_id',
         'is_required',
         'is_upload_fs_required',
-        'type', // Added type
+        'type',
+        'allow_amount_change',
     ];
 
     const TYPE_APPROVAL = 'approval';
@@ -27,6 +28,7 @@ class PumApprovalStep extends Model
     protected $casts = [
         'is_required' => 'boolean',
         'is_upload_fs_required' => 'boolean',
+        'allow_amount_change' => 'boolean',
     ];
 
     const TYPE_ROLE = 'role';

@@ -157,7 +157,19 @@
         <tr>
             <td class="lbl">Jumlah Pengajuan</td>
             <td class="sep">:</td>
-            <td class="val">Rp {{ number_format($pumRequest->amount, 0, ',', '.') }}</td>
+            <td class="val">Rp {{ number_format($pumRequest->amount, 0, ',', '.') }}
+                @php
+                    // Check if any release step changed the amount
+                    $releaseWithAmount = $pumRequest->approvals
+                        ->filter(fn($a) => $a->released_amount !== null && $a->step?->type === \App\Models\PumApprovalStep::TYPE_RELEASE)
+                        ->first();
+                @endphp
+                @if($releaseWithAmount)
+                    <br><small style="color:#888;font-size:9pt;">
+                        (Nominal disetujui release: <strong>Rp {{ number_format($releaseWithAmount->released_amount, 0, ',', '.') }}</strong>)
+                    </small>
+                @endif
+            </td>
         </tr>
         <tr>
             <td class="lbl">Keterangan</td>
@@ -167,9 +179,27 @@
         <tr>
             <td class="lbl">Oleh Petugas</td>
             <td class="sep">:</td>
-            <td class="val">{{ $pumRequest->creator->name ?? '-' }}</td>
+            <td class="val">{{ $pumRequest->creator?->name ?? '-' }}</td>
         </tr>
     </table>
+
+    {{-- ── Catatan Release (Paling Bawah sebelum TTD) ── --}}
+    @php
+        $releaseNotes = $pumRequest->approvals
+            ->filter(fn($a) => $a->step?->type === \App\Models\PumApprovalStep::TYPE_RELEASE && !empty($a->notes))
+            ->values();
+    @endphp
+    @if($releaseNotes->count() > 0)
+        <div style="margin-bottom: 25px; border: 1px solid #eee; padding: 10px; border-radius: 4px;">
+            <div style="font-weight: bold; margin-bottom: 5px; text-decoration: underline;">Catatan Release:</div>
+            @foreach($releaseNotes as $rn)
+                <div style="margin-bottom: 4px; font-size: 10.5pt;">
+                    <span style="font-weight: bold; color: #444;">{{ $rn->step?->name ?? 'Release' }}:</span>
+                    {{ $rn->notes }}
+                </div>
+            @endforeach
+        </div>
+    @endif
 
     {{-- ══════════════════════════════
          TANDA TANGAN (FLEX LAYOUT)

@@ -154,7 +154,7 @@
                                 </div>
 
                                 <!-- Checkboxes -->
-                                <div class="mt-3 flex gap-4">
+                                <div class="mt-3 flex flex-wrap gap-4">
                                     <label class="flex items-center">
                                         <input type="checkbox" x-model="step.is_required"
                                                class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
@@ -164,6 +164,12 @@
                                         <input type="checkbox" x-model="step.is_upload_fs_required"
                                                class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
                                         <span class="ml-2 text-sm text-gray-700">Wajib Upload FS</span>
+                                    </label>
+                                    {{-- Boleh Ubah Nominal: hanya tampil saat tipe release --}}
+                                    <label class="flex items-center" x-show="step.type === 'release'" x-cloak>
+                                        <input type="checkbox" x-model="step.allow_amount_change"
+                                               class="rounded border-amber-400 text-amber-600 shadow-sm focus:ring-amber-500">
+                                        <span class="ml-2 text-sm font-medium text-amber-700">Boleh Ubah Nominal</span>
                                     </label>
                                 </div>
                             </div>
@@ -180,6 +186,8 @@
                             <input type="hidden" :name="'steps[' + index + '][user_id]'" :value="step.user_id || ''">
                             <input type="hidden" :name="'steps[' + index + '][is_required]'" :value="step.is_required ? '1' : '0'">
                             <input type="hidden" :name="'steps[' + index + '][is_upload_fs_required]'" :value="step.is_upload_fs_required ? '1' : '0'">
+                            <input type="hidden" :name="'steps[' + index + '][allow_amount_change]'" :value="step.allow_amount_change ? '1' : '0'">
+
                         </div>
                     </template>
                 </div>
@@ -202,7 +210,7 @@
 function workflowForm() {
     return {
         steps: [
-            { name: '', type: 'approval', approver_type: 'role', role_id: '', user_id: '', is_required: true, is_upload_fs_required: false }
+            { name: '', type: 'approval', approver_type: 'role', role_id: '', user_id: '', is_required: true, is_upload_fs_required: false, allow_amount_change: false }
         ],
 
         addStep() {
@@ -213,7 +221,8 @@ function workflowForm() {
                 role_id: '', 
                 user_id: '', 
                 is_required: true,
-                is_upload_fs_required: false
+                is_upload_fs_required: false,
+                allow_amount_change: false
             });
         },
 
