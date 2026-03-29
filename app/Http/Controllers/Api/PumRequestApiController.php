@@ -110,7 +110,7 @@ class PumRequestApiController extends Controller
                                     && ($user->hasPermission('manage_pum') || $pumRequest->requester_id === $user->id),
                 'attachments'    => $pumRequest->attachments,
                 'attachments2'   => $pumRequest->attachments2,
-                'print_url'      => route('pum-requests.print', $pumRequest),
+                'print_url'      => route('api.pum-requests.print', $pumRequest),
                 'created_at'     => $pumRequest->created_at,
             ],
         ]);
@@ -171,5 +171,16 @@ class PumRequestApiController extends Controller
         }
 
         return response()->file($path);
+    }
+
+    /**
+     * GET /api/pum/requests/{id}/print
+     * Reuse the web print controller logic to return the print view.
+     */
+    public function print(\App\Models\PumRequest $pumRequest)
+    {
+        // Check permission via controller (middleware handles it mostly)
+        // Reuse logic from PumRequestController but via API context
+        return app(\App\Http\Controllers\PumRequestController::class)->print($pumRequest);
     }
 }

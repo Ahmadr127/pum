@@ -56,6 +56,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Wildcard must come LAST
         Route::get('/{pumRequest}',          [PumRequestApiController::class,  'show']);
+        Route::get('/{pumRequest}/print',    [PumRequestApiController::class,  'print'])->name('api.pum-requests.print');
         Route::post('/{pumRequest}/submit',  [PumRequestApiController::class,  'submit']);
         Route::post('/{pumRequest}/approve', [PumApprovalApiController::class, 'approve']);
         Route::post('/{pumRequest}/reject',  [PumApprovalApiController::class, 'reject']);
