@@ -255,3 +255,8 @@ Route::middleware('auth')->group(function () {
     });
 
 });
+
+// Public Signed Route for Mobile Printing (Temporary) - Outside of auth
+Route::get('pum-requests/{pum_request}/print-signed', [\App\Http\Controllers\PumRequestController::class, 'print'])
+    ->middleware('signed')
+    ->name('pum-requests.print-signed');

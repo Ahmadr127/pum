@@ -110,7 +110,11 @@ class PumRequestApiController extends Controller
                                     && ($user->hasPermission('manage_pum') || $pumRequest->requester_id === $user->id),
                 'attachments'    => $pumRequest->attachments,
                 'attachments2'   => $pumRequest->attachments2,
-                'print_url'      => route('api.pum-requests.print', $pumRequest),
+                'print_url'      => \Illuminate\Support\Facades\URL::temporarySignedRoute(
+                    'pum-requests.print-signed', 
+                    now()->addMinutes(60), 
+                    ['pum_request' => $pumRequest->id]
+                ),
                 'created_at'     => $pumRequest->created_at,
             ],
         ]);
