@@ -15,6 +15,8 @@ class NotificationService
      */
     public function notifyApprovers(PumRequest $pumRequest)
     {
+        Log::info("[NotificationService] ENTER notifyApprovers for PUM {$pumRequest->code}");
+
         // Ensure requester and their organization unit are loaded for Org Head resolution
         $pumRequest->loadMissing('requester.organizationUnit');
         
@@ -31,7 +33,7 @@ class NotificationService
             return ['device_count' => 0, 'device_tokens' => [], 'message' => 'No approvers found for this step.'];
         }
 
-        Log::info("[NotificationService] Found " . $approvers->count() . " potential approvers for PUM {$pumRequest->code} at step {$currentApproval->step->name}");
+        Log::info("[NotificationService] Found " . $approvers->count() . " potential approvers for PUM {$pumRequest->code} at step {$currentApproval->step->name}. List: " . $approvers->pluck('name')->implode(', '));
 
         $title = "Persetujuan PUM Baru";
         $body = "Anda perlu approve pengajuan uang muka {$pumRequest->code} dari {$pumRequest->requester->name}";
@@ -55,6 +57,8 @@ class NotificationService
      */
     public function notifyRequesterApproved(PumRequest $pumRequest)
     {
+        Log::info("[NotificationService] ENTER notifyRequesterApproved for PUM {$pumRequest->code}");
+
         $requester = $pumRequest->requester;
         $statusLabel = $pumRequest->status === PumRequest::STATUS_FULFILLED ? 'telah dicairkan' : 'telah disetujui';
 
@@ -74,6 +78,8 @@ class NotificationService
      */
     public function notifyRequesterRejected(PumRequest $pumRequest, string $notes = '')
     {
+        Log::info("[NotificationService] ENTER notifyRequesterRejected for PUM {$pumRequest->code}");
+
         $requester = $pumRequest->requester;
         
         $title = "PUM Ditolak";
@@ -92,6 +98,7 @@ class NotificationService
      */
     public function notifyUsers($users, $title, $body, $data = [])
     {
+        Log::info("[NotificationService] ENTER notifyUsers. User count: " . (is_object($users) ? $users->count() : count($users)));
         $allTokens = [];
         $allDeviceTypeCounts = [];
         $targetUserIds = [];
