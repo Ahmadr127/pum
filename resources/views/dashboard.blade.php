@@ -8,7 +8,7 @@
     <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
         <div class="p-6">
             <h2 class="text-2xl font-bold text-gray-900 mb-1">Selamat Datang, {{ $user->name }}!</h2>
-            <p class="text-gray-600">{{ $user->role->display_name ?? 'User' }} - Sistem Permintaan Uang Muka</p>
+            <p class="text-gray-600">{{ $user->role->display_name ?? 'User' }} - Cash Advanced</p>
         </div>
     </div>
 

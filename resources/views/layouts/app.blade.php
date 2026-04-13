@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Sistem')</title>
+    <title>@yield('title', 'Cash Advanced')</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="icon" type="image/x-icon" href="{{ asset('images/logo.png') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -34,7 +34,7 @@
                         <img src="{{ asset('images/logo.png') }}" alt="Logo" class="h-8 w-auto object-contain">
                     </div>
                     {{-- Use CSS-driven visibility instead of x-show --}}
-                    <h1 class="sidebar-text text-xl font-bold text-white tracking-wide truncate">PUM System</h1>
+                    <h1 class="sidebar-text text-xl font-bold text-white tracking-wide truncate">Cash Advanced</h1>
                 </div>
             </div>
 
@@ -236,7 +236,7 @@
                         
                         <div class="hidden sm:block">
                             <h2 class="text-xl font-semibold text-gray-800">@yield('title', 'Dashboard')</h2>
-                            <p class="text-sm text-gray-500">Sistem</p>
+                            <p class="text-sm text-gray-500">Cash Advanced</p>
                         </div>
                         
                         <!-- Mobile Title -->
