@@ -159,7 +159,7 @@
             <!-- App Name -->
             <h1 class="text-5xl font-bold mb-4 text-center">Cash Advanced</h1>
             <p class="text-xl text-green-100 text-center max-w-md">
-                Sistem Permintaan Uang Muka
+                Cash Advanced System
             </p>
         </div>
     </div>
