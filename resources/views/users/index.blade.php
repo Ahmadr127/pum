@@ -81,7 +81,12 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             @if($user->organizationUnit)
-                                <div class="text-sm text-gray-900">{{ $user->organizationUnit->name }}</div>
+                                <div class="flex flex-col gap-1">
+                                    <div class="text-sm text-gray-900 border-l-2 border-green-500 pl-2">
+                                        {{ $user->organizationUnit->name }}
+                                        <span class="text-xs text-green-600 font-medium ml-1">(Utama)</span>
+                                    </div>
+                                </div>
                             @else
                                 <span class="text-gray-400 text-sm">-</span>
                             @endif
