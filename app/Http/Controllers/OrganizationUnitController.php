@@ -16,10 +16,10 @@ class OrganizationUnitController extends Controller
 
         // Search filter
         if ($request->filled('search')) {
-            $search = $request->search;
+            $search = strtolower($request->search);
             $query->where(function($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('code', 'like', "%{$search}%");
+                $q->whereRaw('LOWER(name) like ?', ["%{$search}%"])
+                  ->orWhereRaw('LOWER(code) like ?', ["%{$search}%"]);
             });
         }
 
