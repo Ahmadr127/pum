@@ -29,6 +29,7 @@ class PumApprovalApiController extends Controller
         $user = Auth::user();
 
         $allRequests = PumRequest::with(['requester', 'workflow.steps', 'approvals.step', 'approvals.approver'])
+            ->latest()
             ->whereIn('status', [PumRequest::STATUS_PENDING, PumRequest::STATUS_APPROVED, PumRequest::STATUS_FULFILLED, PumRequest::STATUS_REJECTED])
             ->whereHas('approvals', function ($q) use ($user) {
                 $q->where(fn($s) => $s->where('status', 'pending')->orWhere('approver_id', $user->id));
@@ -94,6 +95,7 @@ class PumApprovalApiController extends Controller
         $user = Auth::user();
 
         $allRequests = PumRequest::with(['requester', 'workflow.steps', 'approvals.step', 'approvals.approver'])
+            ->latest()
             ->whereIn('status', [PumRequest::STATUS_PENDING, PumRequest::STATUS_APPROVED, PumRequest::STATUS_FULFILLED, PumRequest::STATUS_REJECTED])
             ->whereHas('approvals', function ($q) use ($user) {
                 $q->whereHas('step', fn($s) => $s->where('type', PumApprovalStep::TYPE_RELEASE))
