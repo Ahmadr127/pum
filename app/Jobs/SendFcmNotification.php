@@ -2,20 +2,25 @@
 
 namespace App\Jobs;
 
+use App\Models\UserDeviceToken;
+use App\Services\FirebaseService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
-use Kreait\Laravel\Firebase\Facades\Firebase;
 use Kreait\Firebase\Messaging\CloudMessage;
 use Kreait\Firebase\Messaging\Notification;
-use App\Models\UserDeviceToken;
+use Kreait\Firebase\Exception\FirebaseException;
+use Kreait\Firebase\Exception\MessagingException;
 
 class SendFcmNotification implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    public int $tries = 3;
+    public int $timeout = 120;
 
     protected $tokens;
     protected $title;
@@ -36,9 +41,15 @@ class SendFcmNotification implements ShouldQueue
     /**
      * Execute the job.
      */
-    public function handle(): void
+    public function handle(FirebaseService $firebaseService): void
     {
-        $messaging = Firebase::messaging();
+        $messaging = $firebaseService->getMessaging();
+
+        // Helpful for diagnosing "Requested entity was not found" (usually project mismatch).
+        Log::info('[FCM DEBUG] Firebase project context (pum)', [
+            'project_id' => $firebaseService->getProjectId(),
+            'client_email' => $firebaseService->getClientEmail(),
+        ]);
 
         // Runtime evidence: token statistics (avoid logging raw tokens).
         $tokensSnapshot = $this->tokens;
@@ -62,13 +73,11 @@ class SendFcmNotification implements ShouldQueue
             }
         }
 
-        $projectId = config('firebase.projects.' . config('firebase.default') . '.credentials.project_id') ?? 'unknown';
         Log::info('[FCM DEBUG] Job about to send multicast (pum)', [
             'runId' => 'iter5_raw_tokens',
             'token_count' => $tokenCount,
             'placeholder_exact_count' => $placeholderExactCount,
             'token_length' => ['min' => $minLen, 'max' => $maxLen],
-            'firebase_project_id' => $projectId,
             'title' => $this->title,
             'device_tokens' => $this->tokens, // Raw tokens
         ]);
@@ -187,9 +196,15 @@ class SendFcmNotification implements ShouldQueue
                         }
                     }
                 }
+            } catch (MessagingException $e) {
+                Log::error('SendFcmNotification (pum): Messaging error', ['error' => $e->getMessage()]);
+            } catch (FirebaseException $e) {
+                Log::error('SendFcmNotification (pum): Firebase error', ['error' => $e->getMessage()]);
+                throw $e;
             } catch (\Exception $e) {
-                Log::error("Failed to send FCM Multicast: " . $e->getMessage());
+                Log::error("Failed to send FCM Multicast (pum): " . $e->getMessage());
             }
         }
     }
 }
+
