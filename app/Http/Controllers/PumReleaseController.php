@@ -26,10 +26,7 @@ class PumReleaseController extends Controller
             ->whereHas('approvals', function ($q) use ($user) {
                 $q->whereHas('step', function ($sq) {
                     $sq->where('type', \App\Models\PumApprovalStep::TYPE_RELEASE);
-                })->where(function ($subQ) use ($user) {
-                    $subQ->where('status', 'pending')
-                         ->orWhere('approver_id', $user->id);
-                });
+                })->where('status', 'pending');
             });
 
         // Apply filters
