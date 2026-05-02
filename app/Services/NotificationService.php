@@ -47,6 +47,8 @@ class NotificationService
         return $this->notifyUsers($approvers, $title, $body, [
             'type' => 'pum_approval_required',
             'pum_id' => (string) $pumRequest->id,
+            'id' => (string) $pumRequest->id, // Added for fallback compatibility
+            'source' => 'pum', // Added source identification
             'code' => $pumRequest->code,
         ]);
     }
@@ -68,6 +70,8 @@ class NotificationService
         return $this->notifyUsers(collect([$requester]), $title, $body, [
             'type' => 'pum_approved',
             'pum_id' => (string) $pumRequest->id,
+            'id' => (string) $pumRequest->id,
+            'source' => 'pum',
             'code' => $pumRequest->code,
         ]);
     }
@@ -88,6 +92,8 @@ class NotificationService
         return $this->notifyUsers(collect([$requester]), $title, $body, [
             'type' => 'pum_rejected',
             'pum_id' => (string) $pumRequest->id,
+            'id' => (string) $pumRequest->id,
+            'source' => 'pum',
             'code' => $pumRequest->code,
         ]);
     }
