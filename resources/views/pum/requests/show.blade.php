@@ -429,8 +429,17 @@
                             </div>
                         @endif
                         
-                        @if($pumRequest->status === 'new' || $pumRequest->status === 'draft')
-                             <!-- Optional: Delete button if needed -->
+                        @if(auth()->user()->hasPermission('manage_pum') || (in_array($pumRequest->status, ['new', 'rejected']) && $pumRequest->requester_id === auth()->id()))
+                            <div class="border-t border-gray-100 pt-4 mt-4">
+                                <form action="{{ route('pum-requests.destroy', $pumRequest) }}" method="POST" 
+                                      onsubmit="return confirm('Yakin ingin menghapus permintaan ini?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="w-full justify-center flex items-center px-4 py-2 bg-red-50 text-red-700 border border-red-200 rounded-lg hover:bg-red-100 transition-colors font-medium text-sm shadow-sm group">
+                                        <i class="fas fa-trash mr-2 group-hover:scale-110 transition-transform"></i> Hapus Permintaan
+                                    </button>
+                                </form>
+                            </div>
                         @endif
                     </div>
                 </div>

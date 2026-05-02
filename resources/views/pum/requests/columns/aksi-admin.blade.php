@@ -14,7 +14,7 @@
         </a>
         @endif
 
-        @if(in_array($request->status, ['new', 'rejected']) && (auth()->user()->hasPermission('manage_pum') || $request->requester_id === auth()->id()))
+        @if(auth()->user()->hasPermission('manage_pum') || (in_array($request->status, ['new', 'rejected']) && $request->requester_id === auth()->id()))
         <form action="{{ route('pum-requests.destroy', $request) }}" method="POST" class="inline" 
               onsubmit="return confirm('Yakin ingin menghapus?')">
             @csrf

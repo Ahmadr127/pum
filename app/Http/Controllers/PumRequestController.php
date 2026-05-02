@@ -352,11 +352,13 @@ class PumRequestController extends Controller
             abort(403, 'Anda tidak memiliki hak akses untuk menghapus permintaan ini.');
         }
 
-        // Can only delete if status is 'new' or 'rejected'
-        if (!in_array($pumRequest->status, [PumRequest::STATUS_NEW, PumRequest::STATUS_REJECTED])) {
-            return redirect()
-                ->route('pum-requests.index')
-                ->with('error', 'Hanya permintaan dengan status "Baru" atau "Ditolak" yang dapat dihapus.');
+        // Admin (manage_pum) can delete any status, regular users can only delete if status is 'new' or 'rejected'
+        if (!Auth::user()->hasPermission('manage_pum')) {
+            if (!in_array($pumRequest->status, [PumRequest::STATUS_NEW, PumRequest::STATUS_REJECTED])) {
+                return redirect()
+                    ->route('pum-requests.index')
+                    ->with('error', 'Hanya permintaan dengan status "Baru" atau "Ditolak" yang dapat dihapus.');
+            }
         }
 
         $pumRequest->delete();
