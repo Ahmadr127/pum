@@ -194,6 +194,16 @@ class PumRequest extends Model
             }
         }
 
+        // Allow admins or users with manage_pum permission to process any pending step
+        if ($user->hasPermission('manage_pum')) {
+            return true;
+        }
+
+        // Allow users with approve_pum_release permission to process any release step
+        if ($isCurrentStepRelease && $user->hasPermission('approve_pum_release')) {
+            return true;
+        }
+
         // Check if user is eligible for current step
         return $currentApproval->step->canBeApprovedBy($user, $this->requester);
     }
