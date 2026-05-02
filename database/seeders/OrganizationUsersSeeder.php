@@ -169,8 +169,8 @@ class OrganizationUsersSeeder extends Seeder
 
             // Assign as head of the organization unit
             if (isset($orgUnits[$orgCode])) {
-                $orgUnits[$orgCode]->update(['head_id' => $user->id]);
-                $this->command->info("    ↳ Assigned as Head of '{$orgUnits[$orgCode]->name}'");
+                OrganizationUnit::where('id', $orgUnits[$orgCode]->id)->update(['head_id' => $user->id]);
+                $this->command->info("    ↳ Assigned as Head of '{$orgUnits[$orgCode]->name}' (User ID: {$user->id})");
             }
         }
     }
