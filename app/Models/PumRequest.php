@@ -232,12 +232,13 @@ class PumRequest extends Model
             'current_step_order' => 1,
         ]);
 
-        // Create approval records for each step
-        foreach ($workflow->steps as $step) {
-            PumRequestApproval::create([
+        // Create the first approval record
+        $firstStep = $workflow->steps()->orderBy('order')->first();
+        if ($firstStep) {
+            \App\Models\PumRequestApproval::create([
                 'request_id' => $this->id,
-                'step_id' => $step->id,
-                'step_order' => $step->order,
+                'step_id' => $firstStep->id,
+                'step_order' => $firstStep->order,
                 'status' => 'pending',
             ]);
         }
@@ -325,9 +326,9 @@ class PumRequest extends Model
 
         if ($nextStep) {
             // Ensure next approval record exists
-            $nextApproval = \App\Models\PumApproval::firstOrCreate(
+            $nextApproval = \App\Models\PumRequestApproval::firstOrCreate(
                 [
-                    'pum_request_id' => $this->id,
+                    'request_id' => $this->id,
                     'step_id'        => $nextStep->id,
                     'step_order'     => $nextStep->order,
                 ],
