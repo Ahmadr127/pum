@@ -86,7 +86,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <!-- Lampiran 1 -->
                             <div>
-                                <label class="block text-xs font-medium text-gray-500 mb-2">Lampiran Utama (Wajib)</label>
+                                <label class="block text-xs font-medium text-gray-500 mb-2">Lampiran Utama (Wajib) <span class="text-red-500">*</span></label>
                                 <div x-data="fileUpload('attachments')" class="w-full">
                                     <label class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-xl cursor-pointer hover:bg-gray-50 transition-all"
                                             :class="{ 'border-indigo-500 bg-indigo-50': dragover }"
@@ -215,6 +215,18 @@ function fileUpload(inputName = 'attachments') {
         }
     }
 }
+
+// Form validation
+document.getElementById('pumRequestForm')?.addEventListener('submit', function(e) {
+    const attachmentInput = this.querySelector('input[name="attachments[]"]');
+    if (attachmentInput && attachmentInput.files.length === 0) {
+        e.preventDefault();
+        alert('Harap unggah setidaknya satu Lampiran Utama (Wajib).');
+        
+        // Scroll to the attachment section
+        attachmentInput.closest('div').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+});
 </script>
 @endpush
 @endsection

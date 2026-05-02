@@ -103,7 +103,7 @@ class PumRequestController extends Controller
             'no_surat'        => 'nullable|string|max:255',
             'workflow_id'     => 'nullable|exists:pum_approval_workflows,id',
             'submit_for_approval' => 'nullable|boolean',
-            'attachments'     => 'nullable|array',
+            'attachments'     => 'required|array|min:1',
             'attachments.*'   => 'file|mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png|max:5120',
             'attachments2'    => 'nullable|array',
             'attachments2.*'  => 'file|mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png|max:5120',
@@ -302,6 +302,11 @@ class PumRequestController extends Controller
                 $path = $file->store('pum-attachments', 'public');
                 $currentAttachments2[] = $path;
             }
+        }
+
+        // Ensure at least one attachment remains
+        if (empty($currentAttachments)) {
+            return back()->withErrors(['attachments' => 'Setidaknya harus ada satu lampiran utama (Wajib).'])->withInput();
         }
 
         $pumRequest->update([

@@ -19,7 +19,7 @@
             </a>
         </div>
 
-        <form action="{{ route('pum-requests.update', $pumRequest) }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('pum-requests.update', $pumRequest) }}" method="POST" id="pumRequestEditForm" enctype="multipart/form-data">
             @csrf
             @method('PUT')
             
@@ -89,7 +89,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <!-- Lampiran 1 -->
                             <div>
-                                <label class="block text-xs font-medium text-gray-500 mb-2">Lampiran Utama (Wajib)</label>
+                                <label class="block text-xs font-medium text-gray-500 mb-2">Lampiran Utama (Wajib) <span class="text-red-500">*</span></label>
                                 
                                 <!-- Existing Attachments -->
                                 @if($pumRequest->attachments && count($pumRequest->attachments) > 0)
@@ -260,6 +260,18 @@ function fileUpload(inputName = 'attachments') {
         }
     }
 }
+
+// Form validation for Edit
+document.getElementById('pumRequestEditForm')?.addEventListener('submit', function(e) {
+    const newFiles = this.querySelector('input[name="attachments[]"]')?.files.length || 0;
+    const existingFiles = {{ count($pumRequest->attachments ?? []) }};
+    const removedFiles = this.querySelectorAll('input[name="remove_attachments[]"]:checked').length;
+    
+    if (existingFiles - removedFiles + newFiles === 0) {
+        e.preventDefault();
+        alert('Setidaknya harus ada satu Lampiran Utama (Wajib).');
+    }
+});
 </script>
 @endpush
 @endsection
