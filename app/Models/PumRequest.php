@@ -317,17 +317,28 @@ class PumRequest extends Model
             'responded_at' => now(),
         ]);
 
-        // Check if there's a next step
-        $nextApproval = $this->approvals()
-            ->where('step_order', '>', $currentApproval->step_order)
-            ->where('status', 'pending')
-            ->orderBy('step_order')
+        // Check if there's a next step from the workflow definition
+        $nextStep = $this->workflow->steps()
+            ->where('order', '>', $currentApproval->step_order)
+            ->orderBy('order')
             ->first();
 
-        if ($nextApproval) {
+        if ($nextStep) {
+            // Ensure next approval record exists
+            $nextApproval = \App\Models\PumApproval::firstOrCreate(
+                [
+                    'pum_request_id' => $this->id,
+                    'step_id'        => $nextStep->id,
+                    'step_order'     => $nextStep->order,
+                ],
+                ['status' => 'pending']
+            );
+
             // Move to next step
-            $updateData = ['current_step_order' => $nextApproval->step_order];
-            if ($currentApproval->step->type === \App\Models\PumApprovalStep::TYPE_APPROVAL && $nextApproval->step->type === \App\Models\PumApprovalStep::TYPE_RELEASE) {
+            $updateData = ['current_step_order' => $nextStep->order];
+            
+            // If transitioning from approval to release, set request status to 'approved'
+            if ($currentApproval->step->type === \App\Models\PumApprovalStep::TYPE_APPROVAL && $nextStep->type === \App\Models\PumApprovalStep::TYPE_RELEASE) {
                 $updateData['status'] = self::STATUS_APPROVED;
             }
             $this->update($updateData);
