@@ -337,12 +337,13 @@ class PumRequest extends Model
         } else {
             // All steps approved
             // Check if the last step was a 'release' step
-            if ($currentApproval->step->type === PumApprovalStep::TYPE_RELEASE) {
+            if ($currentApproval->step->type === \App\Models\PumApprovalStep::TYPE_RELEASE) {
                 $this->update([
                     'status' => self::STATUS_FULFILLED,
                     'current_step_order' => null,
                 ]);
             } else {
+                // If it's the last approval but there are no release steps (fallback)
                 $this->update([
                     'status' => self::STATUS_APPROVED,
                     'current_step_order' => null,
