@@ -127,7 +127,6 @@ class OrganizationUsersSeeder extends Seeder
             ['nik' => '20253008', 'name' => 'TUMPAS BANGKIT PRAYUDA, SE', 'username' => 'tumpas.bangkit', 'email' => 'tumpas.bangkit@azra.com', 'org_code' => 'MARK', 'role' => $managerRole],
             ['nik' => '20242988', 'name' => 'VERONIKA RINI HANDAYANI, A. MD', 'username' => 'veronika.rini', 'email' => 'veronika.rini@azra.com', 'org_code' => 'SEKR', 'role' => $staffRole],
             // Additional users
-            ['nik' => '99999002', 'name' => 'Admin System', 'username' => 'admin', 'email' => 'admin@azra.com', 'org_code' => 'IT', 'role' => $adminRole],
         ];
 
         foreach ($usersData as $userData) {
@@ -167,6 +166,12 @@ class OrganizationUsersSeeder extends Seeder
             }
 
             $this->command->info("  ✓ User '{$user->name}' created/updated");
+
+            // Assign as head of the organization unit
+            if (isset($orgUnits[$orgCode])) {
+                $orgUnits[$orgCode]->update(['head_id' => $user->id]);
+                $this->command->info("    ↳ Assigned as Head of '{$orgUnits[$orgCode]->name}'");
+            }
         }
     }
 }
