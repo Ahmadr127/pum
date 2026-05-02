@@ -94,16 +94,19 @@ class PumRequestApiController extends Controller
                 'status'       => $pumRequest->status,
                 'status_label' => $pumRequest->status_label,
                 'workflow'     => $pumRequest->workflow,
-                'approvals'    => $pumRequest->approvals->map(fn($a) => [
-                    'id'           => $a->id,
-                    'step_order'   => $a->step_order,
-                    'step_type'    => $a->step->type ?? null,
-                    'step_name'    => $a->step->name ?? '-',
-                    'approver'     => $a->approver,
-                    'status'       => $a->status,
-                    'notes'        => $a->notes,
-                    'responded_at' => $a->responded_at,
-                ]),
+                'approvals'    => $pumRequest->workflow ? $pumRequest->workflow->steps->map(function($step) use ($pumRequest) {
+                    $a = $pumRequest->approvals->where('step_id', $step->id)->first();
+                    return [
+                        'id'           => $a->id ?? 0,
+                        'step_order'   => $step->order,
+                        'step_type'    => $step->type,
+                        'step_name'    => $step->name,
+                        'approver'     => $a ? $a->approver : null,
+                        'status'       => $a ? $a->status : 'pending',
+                        'notes'        => $a ? $a->notes : null,
+                        'responded_at' => $a ? $a->responded_at : null,
+                    ];
+                }) : [],
                 'current_step'   => $currentStep,
                 'can_approve'    => $pumRequest->canBeApprovedBy($user),
                 'can_submit'     => $pumRequest->status === PumRequest::STATUS_NEW
