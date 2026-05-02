@@ -283,6 +283,14 @@ class PumRequest extends Model
                             'current_step_order' => null,
                         ]);
                     }
+                    break;
+                }
+            } else {
+                // The requester is not the approver for this step, stop auto-approving
+                break;
+            }
+        }
+
         return $this;
     }
 
