@@ -33,13 +33,13 @@ class FirebaseService
         }
 
         try {
-            $client = new Client([
+            $options = HttpClientOptions::default()->withGuzzleConfigOptions([
                 'version' => '1.1',
             ]);
 
             $factory = (new Factory)
                 ->withServiceAccount($credentials)
-                ->withHttpClient($client);
+                ->withHttpClientOptions($options);
 
             $this->messaging = $factory->createMessaging();
 
