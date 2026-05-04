@@ -100,14 +100,18 @@ class PumRequestController extends Controller
             'request_date'    => 'required|date',
             'amount'          => 'required|numeric|min:0',
             'description'     => 'nullable|string|max:1000',
-            'no_surat'        => 'nullable|string|max:255',
+            'no_surat'        => 'nullable|string|max:255|unique:pum_requests,code',
             'workflow_id'     => 'nullable|exists:pum_approval_workflows,id',
             'submit_for_approval' => 'nullable|boolean',
-            'attachments'     => 'required|array|min:1',
+            'attachments'     => 'required_without:scanned_pdf|array',
             'attachments.*'   => 'file|mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png|max:5120',
             'attachments2'    => 'nullable|array',
             'attachments2.*'  => 'file|mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png|max:5120',
-            'scanned_pdf'     => 'nullable|file|mimes:pdf|max:10240',
+            'scanned_pdf'     => 'required_without:attachments|file|mimes:pdf|max:10240',
+        ], [
+            'no_surat.unique' => 'Nomor Surat / Kode ini sudah digunakan.',
+            'attachments.required_without' => 'Lampiran wajib diisi jika tidak ada file scan.',
+            'scanned_pdf.required_without' => 'File scan wajib diisi jika tidak ada lampiran manual.',
         ]);
 
         // Check authorization to create for others

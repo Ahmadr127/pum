@@ -267,7 +267,10 @@ function hasilScanModal() {
                 const response = await fetch('{{ route("pum-requests.store") }}', {
                     method: 'POST',
                     body: fd,
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    headers: { 
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    },
                     redirect: 'follow',
                 });
 
@@ -279,12 +282,12 @@ function hasilScanModal() {
                 if (response.ok) {
                     window.location.reload();
                 } else {
-                    const text = await response.text();
-                    // Try to extract Laravel validation error
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(text, 'text/html');
-                    const errEl = doc.querySelector('.text-red-600, [class*="text-red"]');
-                    this.errorMsg = errEl ? errEl.textContent.trim() : 'Tidak bisa menyimpan file/nomor surat yang sudah ada';
+                    const data = await response.json();
+                    if (data.errors) {
+                        this.errorMsg = Object.values(data.errors).flat().join(', ');
+                    } else {
+                        this.errorMsg = data.message || 'Terjadi kesalahan saat menyimpan.';
+                    }
                 }
             } catch (err) {
                 console.error(err);
