@@ -6,7 +6,12 @@
             <i class="fas fa-eye mr-1"></i> Detail
         </a>
         
-        @if(auth()->user()->hasPermission('manage_pum') || $request->requester_id === auth()->id())
+        @php
+            $canEdit = auth()->user()->hasPermission('manage_pum') || 
+                      ($request->requester_id === auth()->id() && !$request->hasApprovals());
+        @endphp
+        
+        @if($canEdit)
         <a href="{{ route('pum-requests.edit', $request) }}" 
            class="inline-flex items-center px-2 py-1 bg-yellow-100 text-yellow-700 rounded text-xs hover:bg-yellow-200"
            title="Edit Pengajuan">
