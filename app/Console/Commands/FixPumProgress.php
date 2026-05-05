@@ -60,9 +60,13 @@ class FixPumProgress extends Command
         $bar->start();
 
         foreach ($requests as $request) {
+            $this->comment("Memproses: {$request->no_surat}");
             $request->syncWorkflowProgress();
+            $this->info("Berhasil disinkronkan: {$request->no_surat}");
             $bar->advance();
         }
+
+
 
         $bar->finish();
         $this->newLine();

@@ -259,11 +259,27 @@ class PumRequest extends Model
             $this->update(['current_step_order' => 1]);
         }
 
-        // AUTO-APPROVE LOOP
+        // AUTO-APPROVE & BUG RECOVERY LOOP
         while ($currentApproval = $this->getCurrentApproval()) {
+            // BUG RECOVERY: If this pending step is BEHIND the current_step_order, it means it was skipped by the bug
+            if ($this->current_step_order !== null && $currentApproval->step_order < $this->current_step_order) {
+                \Log::warning("Sync PUM {$this->code}: Fixing hanging step '{$currentApproval->step->name}' (Order {$currentApproval->step_order} < Current {$this->current_step_order})");
+                
+                $currentApproval->update([
+                    'status' => 'approved',
+                    'notes' => 'Fixed by system (Bug recovery: Hanging step)',
+                    'responded_at' => now(),
+                ]);
+                continue; // Re-check next pending approval
+            }
+
             $approvers = $currentApproval->step->getApprovers($this->requester);
+            $approverIds = $approvers->pluck('id')->toArray();
             
+            \Log::info("Sync PUM {$this->code}: Step '{$currentApproval->step->name}' (Order {$currentApproval->step_order}). Eligible Approvers: " . implode(',', $approverIds) . ". Requester: {$this->requester_id}");
+
             // If the requester is among the eligible approvers for this step
+
             if ($approvers->contains('id', $this->requester_id)) {
                 // Auto-approve the step
                 $currentApproval->update([
@@ -309,6 +325,7 @@ class PumRequest extends Model
                     break;
                 }
             } else {
+                // Requester is not an approver for this step, stop auto-approving
                 break;
             }
         }
