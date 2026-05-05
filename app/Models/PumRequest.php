@@ -104,6 +104,14 @@ class PumRequest extends Model
     }
 
     /**
+     * Check if any approval step has been approved
+     */
+    public function hasApprovals()
+    {
+        return $this->approvals()->where('status', 'approved')->exists();
+    }
+
+    /**
      * Generate unique code for new request
      */
     public static function generateCode($user = null)

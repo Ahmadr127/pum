@@ -265,11 +265,18 @@
 
                     <!-- Actions -->
                     <div class="space-y-4">
-                        @if($pumRequest->status === 'new')
+                        @php
+                            $canEdit = auth()->user()->hasPermission('manage_pum') || 
+                                      ($pumRequest->requester_id === auth()->id() && !$pumRequest->hasApprovals());
+                        @endphp
+
+                        @if($canEdit)
                             <a href="{{ route('pum-requests.edit', $pumRequest) }}" class="block w-full text-center px-4 py-2 bg-yellow-400 text-yellow-900 rounded-lg hover:bg-yellow-500 transition-colors font-medium text-sm shadow-sm group">
                                 <i class="fas fa-edit mr-2 group-hover:scale-110 transition-transform"></i> Edit Data
                             </a>
-                            
+                        @endif
+
+                        @if($pumRequest->status === 'new')
                             <form action="{{ route('pum-requests.submit', $pumRequest) }}" method="POST">
                                 @csrf
                                 <button type="submit" class="w-full justify-center flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium text-sm shadow-md group">
