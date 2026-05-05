@@ -86,7 +86,9 @@ class PumRequestController extends Controller
             return response()->json(['exists' => false]);
         }
         
-        $exists = PumRequest::where('no_surat', $noSurat)->exists();
+        $exists = PumRequest::where('code', $noSurat)
+            ->orWhere('no_surat', $noSurat)
+            ->exists();
         return response()->json(['exists' => $exists]);
     }
 
@@ -100,7 +102,21 @@ class PumRequestController extends Controller
             'request_date'    => 'required|date',
             'amount'          => 'required|numeric|min:0',
             'description'     => 'nullable|string|max:1000',
-            'no_surat'        => 'nullable|string|max:255|unique:pum_requests,code',
+            'no_surat'        => [
+                'nullable',
+                'string',
+                'max:255',
+                function ($attribute, $value, $fail) {
+                    if (!empty($value)) {
+                        $exists = \App\Models\PumRequest::where('code', $value)
+                            ->orWhere('no_surat', $value)
+                            ->exists();
+                        if ($exists) {
+                            $fail('Nomor Surat / Kode ini sudah digunakan.');
+                        }
+                    }
+                }
+            ],
             'workflow_id'     => 'nullable|exists:pum_approval_workflows,id',
             'submit_for_approval' => 'nullable|boolean',
             'attachments'     => 'required_without:scanned_pdf|array',
@@ -109,7 +125,6 @@ class PumRequestController extends Controller
             'attachments2.*'  => 'file|mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png|max:5120',
             'scanned_pdf'     => 'required_without:attachments|file|mimes:pdf|max:10240',
         ], [
-            'no_surat.unique' => 'Nomor Surat / Kode ini sudah digunakan.',
             'attachments.required_without' => 'Lampiran wajib diisi jika tidak ada file scan.',
             'scanned_pdf.required_without' => 'File scan wajib diisi jika tidak ada lampiran manual.',
         ]);
@@ -649,3 +664,5 @@ class PumRequestController extends Controller
         return view('pum.requests.show-print', compact('pumRequest', 'signedApprovals', 'qrCodes'));
     }
 }
+
+

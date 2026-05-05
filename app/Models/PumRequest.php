@@ -222,19 +222,36 @@ class PumRequest extends Model
             'current_step_order' => 1,
         ]);
 
-        // Create the first approval record
+        // Ensure the first approval record exists
         $firstStep = $workflow->steps()->orderBy('order')->first();
         if ($firstStep) {
-            \App\Models\PumRequestApproval::create([
-                'request_id' => $this->id,
-                'step_id' => $firstStep->id,
-                'step_order' => $firstStep->order,
-                'status' => 'pending',
-            ]);
+            PumRequestApproval::firstOrCreate(
+                [
+                    'request_id' => $this->id,
+                    'step_id'    => $firstStep->id,
+                    'step_order' => $firstStep->order,
+                ],
+                ['status' => 'pending']
+            );
         }
 
-        // AUTO-APPROVE LOGIC
-        // If the requester is the designated approver for the current step(s), auto-approve it.
+        return $this->syncWorkflowProgress();
+    }
+
+    /**
+     * Synchronize workflow progress, handling auto-approvals and missing records.
+     * Useful for both initial submission and repairing bugged states.
+     */
+    public function syncWorkflowProgress()
+    {
+        if (!$this->workflow_id) return $this;
+
+        // Ensure current_step_order is set if missing but workflow exists
+        if ($this->current_step_order === null && $this->status === self::STATUS_PENDING) {
+            $this->update(['current_step_order' => 1]);
+        }
+
+        // AUTO-APPROVE LOOP
         while ($currentApproval = $this->getCurrentApproval()) {
             $approvers = $currentApproval->step->getApprovers($this->requester);
             
@@ -248,42 +265,49 @@ class PumRequest extends Model
                     'responded_at' => now(),
                 ]);
                 
-                // Move to next step
-                $nextApproval = $this->approvals()
-                    ->where('step_order', '>', $currentApproval->step_order)
-                    ->where('status', 'pending')
-                    ->orderBy('step_order')
+                // Move to next step logic
+                $nextStep = $this->workflow->steps()
+                    ->where('order', '>', $currentApproval->step_order)
+                    ->orderBy('order')
                     ->first();
 
-                if ($nextApproval) {
-                    $updateData = ['current_step_order' => $nextApproval->step_order];
-                    if ($currentApproval->step->type === \App\Models\PumApprovalStep::TYPE_APPROVAL && $nextApproval->step->type === \App\Models\PumApprovalStep::TYPE_RELEASE) {
+                if ($nextStep) {
+                    // Ensure next approval record exists
+                    PumRequestApproval::firstOrCreate(
+                        [
+                            'request_id' => $this->id,
+                            'step_id'    => $nextStep->id,
+                            'step_order' => $nextStep->order,
+                        ],
+                        ['status' => 'pending']
+                    );
+
+                    $updateData = ['current_step_order' => $nextStep->order];
+                    
+                    if ($currentApproval->step->type === PumApprovalStep::TYPE_APPROVAL && $nextStep->type === PumApprovalStep::TYPE_RELEASE) {
                         $updateData['status'] = self::STATUS_APPROVED;
                     }
                     $this->update($updateData);
                 } else {
                     // All steps approved
-                    if ($currentApproval->step->type === PumApprovalStep::TYPE_RELEASE) {
-                        $this->update([
-                            'status' => self::STATUS_FULFILLED,
-                            'current_step_order' => null,
-                        ]);
-                    } else {
-                        $this->update([
-                            'status' => self::STATUS_APPROVED,
-                            'current_step_order' => null,
-                        ]);
-                    }
+                    $finalStatus = ($currentApproval->step->type === PumApprovalStep::TYPE_RELEASE) 
+                                    ? self::STATUS_FULFILLED 
+                                    : self::STATUS_APPROVED;
+                    
+                    $this->update([
+                        'status' => $finalStatus,
+                        'current_step_order' => null,
+                    ]);
                     break;
                 }
             } else {
-                // The requester is not the approver for this step, stop auto-approving
                 break;
             }
         }
 
         return $this;
     }
+
 
     /**
      * Approve current step
