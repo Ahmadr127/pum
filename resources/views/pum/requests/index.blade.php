@@ -7,6 +7,12 @@
     <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
         <!-- Header with Add Button -->
         <div class="px-4 py-3 bg-white border-b border-gray-200 flex justify-end gap-2">
+            @if(auth()->user()->hasPermission('manage_pum'))
+            <a href="{{ route('pum-requests.trashed') }}" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded inline-flex items-center text-sm transition-colors">
+                <i class="fas fa-trash-alt mr-2"></i>
+                Lihat Sampah
+            </a>
+            @endif
             @if(auth()->user()->hasPermission('create_pum'))
             <button type="button"
                     @click="$dispatch('open-scan-pdf')"

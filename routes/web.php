@@ -205,6 +205,11 @@ Route::middleware('auth')->group(function () {
     Route::middleware('permission:manage_pum')->group(function () {
         Route::get('pum-requests', [PumRequestController::class, 'index'])
             ->name('pum-requests.index');
+        Route::get('pum-requests-trashed', [PumRequestController::class, 'trashed'])
+            ->name('pum-requests.trashed');
+        Route::delete('pum-requests/{id}/force-delete', [PumRequestController::class, 'forceDelete'])
+            ->name('pum-requests.force-delete');
+
         Route::post('pum-requests/{pum_request}/fulfill', [PumRequestController::class, 'fulfill'])
             ->name('pum-requests.fulfill');
         Route::get('pum-requests-export', [PumRequestController::class, 'export'])

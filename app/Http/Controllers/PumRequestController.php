@@ -615,6 +615,48 @@ class PumRequestController extends Controller
     }
 
     /**
+     * Display a listing of trashed resources.
+     */
+    public function trashed(Request $request)
+    {
+        $query = PumRequest::onlyTrashed()
+            ->with(['requester', 'workflow'])
+            ->search($request->search)
+            ->byRequester($request->requester_id);
+
+        $requests = $query->orderBy('deleted_at', 'desc')->paginate(15);
+        $users = User::orderBy('name')->get();
+
+        return view('pum.requests.trashed', compact('requests', 'users'));
+    }
+
+    /**
+     * Permanently delete a trashed resource.
+     */
+    public function forceDelete($id)
+    {
+        $pumRequest = PumRequest::onlyTrashed()->findOrFail($id);
+        
+        // Delete attachments from storage
+        if ($pumRequest->attachments) {
+            foreach ($pumRequest->attachments as $path) {
+                Storage::disk('public')->delete($path);
+            }
+        }
+        if ($pumRequest->attachments2) {
+            foreach ($pumRequest->attachments2 as $path) {
+                Storage::disk('public')->delete($path);
+            }
+        }
+
+        $pumRequest->forceDelete();
+
+        return redirect()
+            ->route('pum-requests.trashed')
+            ->with('success', 'Permintaan uang muka berhasil dihapus secara permanen.');
+    }
+
+    /**
      * Print view with QR-based signatures.
      * Generates QR codes as base64 data URIs server-side to avoid broken
      * image errors when the print tab makes unauthenticated image requests.

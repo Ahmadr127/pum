@@ -37,6 +37,24 @@ class PumRequest extends Model
         'current_step_order' => 'integer',
     ];
 
+    /**
+     * The "booted" method of the model.
+     */
+    protected static function booted()
+    {
+        static::deleting(function ($pumRequest) {
+            // If it's a soft delete, rename the code so it can be reused
+            if (!$pumRequest->isForceDeleting()) {
+                $suffix = '-DEL-' . now()->timestamp;
+                $pumRequest->code = $pumRequest->code . $suffix;
+                if ($pumRequest->no_surat) {
+                    $pumRequest->no_surat = $pumRequest->no_surat . $suffix;
+                }
+                $pumRequest->save();
+            }
+        });
+    }
+
     const STATUS_NEW = 'new';
     const STATUS_PENDING = 'pending';
     const STATUS_APPROVED = 'approved';
