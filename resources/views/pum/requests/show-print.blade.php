@@ -223,15 +223,17 @@
             @endif
         </div>
 
-        {{-- 2. Approvals --}}
+        {{-- 2. Approvals & Release --}}
         @foreach($signedApprovals as $approval)
             @php 
                 $approver = $approval->approver;
                 $isReleaseStep = $approval->step && $approval->step->type === \App\Models\PumApprovalStep::TYPE_RELEASE;
             @endphp
-            @if(!$isReleaseStep)
             <div class="sig-box">
-                <div class="sig-role">Disetujui Oleh,<br>{{ $approval->step->name ?? 'Approver' }}</div>
+                <div class="sig-role">
+                    {{ $isReleaseStep ? 'Dikeluarkan Oleh,' : 'Disetujui Oleh,' }}<br>
+                    {{ $approval->step->name ?? 'Approver' }}
+                </div>
 
                 @if($approver && isset($qrCodes[$approver->id]))
                     <img class="qr-img" src="{{ $qrCodes[$approver->id] }}" alt="QR">
@@ -244,7 +246,6 @@
                     <div class="sig-nip">NIP. {{ $approver->nik }}</div>
                 @endif
             </div>
-            @endif
         @endforeach
 
         {{-- Spacer to ensure left alignment if flex-grow used, or use justify-content: start/space-between --}}
