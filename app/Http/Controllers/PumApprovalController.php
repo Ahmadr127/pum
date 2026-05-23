@@ -55,7 +55,7 @@ class PumApprovalController extends Controller
         }
 
         // Get all matching requests
-        $allRequests = $query->get();
+        $allRequests = $query->orderBy('created_at', 'desc')->get();
         
         Log::debug('[PumApproval] user=' . $user->id . ' allRequests=' . $allRequests->count());
 

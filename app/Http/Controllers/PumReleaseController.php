@@ -46,7 +46,7 @@ class PumReleaseController extends Controller
             $query->whereDate('request_date', '<=', $request->date_to);
         }
 
-        $allRequests = $query->get();
+        $allRequests = $query->orderBy('created_at', 'desc')->get();
         
         Log::debug('[PumRelease] user=' . $user->id . ' allRequests=' . $allRequests->count());
 
