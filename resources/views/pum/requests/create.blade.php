@@ -188,6 +188,10 @@ function fileUpload(inputName = 'attachments') {
         
         addFiles(newFiles) {
             newFiles.forEach(file => {
+                if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+                    alert(`File "${file.name}" bukan PDF. Hanya file PDF yang diizinkan.`);
+                    return;
+                }
                 if (file.size <= 5 * 1024 * 1024) { // 5MB limit
                     this.files.push(file);
                 } else {

@@ -120,13 +120,15 @@ class PumRequestController extends Controller
             'workflow_id'     => 'nullable|exists:pum_approval_workflows,id',
             'submit_for_approval' => 'nullable|boolean',
             'attachments'     => 'required_without:scanned_pdf|array',
-            'attachments.*'   => 'file|mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png|max:5120',
+            'attachments.*'   => 'file|mimes:pdf|max:5120',
             'attachments2'    => 'nullable|array',
-            'attachments2.*'  => 'file|mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png|max:5120',
+            'attachments2.*'  => 'file|mimes:pdf|max:5120',
             'scanned_pdf'     => 'required_without:attachments|file|mimes:pdf|max:10240',
         ], [
-            'attachments.required_without' => 'Lampiran wajib diisi jika tidak ada file scan.',
-            'scanned_pdf.required_without' => 'File scan wajib diisi jika tidak ada lampiran manual.',
+            'attachments.required_without'   => 'Lampiran wajib diisi jika tidak ada file scan.',
+            'scanned_pdf.required_without'   => 'File scan wajib diisi jika tidak ada lampiran manual.',
+            'attachments.*.mimes'            => 'Lampiran hanya boleh berupa file PDF.',
+            'attachments2.*.mimes'           => 'Lampiran tambahan hanya boleh berupa file PDF.',
         ]);
 
         // Check authorization to create for others
@@ -275,12 +277,15 @@ class PumRequestController extends Controller
             'description' => 'nullable|string|max:1000',
             'workflow_id' => 'nullable|exists:pum_approval_workflows,id',
             'submit_for_approval' => 'nullable|boolean',
-            'attachments' => 'nullable|array',
-            'attachments.*' => 'file|mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png|max:5120',
-            'remove_attachments' => 'nullable|array',
-            'attachments2' => 'nullable|array',
-            'attachments2.*' => 'file|mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png|max:5120',
-            'remove_attachments2' => 'nullable|array',
+            'attachments'           => 'nullable|array',
+            'attachments.*'         => 'file|mimes:pdf|max:5120',
+            'remove_attachments'    => 'nullable|array',
+            'attachments2'          => 'nullable|array',
+            'attachments2.*'        => 'file|mimes:pdf|max:5120',
+            'remove_attachments2'   => 'nullable|array',
+        ], [
+            'attachments.*.mimes'  => 'Lampiran hanya boleh berupa file PDF.',
+            'attachments2.*.mimes' => 'Lampiran tambahan hanya boleh berupa file PDF.',
         ]);
 
         // Handle existing attachments removal

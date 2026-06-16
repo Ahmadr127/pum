@@ -120,7 +120,8 @@
                                         
                                         <div class="flex flex-col items-center justify-center pt-5 pb-6" x-show="files.length === 0">
                                             <i class="fas fa-cloud-upload-alt text-2xl text-gray-400 mb-2"></i>
-                                            <p class="text-sm text-gray-500">Upload Dokumen/Invoice</p>
+                                            <p class="text-sm text-gray-500">Upload Dokumen/Invoice (PDF)</p>
+                                            <p class="text-xs text-gray-400 mt-1">Hanya file PDF</p>
                                         </div>
 
                                         <div class="w-full px-4" x-show="files.length > 0">
@@ -131,7 +132,7 @@
                                                 </div>
                                             </template>
                                         </div>
-                                        <input type="file" name="attachments[]" multiple x-ref="fileInput" class="hidden" @change="handleFiles($event)" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png">
+                                        <input type="file" name="attachments[]" multiple x-ref="fileInput" class="hidden" @change="handleFiles($event)" accept=".pdf,application/pdf">
                                     </label>
                                 </div>
                                 @error('attachments')
@@ -172,7 +173,8 @@
                                         
                                         <div class="flex flex-col items-center justify-center pt-5 pb-6" x-show="files.length === 0">
                                             <i class="fas fa-paperclip text-2xl text-gray-400 mb-2"></i>
-                                            <p class="text-sm text-gray-500">Upload File Pendukung</p>
+                                            <p class="text-sm text-gray-500">Upload File Pendukung (PDF)</p>
+                                            <p class="text-xs text-gray-400 mt-1">Hanya file PDF</p>
                                         </div>
 
                                         <div class="w-full px-4" x-show="files.length > 0">
@@ -183,7 +185,7 @@
                                                 </div>
                                             </template>
                                         </div>
-                                        <input type="file" name="attachments2[]" multiple x-ref="fileInput" class="hidden" @change="handleFiles($event)" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png">
+                                        <input type="file" name="attachments2[]" multiple x-ref="fileInput" class="hidden" @change="handleFiles($event)" accept=".pdf,application/pdf">
                                     </label>
                                 </div>
                             </div>
@@ -233,6 +235,10 @@ function fileUpload(inputName = 'attachments') {
         
         addFiles(newFiles) {
             newFiles.forEach(file => {
+                if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+                    alert(`File "${file.name}" bukan PDF. Hanya file PDF yang diizinkan.`);
+                    return;
+                }
                 if (file.size <= 5 * 1024 * 1024) {
                     this.files.push(file);
                 } else {
