@@ -248,6 +248,22 @@
             </div>
         @endforeach
 
+        {{-- Force a new row for manual signatures --}}
+        <div style="flex-basis: 100%; height: 0;"></div>
+
+        {{-- 3. Penerima & Menyerahkan (Manual Signatures) --}}
+        <div class="sig-box" style="margin-top: 10px;">
+            <div class="sig-role">Penerima</div>
+            <div class="qr-empty" style="height: 60px;"></div>
+            <div class="sig-name" style="text-decoration: none;">(___________________________)</div>
+        </div>
+
+        <div class="sig-box" style="margin-top: 10px;">
+            <div class="sig-role">Menyerahkan</div>
+            <div class="qr-empty" style="height: 60px;"></div>
+            <div class="sig-name" style="text-decoration: none;">(___________________________)</div>
+        </div>
+
         {{-- Spacer to ensure left alignment if flex-grow used, or use justify-content: start/space-between --}}
     </div>
 
