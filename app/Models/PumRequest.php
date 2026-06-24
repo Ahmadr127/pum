@@ -518,16 +518,18 @@ class PumRequest extends Model
     }
 
     /**
-     * Scope for search
+     * Scope for search — case-insensitive via LOWER() agar bekerja
+     * di semua collation MySQL (termasuk utf8_bin / utf8mb4_bin).
      */
     public function scopeSearch($query, $search)
     {
         if ($search) {
-            return $query->where(function ($q) use ($search) {
-                $q->where('code', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%")
-                  ->orWhereHas('requester', function ($q) use ($search) {
-                      $q->where('name', 'like', "%{$search}%");
+            $s = strtolower(trim($search));
+            return $query->where(function ($q) use ($s) {
+                $q->whereRaw('LOWER(code) LIKE ?', ["%{$s}%"])
+                  ->orWhereRaw('LOWER(description) LIKE ?', ["%{$s}%"])
+                  ->orWhereHas('requester', function ($q) use ($s) {
+                      $q->whereRaw('LOWER(name) LIKE ?', ["%{$s}%"]);
                   });
             });
         }

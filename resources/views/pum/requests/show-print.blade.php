@@ -255,14 +255,14 @@
         <div class="sig-box" style="margin-top: 10px;">
             <div class="sig-role">Penerima</div>
             <div class="qr-empty" style="height: 60px;"></div>
-            <div class="sig-name" style="text-decoration: none;">(___________________________)</div>
+            <div class="sig-name" style="text-decoration: none;">___________________________</div>
             <div class="sig-nip">NIP. ___________________</div>
         </div>
 
         <div class="sig-box" style="margin-top: 10px;">
             <div class="sig-role">Menyerahkan</div>
             <div class="qr-empty" style="height: 60px;"></div>
-            <div class="sig-name" style="text-decoration: none;">(___________________________)</div>
+            <div class="sig-name" style="text-decoration: none;">___________________________</div>
             <div class="sig-nip">NIP. ___________________</div>
         </div>
 
