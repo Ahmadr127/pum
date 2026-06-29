@@ -29,6 +29,15 @@
                         <input type="text" name="search" value="{{ request('search') }}" placeholder="Kode, nama pengaju..."
                                class="block w-full px-2 py-1.5 border border-gray-300 rounded text-sm">
                     </div>
+                    <div class="w-48">
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Status Approval Anda</label>
+                        <select name="status" onchange="this.form.submit()" class="block w-full px-2 py-1.5 border border-gray-300 rounded text-sm bg-white">
+                            <option value="">Semua Status</option>
+                            <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Menunggu [{{ $summary['pending'] }}]</option>
+                            <option value="approved" {{ request('status') === 'approved' ? 'selected' : '' }}>Disetujui [{{ $summary['approved'] }}]</option>
+                            <option value="rejected" {{ request('status') === 'rejected' ? 'selected' : '' }}>Ditolak [{{ $summary['rejected'] }}]</option>
+                        </select>
+                    </div>
                     <div class="flex items-center gap-2">
                         <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-1.5 px-3 rounded text-sm">
                             <i class="fas fa-search mr-1"></i> Cari

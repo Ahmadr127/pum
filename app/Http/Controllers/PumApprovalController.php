@@ -87,14 +87,48 @@ class PumApprovalController extends Controller
         
         Log::debug('[PumApproval] filtered=' . $requests->count() . ' ids=' . $requests->pluck('id')->join(','));
 
-        // Calculate summary counts from filtered request
+        // Calculate summary counts based on user action status on the full list of eligible requests
+        $userRejectedCount = 0;
+        $userPendingCount = 0;
+        $userApprovedCount = 0;
+
+        foreach ($requests as $r) {
+            $userApproval = $r->approvals->where('approver_id', $user->id)->first();
+            $hasActioned = $userApproval && in_array($userApproval->status, ['approved', 'rejected']);
+            if ($hasActioned) {
+                if ($userApproval->status === 'approved') {
+                    $userApprovedCount++;
+                } else {
+                    $userRejectedCount++;
+                }
+            } else {
+                $userPendingCount++;
+            }
+        }
+
         $summary = [
-            'new' => $requests->where('status', 'new')->count(),
-            'pending' => $requests->where('status', 'pending')->count(),
-            'approved' => $requests->where('status', 'approved')->count(),
-            'rejected' => $requests->where('status', 'rejected')->count(),
-            'fulfilled' => $requests->where('status', 'fulfilled')->count(),
+            'rejected' => $userRejectedCount,
+            'pending' => $userPendingCount,
+            'approved' => $userApprovedCount,
         ];
+
+        // Filter the collection by status if requested
+        $statusFilter = $request->get('status');
+        if (in_array($statusFilter, ['approved', 'rejected', 'pending'])) {
+            $requests = $requests->filter(function ($r) use ($user, $statusFilter) {
+                $userApproval = $r->approvals->where('approver_id', $user->id)->first();
+                $hasActioned = $userApproval && in_array($userApproval->status, ['approved', 'rejected']);
+                
+                if ($statusFilter === 'approved') {
+                    return $hasActioned && $userApproval->status === 'approved';
+                } elseif ($statusFilter === 'rejected') {
+                    return $hasActioned && $userApproval->status === 'rejected';
+                } elseif ($statusFilter === 'pending') {
+                    return !$hasActioned;
+                }
+                return true;
+            });
+        }
 
         // Manual pagination for filtered collection
         $page = $request->get('page', 1);
