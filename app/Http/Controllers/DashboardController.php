@@ -81,15 +81,14 @@ class DashboardController extends Controller
         
         // PUM Approval Stats (if user has approve_pum permission)
         if ($user->hasPermission('approve_pum')) {
-            $pendingApprovals = PumRequest::with(['requester', 'approvals.step'])
+            $allPendingApprovals = PumRequest::with(['requester', 'approvals.step'])
                 ->where('status', PumRequest::STATUS_PENDING)
                 ->whereHas('approvals', fn($q) => $q->where('status', 'pending'))
                 ->get()
-                ->filter(fn($req) => $req->canBeApprovedBy($user))
-                ->take(5);
+                ->filter(fn($req) => $req->canBeApprovedBy($user));
             
-            $data['pendingApprovals'] = $pendingApprovals;
-            $data['pendingApprovalsCount'] = $pendingApprovals->count();
+            $data['pendingApprovals'] = $allPendingApprovals->take(5);
+            $data['pendingApprovalsCount'] = $allPendingApprovals->count();
             
             // Stats for approvers - always set for approve_pum users
             // Count all requests that this user can approve or has approved
@@ -111,7 +110,7 @@ class DashboardController extends Controller
             
             $data['approvalStats'] = [
                 'total' => $myApprovalRequests->count(),
-                'pending' => $myApprovalRequests->where('status', 'pending')->count(),
+                'pending' => $myApprovalRequests->filter(fn($req) => $req->canBeApprovedBy($user))->count(),
                 // Count requests where THIS user has actually approved an approval-type step
                 'approved' => $myApprovalRequests->filter(function($req) use ($user) {
                     return $req->approvals
